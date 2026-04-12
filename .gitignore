@@ -1,0 +1,28 @@
+# OS artifacts
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor backups and swap files
+*~
+*.swp
+*.swo
+*.bak
+.idea/
+.vscode/
+
+# Local scratch and working directories
+/scratch/
+/tmp/
+/.local/
+/.starter-work/
+
+# Archives and build artifacts (not expected in this repo, but cheap to exclude)
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# Temporary adoption records that should never be committed to this framework repo
+# (these belong in destination projects, not in the framework itself)
+/beginning/
