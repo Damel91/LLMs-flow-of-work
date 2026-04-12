@@ -71,7 +71,7 @@ earlier drafting remain foundational to the current repo.
 ## Session-Based Interpretation
 
 The method emerged empirically through extended-mode work with Sonnet 4.6.
-Damel already provided a clear structural intention and working direction. At
+Davide Mele already provided a clear structural intention and working direction. At
 that stage, the method existed in practice but not yet as a fully formalized
 contract system. The later Codex pass was the phase in which that structure
 was pushed into an explicit flow-of-work contract suitable for multi-LLM use.
@@ -85,7 +85,7 @@ framing with Codex.
 
 ## Human Direction And Formalization
 
-The user, Damel, supplied the direction of the work, the quality bar, repeated
+The user, Davide Mele, supplied the direction of the work, the quality bar, repeated
 architectural corrections, acceptance and rejection of competing formulations,
 and the decision to turn an empirical working method into a reusable public
 governance structure. The LLM role was formalization under that direction.
