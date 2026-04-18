@@ -113,6 +113,12 @@ capability levels. It survives context loss because it is designed to be
 re-read, not remembered. It scales to long projects because governance
 is structural, not dependent on anyone's memory.
 
+That portability does not mean symmetry. The framework is designed for
+frontier-model use, and in practice works best with frontier reasoning
+models or frontier coding/agentic models. Previous frontier models may still
+be usable with more supervision, but free-tier, lightweight, or small local
+models are not the intended class of executor for governance ownership.
+
 ---
 
 ## What This Is Not
@@ -146,6 +152,11 @@ Anyone working on a non-trivial software project with LLM assistance
 who has experienced the governance failure described above and wants
 a structured alternative that does not require autonomous agents or
 proprietary tooling.
+
+Practically, this also means people who are willing to use a paid frontier
+plan or equivalent API access. The final goal of the framework is not casual
+free-tier assistance. It is stable long-running collaboration with a model
+strong enough to respect document hierarchy, routing, and evidence discipline.
 
 The contract is a starting point, not a prescription. The project-specific
 overlay shows how it can be adapted for a concrete project. You will adapt

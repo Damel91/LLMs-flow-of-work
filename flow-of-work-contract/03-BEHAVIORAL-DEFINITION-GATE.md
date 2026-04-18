@@ -176,6 +176,8 @@ authority to proceed.
 
 Do not:
 
+- declare a behavior, mechanism, or property absent without first re-reading
+  the most relevant authoritative section directly
 - invent user interaction behavior because the feature goal seems obvious
 - infer prompt schema from intent alone
 - implement a state transition that is not defined anywhere authoritative

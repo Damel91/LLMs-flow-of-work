@@ -171,6 +171,8 @@ Do not mark the user `operational` unless they have covered, at minimum:
 - the working loop
 - the meanings of `Implemented`, `Partial`, and `Gap`
 - the difference between implementation closure and behavioral authority
+- the difference between live surfaces and stubs/probes when judging campaign
+  authority
 
 In installed-project mode:
 

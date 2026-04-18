@@ -20,9 +20,8 @@ This repository contains:
 - a project overlay template and supporting templates
 - a manual directory containing the front-facing operating manual, its
   onboarding bootstrap, and supporting notes
-- two adoption procedures:
+- one adoption procedure:
   - this guided procedure
-  - `MANUAL-STARTER.md`
 - one post-adoption code integration tool:
   - `CODE-BOOTSTRAP.md`
 - a reader for browsing the contract documents offline
@@ -566,8 +565,7 @@ The final installed `AGENT.md` should:
 - keep only essential runtime hard stops
 - resolve installed paths coherently when structure was adapted
 - remove the template-only `Initialization Check` section
-- remove the template-only adoption fallback routing to `STARTER.md` and
-  `MANUAL-STARTER.md`
+- remove the template-only adoption fallback routing to `STARTER.md`
 - keep no adoption-procedure logic once the starter has validated the
   destination control plane successfully
 
@@ -615,7 +613,6 @@ The optional human-support set is:
 The non-install set is:
 
 - `STARTER.md`
-- `MANUAL-STARTER.md`
 - `README.md`
 - `WHY.md`
 - `LLM-CONTRIBUTORS.md`

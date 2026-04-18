@@ -51,7 +51,7 @@ Use:
   document base is being derived from that code
 - `unknown` only during incomplete setup
 
-**Adoption procedure:** [starter_guided / starter_manual / unknown]
+**Adoption procedure:** [starter_guided / unknown]
 
 This field records which adoption procedure created the project control plane.
 It is not a second adoption-mode field.
@@ -59,7 +59,6 @@ It is not a second adoption-mode field.
 Use:
 
 - `starter_guided` when the project was adopted through `STARTER.md`
-- `starter_manual` when the project was adopted through `MANUAL-STARTER.md`
 - `unknown` only during incomplete setup
 
 When `adoption mode = code_first`, this field still records how adoption

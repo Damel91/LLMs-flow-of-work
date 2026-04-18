@@ -161,16 +161,19 @@ capability.
 
 Every LLM session must be initialized with:
 
-1. Repository identity and purpose
-2. Canonical docs per `authorities/PROJECT-OVERLAY.md`:
-   - the baseline documents at their installed project locations
-   - the interaction document at its installed project location
-   - `authorities/TRACEABILITY_MATRIX.md`
-3. Relevant current history:
+1. Relevant current history:
+   - whether a governing head `REQUIREMENTS_DIFF_*` exists for the targeted
+     behavior, requirement family, or workflow surface
    - the installed `IMPL-INDEX.md` at the project's actual `impl` location
    - active `IMPL-*`, if present
    - latest relevant `TestCampaign-*`
-   - latest governing `REQUIREMENTS_DIFF_*`
+2. Repository identity and purpose
+3. Canonical docs per `authorities/PROJECT-OVERLAY.md`:
+   - the baseline documents at their installed project locations
+   - the interaction document at its installed project location
+   - `authorities/TRACEABILITY_MATRIX.md`
+   - if a governing head `REQUIREMENTS_DIFF_*` exists, it must be read before
+     the canonical docs are treated as the full governing set
 4. Governance constraints:
    - docs-first
    - user as master router

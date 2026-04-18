@@ -23,6 +23,10 @@ desktop.ini
 *.tar.gz
 *.tgz
 
+# Python cache from local lint tooling
+__pycache__/
+*.pyc
+
 # Temporary adoption records that should never be committed to this framework repo
 # (these belong in destination projects, not in the framework itself)
 /beginning/

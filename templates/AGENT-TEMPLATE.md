@@ -35,7 +35,6 @@ If the project is not initialized:
 - state that this entrypoint is runtime-first, not adoption-first
 - route the user to the framework repo:
   - `STARTER.md` for guided adoption
-  - `MANUAL-STARTER.md` for manual adoption
   - `STARTER.md` in `code_first` mode if the project starts from existing code
 
 ---

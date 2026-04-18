@@ -46,13 +46,16 @@ Separate from handoff readiness, the active LLM and/or user must judge whether
 the current state is mature enough that a campaign result would be
 interpretable.
 
-A campaign is constructible only when enough behavior has accumulated that:
+A campaign is constructible only when the answer is yes to all three questions
+below:
 
-- the relevant use cases and sequences can be exercised coherently
-- a failure would distinguish between incomplete implementation, bug, and scope
-  issue with reasonable clarity
-- the campaign would validate a meaningful behavior slice rather than merely
-  prove that the system is still unfinished
+- can the targeted use case or sequence be exercised coherently enough that the
+  campaign is about the intended behavior rather than setup noise?
+- if the campaign fails, will the result distinguish incomplete
+  implementation, bug, and scope issue with reasonable clarity?
+- will the campaign validate a meaningful live behavior slice rather than
+  mainly prove that the system is still unfinished or only exercise
+  stubs/probes?
 
 If this condition is not met yet:
 

@@ -34,8 +34,8 @@ models and users must find them immediately, without navigating:
 
 Temporary exception during adoption:
 
-- `STARTER.md` and `MANUAL-STARTER.md` may be used at repository root only
-  while adoption or migration is actively in progress
+- `STARTER.md` may be used at repository root only while adoption or migration
+  is actively in progress
 - they are adoption artifacts, not steady-state control-plane files
 - they must be removed or excluded once adoption is complete
 
@@ -89,7 +89,6 @@ Temporary adoption-only root files may exist during active adoption, but
 they are not part of the canonical steady-state structure:
 
 - `STARTER.md`
-- `MANUAL-STARTER.md`
 
 ---
 

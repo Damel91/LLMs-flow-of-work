@@ -341,7 +341,7 @@
     margin: 2em 0;
   }
 
-  /* tag badges nel testo */
+  /* tag badges in the text */
   .md-body p > code:only-child,
   .md-body li > code:only-child {
     background: var(--tag);
@@ -357,7 +357,7 @@
   <header class="topbar">
     <div class="topbar-logo">md<span>//</span>reader</div>
     <div class="topbar-sep"></div>
-    <div class="topbar-hint">trascina file .md o usale dal selettore</div>
+    <div class="topbar-hint">drag .md files here or use the picker</div>
   </header>
 
   <!-- sidebar -->
@@ -365,10 +365,10 @@
     <label class="drop-zone" id="dropZone">
       <input type="file" id="fileInput" accept=".md,.markdown" multiple>
       <div class="drop-icon">⌘</div>
-      <div class="drop-label"><strong>apri file</strong><br>o trascina qui<br>.md / .markdown</div>
+      <div class="drop-label"><strong>open files</strong><br>or drag them here<br>.md / .markdown</div>
     </label>
     <div class="file-list" id="fileList">
-      <div class="sidebar-empty" id="emptyMsg">nessun documento aperto</div>
+      <div class="sidebar-empty" id="emptyMsg">no document open</div>
     </div>
   </aside>
 
@@ -376,7 +376,7 @@
   <main class="main" id="main">
     <div class="welcome" id="welcome">
       <div class="welcome-icon">◈</div>
-      <div class="welcome-text">apri un file markdown<br>per iniziare a leggere</div>
+      <div class="welcome-text">open a markdown file<br>to start reading</div>
     </div>
   </main>
 
@@ -475,7 +475,7 @@
       <div class="doc-toolbar">
         <span class="doc-filename">${doc.name}</span>
         <span class="doc-toolbar-sep"></span>
-        <button class="btn-copy" id="btnCopy">copia testo</button>
+        <button class="btn-copy" id="btnCopy">copy text</button>
       </div>
       <div class="md-body">${html}</div>
     `;
@@ -483,8 +483,8 @@
     document.getElementById('btnCopy').addEventListener('click', () => {
       navigator.clipboard.writeText(doc.content).then(() => {
         const btn = document.getElementById('btnCopy');
-        btn.textContent = 'copiato ✓';
-        setTimeout(() => btn.textContent = 'copia testo', 1800);
+        btn.textContent = 'copied ✓';
+        setTimeout(() => btn.textContent = 'copy text', 1800);
       });
     });
 

@@ -18,7 +18,6 @@ Open a capable LLM, give it this repository, and paste the prompt for your situa
 | New project, blank slate | `STARTER.md` | *"Read `STARTER.md` and guide me through initializing a new project with this flow of work."* |
 | Existing project with docs to migrate | `STARTER.md` | *"Read `STARTER.md` and help me migrate my existing project into this flow of work."* |
 | Existing codebase with no usable docs | `STARTER.md` | *"Read `STARTER.md` and help me initialize a new project from my existing codebase."* |
-| Manual, human-only setup | `MANUAL-STARTER.md` | (no LLM needed) |
 
 `STARTER.md` is the single entry point for every LLM-driven adoption. It handles all three project states by configuring the destination project differently depending on what you are starting from. At the end you have a working `authorities/` control plane and a project entrypoint (`AGENT.md`) installed at the root of your project. Before handoff, the starter validates the installed control plane and promotes a runtime-ready `AGENT.md` for the destination project. When the chosen layout would make direct template copy incoherent, the starter may use a private `.starter-work/` workspace to derive the final `AGENT.md`, `05-PROJECT-STRUCTURE.md`, and, if needed, `CODE-BOOTSTRAP.md` before promotion. That workspace is removed before handoff.
 
@@ -51,13 +50,22 @@ In all three states the user remains the routing authority, answers one question
 flow-of-work-contract/        the five governance contracts
 templates/                    AGENT-TEMPLATE.md, PROJECT-OVERLAY.md, IMPL-INDEX.md, TRACEABILITY_MATRIX.md
 STARTER.md                    guided LLM-driven adoption (single entry point)
-MANUAL-STARTER.md             manual human-first adoption
 CODE-BOOTSTRAP.md             post-adoption code integration tool
 manual/                       front-facing manual, onboarding bootstrap, supporting notes
+tools/                        extraordinary control-plane integrity audit utilities
 reader/md-reader.html         offline Markdown reader (optional utility)
 ```
 
-The five contracts are the system. `STARTER.md` and `MANUAL-STARTER.md` are temporary adoption tools that run once and step aside. `CODE-BOOTSTRAP.md` is a post-adoption integration tool that is installed into destination projects and invoked only when operational state requires it. In the current framework version, that active use is the first working session of a code-first project. The templates are the installation blueprints: some are copied directly into the destination project, while `AGENT-TEMPLATE.md` is used as the working source for the final installed `AGENT.md`. The `manual/` directory is installed under `authorities/manual/` in destination projects and provides the user operating manual plus its onboarding bootstrap. The reader is a convenience utility with no operational role.
+The five contracts are the system. `STARTER.md` is the adoption tool that runs once and steps aside. `CODE-BOOTSTRAP.md` is a post-adoption integration tool that is installed into destination projects and invoked only when operational state requires it. In the current framework version, that active use is the first working session of a code-first project. The templates are the installation blueprints: some are copied directly into the destination project, while `AGENT-TEMPLATE.md` is used as the working source for the final installed `AGENT.md`. The `manual/` directory is installed under `authorities/manual/` in destination projects and provides the user operating manual plus its onboarding bootstrap. The reader is a convenience utility with no operational role.
+
+The repository also includes an extraordinary control-plane integrity audit.
+It is not part of the normal flow of work. Use it only when you suspect
+structural drift, after major framework refactors or migrations, or before
+publishing:
+
+- `python3 tools/control_plane_lint.py framework .`
+- `python3 tools/control_plane_lint.py workspace /path/to/adopted/project`
+- `Read tools/CONTROL-PLANE-LINT-SPEC.md and execute it in framework or workspace mode`
 
 ---
 
@@ -75,7 +83,7 @@ For the longer version, read [`WHY.md`](./WHY.md).
 
 ## After adoption
 
-Once your project has `AGENT.md` at its root and an initialized `authorities/` structure, the setup phase is over. Stop using `STARTER.md` and `MANUAL-STARTER.md`. New working sessions start from `AGENT.md` in your project root. If overlay state says manual onboarding is still pending or in progress, `AGENT.md` will first route the session into `authorities/manual/MANUAL-BOOTSTRAP.md`. If that state is completed or explicitly skipped, normal routing continues. For code-first projects, once manual onboarding is completed or skipped, the first working session will still run `CODE-BOOTSTRAP.md` once as its first operational task if overlay state still marks it pending. After that, normal work begins. In other projects, `CODE-BOOTSTRAP.md` simply remains dormant until a later operational state explicitly calls for it.
+Once your project has `AGENT.md` at its root and an initialized `authorities/` structure, the setup phase is over. Stop using `STARTER.md`. New working sessions start from `AGENT.md` in your project root. If overlay state says manual onboarding is still pending or in progress, `AGENT.md` will first route the session into `authorities/manual/MANUAL-BOOTSTRAP.md`. If that state is completed or explicitly skipped, normal routing continues. For code-first projects, once manual onboarding is completed or skipped, the first working session will still run `CODE-BOOTSTRAP.md` once as its first operational task if overlay state still marks it pending. After that, normal work begins. In other projects, `CODE-BOOTSTRAP.md` simply remains dormant until a later operational state explicitly calls for it.
 
 ---
 
@@ -83,15 +91,22 @@ Once your project has `AGENT.md` at its root and an initialized `authorities/` s
 
 The same contract governs all models. Every project installs an `AGENT.md` from the same template family regardless of which model will read it. Capability is a runtime property of the session, not of the file.
 
+- Verified in practice:
+  - frontier Claude Sonnet/Opus-class models in extended reasoning mode
+  - frontier GPT-5-class coding or agentic models
+- Likely compatible with more supervision:
+  - previous frontier reasoning models of the same families
 - Frontier models with file and shell access implement, review, and prepare traceability updates inside an IMPL packet boundary.
 - Frontier models in chat mode analyze, draft diffs and packets, produce patch-ready outputs.
-- Local small models are allowed only in narrow bounded execution roles — never for architecture, governance, or traceability decisions.
+- Free-tier, lightweight, or small local models are not a good fit as primary governance executors. They may help with narrow bounded tasks, but they are not the intended class of model for this repository.
 
 ---
 
 ## Maturity note
 
 This framework presumes a user willing to think in terms of scope, intent, evidence, and routing authority. It is not automation that removes you from decisions. It applies engineering discipline to a kind of collaboration where discipline was missing. If that sounds like what you need, it may be exactly that.
+
+In practice, it also presumes access to a paid frontier-model tier or equivalent API access. Free versions may be useful for reading or narrow assistance, but they are not a good fit for the framework's intended end state: long-running, document-governed, high-discipline collaboration.
 
 Contributor reviews of the framework, from the LLMs that worked on its drafting and refinement, are recorded in [`LLM-CONTRIBUTORS.md`](./LLM-CONTRIBUTORS.md).
 

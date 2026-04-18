@@ -157,6 +157,12 @@ Your job is to keep authority over:
 - history
 - tradeoffs
 
+That includes a judgment the model cannot make for you: whether a campaign
+produced authoritative evidence on live surfaces or only something that looked
+well-formed. The model can propose that a campaign is sufficient. It must not
+decide on its own that a formally tidy campaign has the epistemic weight needed
+for acceptance.
+
 ---
 
 ## The Core Operating Rules
@@ -579,9 +585,17 @@ Fix:
 If a campaign is not yet interpretable, it generates noise instead of
 evidence.
 
+A campaign can also be cleanly written and still fail to prove the behavior you
+actually care about if it only touches stubs, probes, or other non-authoritative
+surfaces.
+
 Fix:
 
 - ask whether the behavior slice is meaningful enough to validate yet
+- check whether the campaign exercises live surfaces, real state, and the
+  actual integration path
+- treat stub/probe-heavy campaigns as support evidence unless the contract says
+  those surfaces are authoritative
 
 ### Letting the model invent undefined behavior
 
