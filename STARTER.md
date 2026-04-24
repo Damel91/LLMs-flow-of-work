@@ -17,7 +17,8 @@ This repository contains:
   software projects without losing control over time
 - one session entrypoint template (`templates/AGENT-TEMPLATE.md`) that destination
   projects install at root
-- a project overlay template and supporting templates
+- a project overlay template, supporting installation templates, and document
+  creation templates
 - a manual directory containing the front-facing operating manual, its
   onboarding bootstrap, and supporting notes
 - one adoption procedure:
@@ -62,9 +63,12 @@ Before starting the guided procedure, read in this order:
 4. `templates/AGENT-TEMPLATE.md`
 5. `templates/IMPL-INDEX.md`
 6. `templates/TRACEABILITY_MATRIX.md`
-7. `CODE-BOOTSTRAP.md`
-8. `manual/REACHING-THE-LLMS.md`
-9. `manual/MANUAL-BOOTSTRAP.md`
+7. `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
+8. `templates/IMPL-TEMPLATE.md`
+9. `templates/TEST-CAMPAIGN-TEMPLATE.md`
+10. `CODE-BOOTSTRAP.md`
+11. `manual/REACHING-THE-LLMS.md`
+12. `manual/MANUAL-BOOTSTRAP.md`
 
 Goal:
 
@@ -74,6 +78,8 @@ Goal:
 - understand what must be project-specific
 - understand how the code bootstrap is installed and later activated
 - understand how the manual is installed and later used for user onboarding
+- understand that document creation templates are drafting aids, not living
+  project artifacts
 
 ---
 
@@ -576,6 +582,9 @@ Optional human-support artifacts may also be installed if the user wants them:
 
 - `reader/`
 - `beginning/STARTER-DIFF.md`
+- `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
+- `templates/IMPL-TEMPLATE.md`
+- `templates/TEST-CAMPAIGN-TEMPLATE.md`
 
 Do not install framework-repository residue into the destination project.
 
@@ -609,6 +618,9 @@ The optional human-support set is:
 
 - `reader/`
 - `beginning/STARTER-DIFF.md`
+- `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
+- `templates/IMPL-TEMPLATE.md`
+- `templates/TEST-CAMPAIGN-TEMPLATE.md`
 
 The non-install set is:
 

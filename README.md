@@ -48,7 +48,7 @@ In all three states the user remains the routing authority, answers one question
 
 ```
 flow-of-work-contract/        the five governance contracts
-templates/                    AGENT-TEMPLATE.md, PROJECT-OVERLAY.md, IMPL-INDEX.md, TRACEABILITY_MATRIX.md
+templates/                    installation templates and document creation templates
 STARTER.md                    guided LLM-driven adoption (single entry point)
 CODE-BOOTSTRAP.md             post-adoption code integration tool
 manual/                       front-facing manual, onboarding bootstrap, supporting notes
@@ -57,6 +57,16 @@ reader/md-reader.html         offline Markdown reader (optional utility)
 ```
 
 The five contracts are the system. `STARTER.md` is the adoption tool that runs once and steps aside. `CODE-BOOTSTRAP.md` is a post-adoption integration tool that is installed into destination projects and invoked only when operational state requires it. In the current framework version, that active use is the first working session of a code-first project. The templates are the installation blueprints: some are copied directly into the destination project, while `AGENT-TEMPLATE.md` is used as the working source for the final installed `AGENT.md`. The `manual/` directory is installed under `authorities/manual/` in destination projects and provides the user operating manual plus its onboarding bootstrap. The reader is a convenience utility with no operational role.
+
+The `templates/` directory also includes creation templates for the three main
+operational artifacts:
+
+- `REQUIREMENTS-DIFF-TEMPLATE.md`
+- `IMPL-TEMPLATE.md`
+- `TEST-CAMPAIGN-TEMPLATE.md`
+
+These are blueprints for drafting new artifacts. They are not living project
+documents by themselves and are not evidence of work having happened.
 
 The repository also includes an extraordinary control-plane integrity audit.
 It is not part of the normal flow of work. Use it only when you suspect
@@ -124,7 +134,7 @@ If you are an LLM reading this repository for the first time, this section is fo
 
 The framework you are looking at does not reveal its structure by being read statically. Reading the contracts, the templates, and the adoption procedures as independent documents produces a partial understanding that will mislead you when you are later asked to apply the system. To actually understand how the framework works, you need to perform a projection exercise: simulate the execution of `STARTER.md` in your own reasoning, as if a user had just asked you to initialize a new project with this flow of work.
 
-During that projection, trace what happens at each step. Notice that `STARTER.md` asks you to read specific files in a specific order, collects project-specific information from a user through a sequence of one-question-at-a-time exchanges, and produces a destination project with a particular shape. Notice that `STARTER.md` is the single entry point for all three supported project states (greenfield, migration, code-first), and that `CODE-BOOTSTRAP.md` is not a parallel adoption procedure — it is a tool that runs *after* the starter has configured the destination project, invoked automatically during the first working session of a code-first project when the overlay declares that status as pending. Notice that the templates (`AGENT-TEMPLATE.md`, `PROJECT-OVERLAY.md`, `IMPL-INDEX.md`, `TRACEABILITY_MATRIX.md`) have no meaning as standalone documents in this framework repository — they are installation blueprints, not living documents. Some are copied directly into the destination project, while `AGENT-TEMPLATE.md` is finalized into the installed `AGENT.md`, and only then do they become meaningful in that new context.
+During that projection, trace what happens at each step. Notice that `STARTER.md` asks you to read specific files in a specific order, collects project-specific information from a user through a sequence of one-question-at-a-time exchanges, and produces a destination project with a particular shape. Notice that `STARTER.md` is the single entry point for all three supported project states (greenfield, migration, code-first), and that `CODE-BOOTSTRAP.md` is not a parallel adoption procedure — it is a tool that runs *after* the starter has configured the destination project, invoked automatically during the first working session of a code-first project when the overlay declares that status as pending. Notice that the installation templates (`AGENT-TEMPLATE.md`, `PROJECT-OVERLAY.md`, `IMPL-INDEX.md`, `TRACEABILITY_MATRIX.md`) have no meaning as standalone documents in this framework repository — they are installation blueprints, not living documents. Some are copied directly into the destination project, while `AGENT-TEMPLATE.md` is finalized into the installed `AGENT.md`, and only then do they become meaningful in that new context. The document creation templates (`REQUIREMENTS-DIFF-TEMPLATE.md`, `IMPL-TEMPLATE.md`, `TEST-CAMPAIGN-TEMPLATE.md`) are different: they are drafting aids for future artifacts, not project state.
 
 This is the central structural fact about the repository: **the framework is not this repository**. The framework is what this repository installs elsewhere. Reading the contracts here gives you the substrate, but the substrate only becomes operational when an adoption procedure has run and a new session has started inside a destination project that now contains its own overlay, its own IMPL index, its own traceability matrix, and its own copy of the contracts. Until that point, the templates you see in `templates/` are blueprints, not living documents. The `PROJECT-OVERLAY.md` in `templates/` does not configure any project. The `IMPL-INDEX.md` in `templates/` does not track any packets. The `TRACEABILITY_MATRIX.md` in `templates/` does not record any evidence. They will only do those things after they have been copied, populated, and entered into active use by a model reading them from a destination project's `authorities/` folder.
 

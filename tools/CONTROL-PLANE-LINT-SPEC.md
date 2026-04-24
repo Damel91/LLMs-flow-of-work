@@ -100,6 +100,9 @@ The framework repo must contain at least:
 - `templates/PROJECT-OVERLAY.md`
 - `templates/IMPL-INDEX.md`
 - `templates/TRACEABILITY_MATRIX.md`
+- `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
+- `templates/IMPL-TEMPLATE.md`
+- `templates/TEST-CAMPAIGN-TEMPLATE.md`
 - `manual/MANUAL-BOOTSTRAP.md`
 - `manual/REACHING-THE-LLMS.md`
 - `flow-of-work-contract/00-INDEX.md`
