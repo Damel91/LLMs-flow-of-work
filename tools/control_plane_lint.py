@@ -231,6 +231,7 @@ def check_framework_mode(result: LintResult) -> None:
         "README.md",
         "STARTER.md",
         "CODE-BOOTSTRAP.md",
+        "CODE-WORKFLOW-CONTRACT.md",
         "WHY.md",
         "tools/CONTROL-PLANE-LINT-SPEC.md",
         "templates/AGENT-TEMPLATE.md",
@@ -262,6 +263,7 @@ def check_framework_mode(result: LintResult) -> None:
         "README.md",
         "STARTER.md",
         "CODE-BOOTSTRAP.md",
+        "CODE-WORKFLOW-CONTRACT.md",
         "WHY.md",
         "templates/AGENT-TEMPLATE.md",
         "templates/PROJECT-OVERLAY.md",
@@ -324,6 +326,11 @@ def check_framework_mode(result: LintResult) -> None:
             "agent-code-bootstrap",
             "AGENT-TEMPLATE.md does not route to CODE-BOOTSTRAP.md",
         )
+    if "CODE-WORKFLOW-CONTRACT.md" not in agent_template:
+        result.error(
+            "agent-code-workflow-contract",
+            "AGENT-TEMPLATE.md does not reference CODE-WORKFLOW-CONTRACT.md",
+        )
 
     overlay_template = read_text(result, root / "templates/PROJECT-OVERLAY.md")
     for required_heading in (
@@ -357,6 +364,11 @@ def check_framework_mode(result: LintResult) -> None:
             "starter-install-set-manual",
             "STARTER.md required install set does not include authorities/manual/*",
         )
+    if "CODE-WORKFLOW-CONTRACT.md" not in starter:
+        result.error(
+            "starter-install-set-code-workflow",
+            "STARTER.md required install set does not include CODE-WORKFLOW-CONTRACT.md",
+        )
     for template_name in (
         "REQUIREMENTS-DIFF-TEMPLATE.md",
         "IMPL-TEMPLATE.md",
@@ -387,6 +399,11 @@ def check_framework_mode(result: LintResult) -> None:
             "structure-manual-folder",
             "05-PROJECT-STRUCTURE.md does not declare authorities/manual/",
         )
+    if "CODE-WORKFLOW-CONTRACT.md" not in structure_doc:
+        result.error(
+            "structure-code-workflow-contract",
+            "05-PROJECT-STRUCTURE.md does not declare CODE-WORKFLOW-CONTRACT.md",
+        )
     for template_name in (
         "REQUIREMENTS-DIFF-TEMPLATE.md",
         "IMPL-TEMPLATE.md",
@@ -409,6 +426,7 @@ def check_workspace_mode(result: LintResult) -> None:
     required_paths = [
         "AGENT.md",
         "CODE-BOOTSTRAP.md",
+        "CODE-WORKFLOW-CONTRACT.md",
         "authorities/PROJECT-OVERLAY.md",
         "authorities/TRACEABILITY_MATRIX.md",
         "authorities/flow-of-work-contract/00-INDEX.md",
@@ -434,6 +452,11 @@ def check_workspace_mode(result: LintResult) -> None:
         result.error(
             "runtime-agent-placeholder",
             "AGENT.md still contains [Project Name] placeholder text",
+        )
+    if "CODE-WORKFLOW-CONTRACT.md" not in agent_text:
+        result.error(
+            "runtime-agent-code-workflow-contract",
+            "AGENT.md does not reference CODE-WORKFLOW-CONTRACT.md",
         )
 
     overlay_path = root / "authorities/PROJECT-OVERLAY.md"

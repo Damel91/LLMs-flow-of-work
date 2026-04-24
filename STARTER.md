@@ -25,6 +25,8 @@ This repository contains:
   - this guided procedure
 - one post-adoption code integration tool:
   - `CODE-BOOTSTRAP.md`
+- one root-level code development workflow contract:
+  - `CODE-WORKFLOW-CONTRACT.md`
 - a reader for browsing the contract documents offline
 
 It is not a project. It has no requirements to implement, no traceability
@@ -66,9 +68,10 @@ Before starting the guided procedure, read in this order:
 7. `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
 8. `templates/IMPL-TEMPLATE.md`
 9. `templates/TEST-CAMPAIGN-TEMPLATE.md`
-10. `CODE-BOOTSTRAP.md`
-11. `manual/REACHING-THE-LLMS.md`
-12. `manual/MANUAL-BOOTSTRAP.md`
+10. `CODE-WORKFLOW-CONTRACT.md`
+11. `CODE-BOOTSTRAP.md`
+12. `manual/REACHING-THE-LLMS.md`
+13. `manual/MANUAL-BOOTSTRAP.md`
 
 Goal:
 
@@ -334,6 +337,7 @@ receives:
 - `IMPL-TEMPLATE.md` at the final `impl` location
 - `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location
 - `CODE-BOOTSTRAP.md`
+- `CODE-WORKFLOW-CONTRACT.md`
 
 `TRACEABILITY_MATRIX.md` is always installed as a template. Its content may be
 empty or skeletal, but the file itself is part of the operational control
@@ -424,6 +428,8 @@ If the structure result is `default` or `adapted_direct_copy`:
 - copy `flow-of-work-contract/*` directly into the destination contract set
 - copy `CODE-BOOTSTRAP.md` directly into the destination as
   `CODE-BOOTSTRAP.md`
+- copy `CODE-WORKFLOW-CONTRACT.md` directly into the destination as
+  `CODE-WORKFLOW-CONTRACT.md`
 
 No structure-override workspace is required in this branch.
 The starter may still use a private working copy of `templates/AGENT-TEMPLATE.md`
@@ -439,6 +445,7 @@ If the structure result is `structure_override`:
    - `flow-of-work-contract/00-INDEX.md`
    - `flow-of-work-contract/05-PROJECT-STRUCTURE.md`
    - `CODE-BOOTSTRAP.md`
+   - `CODE-WORKFLOW-CONTRACT.md`
    - any other starter-needed source files
 3. derive inside `.starter-work/`:
    - the final project-specific `AGENT.md`
@@ -456,6 +463,7 @@ If the structure result is `structure_override`:
    - `templates/TEST-CAMPAIGN-TEMPLATE.md` -> the final `campaigns` location
      chosen by the user
    - the contract set
+   - `CODE-WORKFLOW-CONTRACT.md` -> `CODE-WORKFLOW-CONTRACT.md`
 5. replace only the file(s) that must become project-specific:
    - `AGENT.md`
    - `authorities/flow-of-work-contract/00-INDEX.md`
@@ -549,6 +557,7 @@ Check at least:
 - `authorities/TRACEABILITY_MATRIX.md` exists
 - `authorities/manual/MANUAL-BOOTSTRAP.md` exists
 - `authorities/manual/REACHING-THE-LLMS.md` exists
+- `CODE-WORKFLOW-CONTRACT.md` exists
 - the installed `IMPL-INDEX.md` exists at the final location declared by the
   overlay
 - the installed `REQUIREMENTS-DIFF-TEMPLATE.md` exists at the final `diffs`
@@ -586,6 +595,7 @@ The final installed `AGENT.md` should:
 
 - keep the manual-bootstrap handoff
 - keep the code-bootstrap handoff
+- keep the `CODE-WORKFLOW-CONTRACT.md` read and hard-stop reference
 - keep the normal read order
 - keep only essential runtime hard stops
 - resolve installed paths coherently when structure was adapted
@@ -631,6 +641,7 @@ The required install set is:
 - `IMPL-TEMPLATE.md` at the final `impl` location
 - `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location
 - `CODE-BOOTSTRAP.md`
+- `CODE-WORKFLOW-CONTRACT.md`
 - any minimum operational docs explicitly created during adoption
 
 The optional human-support set is:
@@ -692,6 +703,7 @@ At the end, produce an explicit summary containing:
 - whether `00-INDEX.md` was copied directly or derived privately
 - whether `05-PROJECT-STRUCTURE.md` was copied directly or derived privately
 - whether `CODE-BOOTSTRAP.md` was copied directly or derived privately
+- whether `CODE-WORKFLOW-CONTRACT.md` was copied directly
 - files created
 - files deferred
 - optional human-support artifacts retained
@@ -710,7 +722,8 @@ into `authorities/manual/MANUAL-BOOTSTRAP.md`. After manual onboarding is
 completed or explicitly skipped, overlay sec. 9 still declares
 `code bootstrap mode = local_code_first_derivation` and
 `code bootstrap status = pending`, so the next first operational task is to
-run `CODE-BOOTSTRAP.md` before normal initiative work begins."
+run `CODE-BOOTSTRAP.md` before normal initiative work begins. Normal code work
+after bootstrap is governed by `CODE-WORKFLOW-CONTRACT.md`."
 
 Otherwise conclude with:
 
@@ -720,7 +733,8 @@ manual onboarding pending or in progress, `AGENT.md` will first route the
 session into `authorities/manual/MANUAL-BOOTSTRAP.md`; if manual onboarding is
 completed or explicitly skipped, normal work begins from the control plane in
 `authorities/`. `CODE-BOOTSTRAP.md` remains installed as a dormant integration
-artifact unless later operational state activates it."
+artifact unless later operational state activates it. Normal code work is
+governed by `CODE-WORKFLOW-CONTRACT.md`."
 
 ---
 
@@ -762,4 +776,6 @@ The final structural contract of the adopted project belongs in the installed
 `05-PROJECT-STRUCTURE.md`.
 Code integration and code-first derivation belong in `CODE-BOOTSTRAP.md` and
 begin only after adoption has completed or when later operational state
-explicitly activates that tool.
+explicitly activates that tool. Code development execution discipline belongs
+in `CODE-WORKFLOW-CONTRACT.md` and is read by the installed `AGENT.md` during
+normal runtime work.

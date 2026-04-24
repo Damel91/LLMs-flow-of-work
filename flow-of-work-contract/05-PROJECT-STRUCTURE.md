@@ -27,10 +27,10 @@ The directory structure reflects that directly: documents are not scattered
 across the repository. They are grouped by the role they play in the authority
 stack, inside a single dedicated folder called `authorities/`.
 
-In steady-state operation, three root-level files may be present because
-models and users must find them immediately, without navigating:
-`AGENT.md`, `README.md`, and `CODE-BOOTSTRAP.md`. Everything else lives inside
-`authorities/`.
+In steady-state operation, four root-level files may be present because models
+and users must find them immediately, without navigating: `AGENT.md`,
+`README.md`, `CODE-BOOTSTRAP.md`, and `CODE-WORKFLOW-CONTRACT.md`.
+Everything else lives inside `authorities/`.
 
 Temporary exception during adoption:
 
@@ -52,6 +52,7 @@ separation that the governance contract depends on.
 ├── AGENT.md                         # session entrypoint
 ├── README.md                        # human-facing project introduction
 ├── CODE-BOOTSTRAP.md                # dormant integration / code-derivation tool
+├── CODE-WORKFLOW-CONTRACT.md        # code development workflow contract
 ├── src/                             # project source code
 ├── config/                          # configuration files
 ├── tests/                           # automated test code and harnesses
@@ -108,7 +109,7 @@ they are not part of the canonical steady-state structure:
 
 | Folder | Authority role | Governed by | Must not contain |
 |---|---|---|---|
-| `/` (root) | Immediate model and user entry points plus installed integration bootstrap | — | Any authority document other than AGENT.md and README.md, except `CODE-BOOTSTRAP.md` and temporary adoption bootstraps during active adoption |
+| `/` (root) | Immediate model and user entry points plus installed integration bootstrap and code workflow contract | — | Any authority document other than AGENT.md and README.md, except `CODE-BOOTSTRAP.md`, `CODE-WORKFLOW-CONTRACT.md`, and temporary adoption bootstraps during active adoption |
 | `src/` | Project source code | Project-specific | Authority documents, test evidence |
 | `config/` | Configuration files | Project-specific | Source code, authority documents |
 | `tests/` | Automated test code and harnesses | `04-TEST-AND-HANDOFF-CONTRACT.md` | TestCampaign documents (those belong in campaigns/) |
@@ -148,7 +149,8 @@ belong to `STARTER.md`, which may derive the final installed `AGENT.md` before
 handoff.
 
 `AGENT.md` must reference `authorities/flow-of-work-contract/00-INDEX.md` as
-the first document to read after the entrypoint itself.
+the first contract document to read after the overlay, and must reference
+`CODE-WORKFLOW-CONTRACT.md` before code work begins.
 
 When overlay state declares manual onboarding pending or in progress,
 `AGENT.md` may route first into `authorities/manual/MANUAL-BOOTSTRAP.md`
@@ -171,7 +173,20 @@ existing code after adoption is already complete.
 It is not the session entrypoint. It must not replace `AGENT.md`. In projects
 where later operational state never activates it, it remains dormant.
 
-### 4.4 tests/
+### 4.4 CODE-WORKFLOW-CONTRACT.md
+
+`CODE-WORKFLOW-CONTRACT.md` is the installed code development workflow
+contract.
+
+It governs execution discipline for code, prompt, parser, routing, graph,
+workspace, apply, regression, and commit work. It exists at root because the
+active model must find it before changing runtime behavior.
+
+It is not a product requirements document, not an IMPL packet, and not test
+evidence. It must be referenced by the installed `AGENT.md` read order and hard
+stops.
+
+### 4.5 tests/
 
 Contains automated test code and harnesses — unit tests, integration tests,
 regression tests, and any deterministic local test runners the project uses.
@@ -185,7 +200,7 @@ This folder is distinct from `authorities/campaigns/`. The difference is:
 A regression test lives in `tests/`. The record of running it lives in
 `authorities/campaigns/`. Do not conflate the two.
 
-### 4.5 release/
+### 4.6 release/
 
 Contains release-related artifacts. The exact content depends on the nature
 of the project and may include any combination of:

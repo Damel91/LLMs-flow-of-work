@@ -13,6 +13,7 @@ Before normal work, verify that the project is initialized.
 
 Check for:
 
+- `CODE-WORKFLOW-CONTRACT.md`
 - `authorities/PROJECT-OVERLAY.md`
 - `authorities/flow-of-work-contract/00-INDEX.md`
 - `authorities/TRACEABILITY_MATRIX.md`
@@ -83,11 +84,12 @@ Read in this order:
 1. `authorities/PROJECT-OVERLAY.md`
 2. `authorities/flow-of-work-contract/00-INDEX.md`
 3. continue through the contract set in the order declared by `00-INDEX.md`
-4. `authorities/TRACEABILITY_MATRIX.md`
-5. the installed `IMPL-INDEX.md` location declared by the overlay
-6. active `REQUIREMENTS_DIFF_*` in the installed diff location, if present
-7. active `IMPL-*` in the installed impl location, if present
-8. latest relevant `TestCampaign-*` in the installed campaigns location
+4. `CODE-WORKFLOW-CONTRACT.md`
+5. `authorities/TRACEABILITY_MATRIX.md`
+6. the installed `IMPL-INDEX.md` location declared by the overlay
+7. active `REQUIREMENTS_DIFF_*` in the installed diff location, if present
+8. active `IMPL-*` in the installed impl location, if present
+9. latest relevant `TestCampaign-*` in the installed campaigns location
 
 Use the overlay and installed structure as the source of truth for adapted
 locations.
@@ -98,6 +100,8 @@ locations.
 
 - Docs govern product intent and workflow.
 - No non-trivial work without an active `IMPL-*`.
+- Code, prompt, parser, routing, and graph changes follow
+  `CODE-WORKFLOW-CONTRACT.md`.
 - `TRACEABILITY_MATRIX.md` is factual state only. Update it only from evidence.
 - If behavior is not defined, stop and ask instead of inventing it.
 - For prompts, routing, clarification, planning, or graph transitions, inspect

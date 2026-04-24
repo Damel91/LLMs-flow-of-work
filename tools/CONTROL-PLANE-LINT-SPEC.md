@@ -95,6 +95,7 @@ The framework repo must contain at least:
 - `README.md`
 - `STARTER.md`
 - `CODE-BOOTSTRAP.md`
+- `CODE-WORKFLOW-CONTRACT.md`
 - `WHY.md`
 - `templates/AGENT-TEMPLATE.md`
 - `templates/PROJECT-OVERLAY.md`
@@ -140,6 +141,7 @@ It must:
 - inspect overlay sec. 8 before sec. 9
 - route to `authorities/manual/MANUAL-BOOTSTRAP.md`
 - route to `CODE-BOOTSTRAP.md`
+- read or reference `CODE-WORKFLOW-CONTRACT.md`
 
 If ordering or routing is missing: `error`.
 
@@ -172,6 +174,7 @@ Check `STARTER.md`.
 It must:
 
 - include `authorities/manual/*` in the required install set
+- include `CODE-WORKFLOW-CONTRACT.md` in the required install set
 - include the three category templates in the required install set:
   - `REQUIREMENTS-DIFF-TEMPLATE.md` at the final `diffs` location
   - `IMPL-TEMPLATE.md` at the final `impl` location
@@ -189,6 +192,7 @@ Check `flow-of-work-contract/05-PROJECT-STRUCTURE.md`.
 It must:
 
 - declare `authorities/manual/`
+- declare `CODE-WORKFLOW-CONTRACT.md` as a root-level steady-state file
 - declare the three category templates in the canonical destination folders
 - describe `STARTER.md` as temporary adoption-only root file, not steady-state
   control plane
@@ -207,6 +211,7 @@ The adopted workspace must contain at least:
 
 - `AGENT.md`
 - `CODE-BOOTSTRAP.md`
+- `CODE-WORKFLOW-CONTRACT.md`
 - `authorities/PROJECT-OVERLAY.md`
 - `authorities/TRACEABILITY_MATRIX.md`
 - `authorities/flow-of-work-contract/00-INDEX.md`
@@ -227,6 +232,9 @@ It must **not** still contain template-only adoption logic such as:
 - unresolved `[Project Name]` placeholder text
 
 If any of these remain: `error`.
+
+It must reference `CODE-WORKFLOW-CONTRACT.md`.
+If missing: `error`.
 
 ### 5.3 Overlay State Checks
 
