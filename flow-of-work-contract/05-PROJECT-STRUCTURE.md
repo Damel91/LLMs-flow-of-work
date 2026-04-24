@@ -77,13 +77,25 @@ separation that the governance contract depends on.
     ├── interactions/                # use cases and interaction sequences
     │   └── USE_CASES_AND_SEQUENCES.md
     ├── diffs/                       # active and historical requirement diffs
+    │   ├── REQUIREMENTS-DIFF-TEMPLATE.md
     │   └── REQUIREMENTS_DIFF_*.md
     ├── impl/                        # implementation packet history
     │   ├── IMPL-INDEX.md
+    │   ├── IMPL-TEMPLATE.md
     │   └── IMPL-*.md
     └── campaigns/                   # test evidence
+        ├── TEST-CAMPAIGN-TEMPLATE.md
         └── TestCampaign-*.md
 ```
+
+The three category templates shown in `diffs/`, `impl/`, and `campaigns/` are
+standing local references. They are copied by `STARTER.md` into the destination
+project so future sessions can create new artifacts without returning to the
+framework repository.
+
+They are not active diffs, active packets, or campaign evidence. A model must
+copy the relevant template, rename the copy according to the category naming
+rule, replace placeholders, and leave the installed template unchanged.
 
 Temporary adoption-only root files may exist during active adoption, but
 they are not part of the canonical steady-state structure:
@@ -107,9 +119,9 @@ they are not part of the canonical steady-state structure:
 | `authorities/flow-of-work-contract/` | Workflow governance — how work is conducted | `00-INDEX.md` | Product requirements, IMPL packets |
 | `authorities/baseline/` | Stable accepted product intent | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Active diffs, implementation notes |
 | `authorities/interactions/` | Scenario and interaction contract | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Requirements baseline, IMPL packets |
-| `authorities/diffs/` | Current and historical scope evolution | `01-LLM-SESSION-CONTRACT.md` | Accepted baseline text, test evidence |
-| `authorities/impl/` | Bounded execution history | `01-LLM-SESSION-CONTRACT.md` | Requirements, test campaigns |
-| `authorities/campaigns/` | Validation evidence | `04-TEST-AND-HANDOFF-CONTRACT.md` | Implementation plans, requirements |
+| `authorities/diffs/` | Current and historical scope evolution plus its local creation template | `01-LLM-SESSION-CONTRACT.md` | Accepted baseline text, test evidence |
+| `authorities/impl/` | Bounded execution history plus its local creation template | `01-LLM-SESSION-CONTRACT.md` | Requirements, test campaigns |
+| `authorities/campaigns/` | Validation evidence plus its local creation template | `04-TEST-AND-HANDOFF-CONTRACT.md` | Implementation plans, requirements |
 | `authorities/TRACEABILITY_MATRIX.md` | Accepted factual state across all layers | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Future intent, speculative status |
 
 ---

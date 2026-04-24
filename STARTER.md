@@ -330,6 +330,9 @@ receives:
 - `authorities/flow-of-work-contract/*`
 - `authorities/manual/*`
 - `IMPL-INDEX.md` at the final `impl` location
+- `REQUIREMENTS-DIFF-TEMPLATE.md` at the final `diffs` location
+- `IMPL-TEMPLATE.md` at the final `impl` location
+- `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location
 - `CODE-BOOTSTRAP.md`
 
 `TRACEABILITY_MATRIX.md` is always installed as a template. Its content may be
@@ -413,6 +416,11 @@ If the structure result is `default` or `adapted_direct_copy`:
   `authorities/TRACEABILITY_MATRIX.md`
 - copy `manual/*` directly into the destination as `authorities/manual/`
 - copy `templates/IMPL-INDEX.md` directly into the final `impl` location
+- copy `templates/REQUIREMENTS-DIFF-TEMPLATE.md` directly into the final
+  `diffs` location
+- copy `templates/IMPL-TEMPLATE.md` directly into the final `impl` location
+- copy `templates/TEST-CAMPAIGN-TEMPLATE.md` directly into the final
+  `campaigns` location
 - copy `flow-of-work-contract/*` directly into the destination contract set
 - copy `CODE-BOOTSTRAP.md` directly into the destination as
   `CODE-BOOTSTRAP.md`
@@ -442,6 +450,11 @@ If the structure result is `structure_override`:
    - `templates/TRACEABILITY_MATRIX.md` -> `authorities/TRACEABILITY_MATRIX.md`
    - `manual/*` -> `authorities/manual/`
    - `templates/IMPL-INDEX.md` -> the final `impl` location chosen by the user
+   - `templates/REQUIREMENTS-DIFF-TEMPLATE.md` -> the final `diffs` location
+     chosen by the user
+   - `templates/IMPL-TEMPLATE.md` -> the final `impl` location chosen by the user
+   - `templates/TEST-CAMPAIGN-TEMPLATE.md` -> the final `campaigns` location
+     chosen by the user
    - the contract set
 5. replace only the file(s) that must become project-specific:
    - `AGENT.md`
@@ -538,6 +551,12 @@ Check at least:
 - `authorities/manual/REACHING-THE-LLMS.md` exists
 - the installed `IMPL-INDEX.md` exists at the final location declared by the
   overlay
+- the installed `REQUIREMENTS-DIFF-TEMPLATE.md` exists at the final `diffs`
+  location declared by the overlay
+- the installed `IMPL-TEMPLATE.md` exists at the final `impl` location
+  declared by the overlay
+- the installed `TEST-CAMPAIGN-TEMPLATE.md` exists at the final `campaigns`
+  location declared by the overlay
 - if the structure was adapted, the overlay document map matches the files
   actually installed
 - overlay sec. 8 declares a non-placeholder manual onboarding state
@@ -582,9 +601,6 @@ Optional human-support artifacts may also be installed if the user wants them:
 
 - `reader/`
 - `beginning/STARTER-DIFF.md`
-- `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
-- `templates/IMPL-TEMPLATE.md`
-- `templates/TEST-CAMPAIGN-TEMPLATE.md`
 
 Do not install framework-repository residue into the destination project.
 
@@ -611,6 +627,9 @@ The required install set is:
 - `authorities/flow-of-work-contract/*`
 - `authorities/manual/*`
 - `IMPL-INDEX.md` at the final `impl` location
+- `REQUIREMENTS-DIFF-TEMPLATE.md` at the final `diffs` location
+- `IMPL-TEMPLATE.md` at the final `impl` location
+- `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location
 - `CODE-BOOTSTRAP.md`
 - any minimum operational docs explicitly created during adoption
 
@@ -618,9 +637,6 @@ The optional human-support set is:
 
 - `reader/`
 - `beginning/STARTER-DIFF.md`
-- `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
-- `templates/IMPL-TEMPLATE.md`
-- `templates/TEST-CAMPAIGN-TEMPLATE.md`
 
 The non-install set is:
 

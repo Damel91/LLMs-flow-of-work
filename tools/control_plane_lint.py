@@ -357,6 +357,16 @@ def check_framework_mode(result: LintResult) -> None:
             "starter-install-set-manual",
             "STARTER.md required install set does not include authorities/manual/*",
         )
+    for template_name in (
+        "REQUIREMENTS-DIFF-TEMPLATE.md",
+        "IMPL-TEMPLATE.md",
+        "TEST-CAMPAIGN-TEMPLATE.md",
+    ):
+        if template_name not in starter:
+            result.error(
+                "starter-install-set-category-template",
+                f"STARTER.md required install set does not include {template_name}",
+            )
     if "- `STARTER.md`" not in starter:
         result.error(
             "starter-non-install-set",
@@ -377,6 +387,16 @@ def check_framework_mode(result: LintResult) -> None:
             "structure-manual-folder",
             "05-PROJECT-STRUCTURE.md does not declare authorities/manual/",
         )
+    for template_name in (
+        "REQUIREMENTS-DIFF-TEMPLATE.md",
+        "IMPL-TEMPLATE.md",
+        "TEST-CAMPAIGN-TEMPLATE.md",
+    ):
+        if template_name not in structure_doc:
+            result.error(
+                "structure-category-template",
+                f"05-PROJECT-STRUCTURE.md does not declare {template_name}",
+            )
     if "Temporary adoption-only root files" not in structure_doc or "`STARTER.md`" not in structure_doc:
         result.error(
             "structure-temporary-root",
@@ -543,6 +563,31 @@ def check_workspace_mode(result: LintResult) -> None:
             result.error(
                 "overlay-map-path-missing",
                 f"Declared path for '{row_name}' does not exist: {path}",
+            )
+
+    required_category_templates = {
+        "Requirement diffs": "REQUIREMENTS-DIFF-TEMPLATE.md",
+        "Implementation packets": "IMPL-TEMPLATE.md",
+        "Test campaigns": "TEST-CAMPAIGN-TEMPLATE.md",
+    }
+    for row_name, template_name in required_category_templates.items():
+        if row_name not in location_map:
+            continue
+        default_location, actual_location = location_map[row_name]
+        category_path = resolve_declared_path(
+            result,
+            root,
+            default_location,
+            actual_location,
+            row_name,
+        )
+        if category_path is None:
+            continue
+        template_path = category_path / template_name
+        if not template_path.exists():
+            result.error(
+                "category-template-missing",
+                f"Missing category template at resolved '{row_name}' location: {template_path}",
             )
 
 

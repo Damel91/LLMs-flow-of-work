@@ -1,7 +1,7 @@
 # IMPL-[ID]-[SLUG]
 
 **Version:** 0.1
-**Status:** Draft
+**Status:** Template reference
 **Created:** YYYY-MM-DD
 **Governing diff:** [REQUIREMENTS_DIFF_* / none]
 **Governing baseline:** [baseline requirement references]
@@ -9,6 +9,9 @@
 
 > This is a bounded execution packet.
 > It is not product law and not acceptance evidence.
+> When installed in a destination project, this file is a category reference
+> for creating new `IMPL-*` packets. Copy it, rename the copy, replace all
+> placeholders, and leave this template unchanged.
 
 ---
 

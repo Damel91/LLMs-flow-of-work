@@ -1,7 +1,7 @@
 # TestCampaign-[ID]-[SLUG]
 
 **Version:** 0.1
-**Status:** Draft
+**Status:** Template reference
 **Date:** YYYY-MM-DD
 **Governing IMPL:** [IMPL-*]
 **Governing diff:** [REQUIREMENTS_DIFF_* / none]
@@ -10,6 +10,9 @@
 
 > This is an evidence artifact.
 > It is not an implementation plan and not a requirements document.
+> When installed in a destination project, this file is a category reference
+> for creating new `TestCampaign-*` documents. Copy it, rename the copy,
+> replace all placeholders, and leave this template unchanged.
 
 ---
 

@@ -172,6 +172,10 @@ Check `STARTER.md`.
 It must:
 
 - include `authorities/manual/*` in the required install set
+- include the three category templates in the required install set:
+  - `REQUIREMENTS-DIFF-TEMPLATE.md` at the final `diffs` location
+  - `IMPL-TEMPLATE.md` at the final `impl` location
+  - `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location
 - include `STARTER.md` in the non-install set
 - describe overlay sec. 8 routing before overlay sec. 9 routing in the final
   handoff logic
@@ -185,6 +189,7 @@ Check `flow-of-work-contract/05-PROJECT-STRUCTURE.md`.
 It must:
 
 - declare `authorities/manual/`
+- declare the three category templates in the canonical destination folders
 - describe `STARTER.md` as temporary adoption-only root file, not steady-state
   control plane
 
@@ -357,6 +362,15 @@ For each row:
 - otherwise use the declared actual path
 - if the chosen path still contains placeholder text, emit `error`
 - if the chosen path does not exist, emit `error`
+
+Then verify the category creation templates exist at the resolved category
+locations:
+
+- `REQUIREMENTS-DIFF-TEMPLATE.md` in the resolved `Requirement diffs` location
+- `IMPL-TEMPLATE.md` in the resolved `Implementation packets` location
+- `TEST-CAMPAIGN-TEMPLATE.md` in the resolved `Test campaigns` location
+
+If a category template is missing: `error`.
 
 ### 5.6 Workspace Pass Condition
 

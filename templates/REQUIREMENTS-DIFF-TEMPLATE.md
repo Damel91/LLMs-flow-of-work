@@ -1,7 +1,7 @@
 # REQUIREMENTS_DIFF_[ID]-[SLUG]
 
 **Version:** 0.1
-**Status:** Draft
+**Status:** Template reference
 **Created:** YYYY-MM-DD
 **Governing baseline:** [baseline document references]
 **Change line:** [short change-family name]
@@ -9,6 +9,9 @@
 
 > This is a product-contract change document.
 > It is not implementation evidence and not an IMPL packet.
+> When installed in a destination project, this file is a category reference
+> for creating new `REQUIREMENTS_DIFF_*` documents. Copy it, rename the copy,
+> replace all placeholders, and leave this template unchanged.
 
 ---
 

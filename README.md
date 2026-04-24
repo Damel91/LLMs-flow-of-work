@@ -66,7 +66,15 @@ operational artifacts:
 - `TEST-CAMPAIGN-TEMPLATE.md`
 
 These are blueprints for drafting new artifacts. They are not living project
-documents by themselves and are not evidence of work having happened.
+documents by themselves and are not evidence of work having happened. During
+adoption, `STARTER.md` installs copies of these creation templates into the
+destination project's corresponding authority folders:
+
+- `REQUIREMENTS-DIFF-TEMPLATE.md` in the final `diffs` location
+- `IMPL-TEMPLATE.md` in the final `impl` location
+- `TEST-CAMPAIGN-TEMPLATE.md` in the final `campaigns` location
+
+Those installed copies are local references for future artifact creation.
 
 The repository also includes an extraordinary control-plane integrity audit.
 It is not part of the normal flow of work. Use it only when you suspect
