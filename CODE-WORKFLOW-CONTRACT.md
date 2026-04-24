@@ -36,6 +36,10 @@ extension.
 The goal is not to reach the first passing state. The goal is to reach the
 simplest correct state that leaves the codebase healthier, not more fragile.
 
+Do not camouflage success. If the visible effect is correct but the code is
+fragile, duplicated, over-specific, or hard to reason about, state that plainly
+instead of presenting the result as good engineering.
+
 ---
 
 ## 2. Work Definition Before Code
@@ -103,11 +107,30 @@ Before adding a fallback, identify:
 If the answer is unclear, do not add the fallback. Ask for the intended
 behavior.
 
+Error handling is not the same as fallback invention.
+
+Good error handling:
+
+- makes failure explicit
+- preserves useful diagnostic information
+- protects callers from undefined state
+- follows the existing error model of the codebase
+
+Bad fallback handling:
+
+- silently returns a convenient default
+- hides a defect that should be fixed
+- turns missing behavior into implicit behavior
+- makes the caller believe the operation succeeded when it did not
+
 ---
 
 ## 5. No Dead Code Or Dead Flow
 
 Refactoring must remove obsolete code paths.
+
+Use a delete-first mindset during refactors. When a new flow replaces an old
+one, first identify what can be removed, then add only what is still needed.
 
 Do not leave behind:
 
@@ -173,6 +196,13 @@ It means:
   broader case
 - keep interfaces stable when possible
 
+Small abstraction rule:
+
+- abstract when there are at least two real uses, or when the underlying rule is
+  already stable and clearly broader than the current example
+- do not create an abstraction only because it might be useful later
+- do not keep copy-pasted logic when reuse is already evident
+
 Premature abstraction is bad. So is narrow code that forces the next worker to
 patch the same idea again somewhere else.
 
@@ -234,10 +264,15 @@ After tests pass, still inspect:
 - whether the implementation is reusable enough for the problem class
 - whether the patch introduced hidden coupling
 - whether the test was weakened to pass
+- whether the test is too coupled to current implementation details
 - whether the test only covers the example and not the rule
 - whether dead or contradictory code remains
 
 If a test passes but the code is logically poor, the work is not done.
+
+Test integrity matters. A good test protects behavior, a rule, or a regression
+seam. It should not freeze incidental implementation details unless those
+details are themselves the behavior being protected.
 
 ---
 
@@ -283,6 +318,13 @@ Do not delete state blindly if it is needed to reproduce behavior.
 If a code change requires a cache, index, graph, or workspace refresh, treat
 that refresh as part of the work.
 
+After work that touches runtime state, verify cleanup explicitly:
+
+- temporary workspace files are removed or intentionally retained
+- caches or indexes are refreshed when needed
+- local databases or snapshots are either source-of-truth, fixture, or ignored
+- generated files are not left ambiguous
+
 ---
 
 ## 13. Commit Discipline
@@ -322,6 +364,8 @@ Stop coding and discuss when:
 - there are two plausible designs with different future costs
 - the code passes but does not look logically clean
 - the worker is about to add passive code just to close the task
+- the worker cannot explain why the solution is generally correct
+- runtime state cleanup is uncertain
 
 These are not interruptions. They are part of good coding.
 
@@ -339,6 +383,9 @@ Do not:
 - implement broad rewrites without a stated reason
 - hide uncertainty in generic handlers
 - duplicate logic instead of extracting a reusable rule when reuse is obvious
+- over-abstract a single case without a stable rule
+- present a fragile passing result as good code
+- leave runtime state cleanup ambiguous
 - commit unrelated changes together
 - treat local commits as acceptance
 - treat "it works now" as equivalent to "it is well designed"
@@ -356,6 +403,8 @@ Coding work can be considered technically closed only when:
   such checks is explicitly stated
 - the code has been reviewed for logic, reuse, and maintainability
 - runtime state and generated files have been handled deliberately
+- the worker can explain in two to five lines why the design is correct, not
+  only which files changed
 - the relevant commit checkpoint has been created when git is in use
 
 If the code passes tests but fails the logic, reuse, or cleanup review, it is
