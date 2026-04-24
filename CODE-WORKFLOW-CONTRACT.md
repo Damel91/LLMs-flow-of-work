@@ -1,6 +1,6 @@
 # Code Workflow Contract
 
-**Version:** 0.1
+**Version:** 0.2
 **Status:** working_draft
 **Last updated:** 2026-04-25
 
@@ -8,295 +8,355 @@
 
 ## 0. Purpose
 
-This document governs how code development work is executed inside an adopted
-project.
+This document defines good coding rules for an LLM or human working on a real
+codebase.
 
-It exists because real LLM-assisted coding does not fail only at the product
-requirements layer. It also fails at the execution layer:
+Its scope is code-bounded:
 
-- the model bypasses planning and writes from raw user intent
-- prompts and parsers drift apart
-- generated code is treated as accepted before validation
-- live campaigns are used to discover predictable bugs
-- small local fixes silently expand into workflow changes
-- output contracts are patched heuristically instead of being defined
-- workspace validation and final apply are confused
+- how code should be changed
+- how refactors should be kept clean
+- how fallback behavior should be treated
+- how open technical questions should be handled
+- how tests should be interpreted
+- how commits should be used to preserve work state
 
-This contract defines the operational discipline for those code-development
-failures.
-
-It does not define product behavior. It does not replace requirements,
-diffs, IMPL packets, or test campaigns.
+It is not a product behavior document. It does not decide what the software
+should do. It regulates how code is written once the work target is known.
 
 ---
 
-## 1. Quick Rules
+## 1. Core Principle
 
-1. No non-trivial code change starts without an active `IMPL-*`.
-2. Product behavior changes require a governing `REQUIREMENTS_DIFF_*` first.
-3. Prompt changes are code changes when runtime behavior depends on them.
-4. Prompt output format and parser behavior must be treated as one contract.
-5. Do not bypass planning, refinement, task-unit, or artifact stages when the
-   system defines them.
-6. The executor must receive structured execution input, not raw user intent,
-   when the architecture provides a planning layer.
-7. Prefer contract correction over parser heuristics when a model-owned output
-   format is wrong or ambiguous.
-8. Use parser or runtime leniency only when the accepted contract explicitly
-   allows that tolerance.
-9. Validate in the safest available workspace or staging boundary before
-   applying to the live repo.
-10. Do not treat workspace validation as final acceptance.
-11. Known blockers must be fixed before campaign handoff.
-12. Repeated failures on the same seam require targeted regression coverage.
+Passing a test is not enough.
+
+Code is acceptable only when it is also logically coherent, maintainable,
+bounded to the actual problem, and written in a way that can survive future
+extension.
+
+The goal is not to reach the first passing state. The goal is to reach the
+simplest correct state that leaves the codebase healthier, not more fragile.
 
 ---
 
-## 2. Authority Relationship
+## 2. Work Definition Before Code
 
-This document governs execution discipline for code and prompt changes.
+Before writing or editing code, the worker must know:
 
-Authority order during code work:
+- what change is being made
+- why it is being made
+- which behavior or technical problem it addresses
+- which files or modules are expected to change
+- which adjacent areas are intentionally out of scope
+- what must be tested or inspected before the work is considered complete
 
-1. `AGENT.md` for session entry and routing
-2. `authorities/PROJECT-OVERLAY.md` for project-specific constraints
-3. `authorities/flow-of-work-contract/*` for generic workflow law
-4. this document for code-development execution discipline
-5. active `REQUIREMENTS_DIFF_*`, if product scope is changing
-6. accepted baseline and interaction docs
-7. active `IMPL-*`
-8. `TestCampaign-*` evidence
-9. `TRACEABILITY_MATRIX.md` factual status
+Use the active implementation document, when one exists, to define what must be
+done. Do not replace that definition with memory, intuition, or an apparently
+obvious shortcut.
 
-If this document conflicts with a project-specific overlay rule, stop and ask
-the user which rule should govern before coding.
+If the work definition is incomplete, stop and clarify it before coding.
 
 ---
 
-## 3. What Counts As Code Work
+## 3. Good Laziness vs Bad Laziness
 
-For this contract, code work includes:
+Good laziness is valuable.
 
-- source code changes
-- prompt changes
-- parser changes
-- routing or graph-node changes
-- model-output schema changes
-- workspace, apply, or staging lifecycle changes
-- test harness and regression changes
-- configuration changes that affect runtime behavior
+It means:
 
-Prompt files are not "just text" when runtime behavior depends on them.
-Changing a prompt that controls schema, routing, planning, coder output,
-review, or clarification is a behavioral code change.
+- choosing the simplest solution that solves the real problem
+- avoiding unnecessary abstractions
+- avoiding needless rewrites
+- deleting complexity when it no longer serves the system
+- preferring clear code over clever code
 
----
+Bad laziness is not acceptable.
 
-## 4. Pre-Implementation Gate
+It means:
 
-Before editing code, the active model must confirm:
+- coding before the open question is understood
+- adding passive code to make a test pass quickly
+- leaving dead branches because removing them requires thought
+- adding fallback behavior because deciding the real behavior is harder
+- hiding uncertainty behind generic handlers
+- accepting a local patch that makes future maintenance worse
 
-- request classification is clear
-- governing diff exists if product scope changes
-- active `IMPL-*` exists for non-trivial work
-- behavior-definition gate is clear
-- protected subsystems are not touched without approval
-- expected files and runtime surfaces are known
-- self-check boundary is explicit
-- validation handoff target is known or intentionally deferred
-
-If any item is missing, stop and resolve it before implementation.
+Open questions require attention and discussion, not passive code.
 
 ---
 
-## 5. Planning And Executor Boundary
+## 4. No Invented Fallbacks
 
-If the project architecture has a planning, refinement, artifact, or task-unit
-stage, the executor must not be fed raw user intent directly.
+Do not invent fallback functions, fallback branches, silent recovery paths, or
+default behavior unless explicitly requested or already established by the
+existing design.
 
-The expected flow is:
+Fallbacks are behavior. They are not harmless technical glue.
 
-1. classify request
-2. resolve target
-3. derive or select planning artifact / task unit
-4. execute from that structured input
-5. validate bounded output
-6. review result
-7. apply only through the accepted apply path, if one exists
+Before adding a fallback, identify:
 
-Retries are local recovery only. They are not a substitute for planning or
-context discovery.
+- what failure it handles
+- who depends on it
+- whether the fallback result is safe or merely convenient
+- whether it hides a bug that should be fixed instead
+- whether the user or existing design actually asked for it
 
-If execution cannot obtain a valid task unit or equivalent artifact, the model
-must stop rather than invent one silently.
+If the answer is unclear, do not add the fallback. Ask for the intended
+behavior.
 
 ---
 
-## 6. Prompt And Parser Contract Rule
+## 5. No Dead Code Or Dead Flow
 
-When a model output is parsed by code, the prompt and parser form a single
-runtime contract.
+Refactoring must remove obsolete code paths.
 
-Before changing either side, identify:
+Do not leave behind:
 
-- producer prompt
-- parser or consumer function
-- exact expected format
-- tolerated whitespace or fencing, if any
-- retry or rejection behavior
-- failure message
-- test surface
+- unused functions
+- unreachable branches
+- obsolete parameters
+- stale comments
+- abandoned files
+- old prompt paths
+- disabled tests that no longer represent a real future target
+- compatibility shims that nobody intends to support
 
-If the model consistently produces a format that the parser rejects, first ask:
+Temporary compatibility code is allowed only when it has:
 
-- is the prompt asking for an impractical or unstable format?
-- is the parser stricter than the accepted contract?
-- is the tolerated format already evident from real model output?
+- a clear purpose
+- a bounded lifetime
+- a removal condition
+- a visible note explaining why it exists
 
-Correction rule:
-
-- if the producer is model-owned and the prompt output format is the problem,
-  correct the prompt contract when possible
-- if the parser rejects an accepted or unavoidable model format, correct the
-  parser contract
-- do not add broad heuristics just to make one observed output pass
-- do not rely on hidden whitespace tricks as the governing fix
-
-Strictness is good only when the contract is realistic and testable.
+Dead code is not neutral. It misleads the next reader and gives future models
+false surfaces to reason from.
 
 ---
 
-## 7. Patch Boundary Rule
+## 6. Refactor Discipline
 
-Generated code changes must stay inside the authorized target boundary.
+A refactor must preserve or deliberately improve behavior.
 
-Use the narrowest safe patch form:
+Before refactoring, state the refactor goal:
 
-- symbol-level replacement when the task is symbol-scoped
-- file-level replacement only when the IMPL explicitly authorizes it
-- multi-file change only when the packet scope requires it
+- remove duplication
+- isolate responsibility
+- simplify control flow
+- improve naming
+- separate concerns
+- prepare a specific future change
 
-Reject or reroute output that:
+During refactoring:
 
-- rewrites a full file when only a region was authorized
-- changes unrelated behavior
-- introduces unrequested architecture
-- repairs nearby code without an accepted lateral-issue path
-- changes generated docs or authority files outside packet scope
+- keep the patch as small as the goal allows
+- avoid mixing refactor and feature behavior unless explicitly planned
+- remove old flows when the new flow replaces them
+- update tests that describe the old structure
+- avoid broad rewrites whose benefit is only aesthetic
 
-Lateral issues may be recorded only if the project defines where they go and
-when they may be promoted.
-
----
-
-## 8. Workspace, Apply, And Live Repo Boundary
-
-When the project has a workspace or pending-apply mechanism:
-
-- generated output is validated in workspace first
-- the live repo is not touched during workspace validation
-- apply is a separate explicit step
-- apply must refresh any runtime index, vector store, graph state, or cached
-  representation that depends on changed files
-- temporary workspace files must be cleaned up after successful apply
-
-Do not claim final repo mutation when only workspace validation happened.
-Do not claim workspace safety when the live repo was modified directly.
+After refactoring, inspect for dead paths and duplicated responsibility.
 
 ---
 
-## 9. Testing And Regression Discipline
+## 7. Generalization And Reuse
 
-Use the test and handoff contract for acceptance, but apply these execution
-rules during code work:
+Code should be oriented toward reasonable generalization and reuse.
 
-- run deterministic local checks when available and relevant
-- do not open a live campaign while predictable blockers remain
-- do not use live campaign execution as exploratory debugging
-- when the same seam fails repeatedly, add or update a targeted regression
-  before the next live campaign
-- if no standard test tool exists, use the best deterministic harness available
+This does not mean abstract everything.
 
-For prompt/parser seams, regression coverage may be:
+It means:
 
-- parser unit tests
-- prompt-output fixture tests
-- graph-routing probes
-- live model probes, when deterministic tests cannot cover the behavior alone
+- avoid one-off special cases when a small general rule would be clearer
+- keep reusable behavior in one place
+- avoid duplicating logic across files
+- name functions by the concept they implement, not only by the immediate bug
+- avoid hardcoding the current example when the code obviously represents a
+  broader case
+- keep interfaces stable when possible
 
-Live model probes support evidence. They do not replace deterministic
-regressions when deterministic coverage is possible.
+Premature abstraction is bad. So is narrow code that forces the next worker to
+patch the same idea again somewhere else.
 
 ---
 
-## 10. Review Before Handoff
+## 8. Prompt, Parser, And Configuration Code
 
-Before declaring code work ready, review against:
+Prompt files, parser code, routing code, configuration, and test harnesses are
+part of the codebase when they affect runtime behavior.
 
-- active diff or accepted baseline
-- active `IMPL-*`
-- behavior-definition gate
-- this code workflow contract
-- test and handoff contract
-- changed prompts and parsers as a pair
+Treat them with the same discipline as source code:
 
-The review must surface:
+- no unreviewed behavior changes
+- no dead prompt paths
+- no stale examples that teach the wrong output shape
+- no parser leniency that accepts undefined behavior
+- no configuration change without understanding its runtime effect
 
-- out-of-scope changes
-- untested parser or prompt assumptions
-- missing regressions
-- workspace/apply lifecycle risks
-- traceability claims made too early
-
-No findings is a valid result only if stated explicitly with residual risks.
+If a prompt produces output consumed by code, the prompt and parser must agree
+on a realistic format. Do not solve that mismatch by adding vague heuristics
+unless tolerance itself is the intended behavior.
 
 ---
 
-## 11. Commit Discipline
+## 9. Boundary Of A Patch
 
-If the project uses git and the user has requested local commits:
+Every patch must have a clear boundary.
+
+Before editing, identify:
+
+- target files
+- target functions or components
+- expected side effects
+- files that should not change
+
+A patch is suspicious when it:
+
+- rewrites more code than the problem requires
+- changes naming and behavior together without need
+- edits unrelated files
+- introduces new architecture to solve a local issue
+- makes broad formatting changes inside a behavioral patch
+- changes tests to match broken code instead of fixing the code
+
+When the needed change is larger than expected, stop and state why the boundary
+must expand.
+
+---
+
+## 10. Tests Are Necessary But Not Sufficient
+
+Tests prove only what they actually cover.
+
+Do not infer code quality from a green test alone.
+
+After tests pass, still inspect:
+
+- whether the code expresses the intended logic cleanly
+- whether the implementation is reusable enough for the problem class
+- whether the patch introduced hidden coupling
+- whether the test was weakened to pass
+- whether the test only covers the example and not the rule
+- whether dead or contradictory code remains
+
+If a test passes but the code is logically poor, the work is not done.
+
+---
+
+## 11. Regression Discipline
+
+When the same defect area appears more than once, add or update a targeted
+regression test.
+
+Do this before relying on another broad or live test cycle.
+
+The regression should protect the specific failure mode, not merely increase
+test count.
+
+Good regression coverage is:
+
+- narrow enough to fail for the bug it protects
+- stable enough to run repeatedly
+- named or commented clearly enough to explain the protected behavior
+- connected to the changed code path
+
+If deterministic regression is not possible, document why and use the closest
+repeatable check available.
+
+---
+
+## 12. Runtime State And Generated Files
+
+Runtime state matters when it affects behavior.
+
+Before committing or discarding generated files, caches, local databases,
+workspace files, indexes, snapshots, or build artifacts, determine whether they
+are:
+
+- source of truth
+- reproducible generated output
+- temporary execution state
+- test fixture
+- accidental residue
+
+Do not commit generated state by accident.
+Do not delete state blindly if it is needed to reproduce behavior.
+
+If a code change requires a cache, index, graph, or workspace refresh, treat
+that refresh as part of the work.
+
+---
+
+## 13. Commit Discipline
+
+Use git as a safety mechanism during serious work.
+
+Commit at least:
+
+- after creating a requirements diff or equivalent scope-change document
+- after every code change that significantly changes behavior
+- after each completed implementation cycle
+- after each completed test campaign or equivalent validation cycle
+- after important cleanup that removes dead code or obsolete flow
+
+Commit rules:
 
 - commit coherent semantic units
 - use conventional commit naming unless the project says otherwise
-- do not mix unrelated dirty work into the same commit
-- do not commit generated state unless the user or project explicitly wants it
-- do not amend or rewrite history without explicit approval
+- do not mix unrelated work in the same commit
+- inspect staged files before committing
+- do not commit accidental generated state
+- do not rewrite history without explicit approval
 
-Critical phases may require more frequent local commits than normal. This is a
-state-management decision, not acceptance evidence.
+Local commits are not acceptance. They are checkpoints that protect the work.
 
 ---
 
-## 12. Prohibited Behaviors
+## 14. Discussion Triggers
+
+Stop coding and discuss when:
+
+- a fallback seems necessary but was not requested
+- the requested behavior is not technically or semantically defined
+- a simple fix would leave dead code behind
+- a test can be made to pass by weakening the code or the test
+- the patch boundary expands beyond the original target
+- there are two plausible designs with different future costs
+- the code passes but does not look logically clean
+- the worker is about to add passive code just to close the task
+
+These are not interruptions. They are part of good coding.
+
+---
+
+## 15. Prohibited Behaviors
 
 Do not:
 
-- implement from raw user intent when a planning artifact is required
-- treat prompt editing as lower-risk than code editing
-- change parser behavior without identifying the prompt contract it consumes
-- add broad heuristics when a precise contract correction is available
-- claim an apply succeeded from workspace validation alone
-- update traceability from code completion alone
-- run a campaign to find bugs already known from review
-- silently expand scope because a nearby issue is visible
-- keep retrying the same failing seam without adding targeted regression
-- bypass the user on protected subsystems or scenario changes
+- invent fallback behavior
+- leave dead code or dead flow after refactoring
+- patch around an open question instead of resolving it
+- use tests as proof of logical code quality
+- weaken tests to match bad code
+- implement broad rewrites without a stated reason
+- hide uncertainty in generic handlers
+- duplicate logic instead of extracting a reusable rule when reuse is obvious
+- commit unrelated changes together
+- treat local commits as acceptance
+- treat "it works now" as equivalent to "it is well designed"
 
 ---
 
-## 13. Closure Rule
+## 16. Closure Rule
 
-Code work can be considered execution-closed only when:
+Coding work can be considered technically closed only when:
 
-- the active packet scope has been implemented or explicitly reduced
-- model-side review is complete
-- predictable blockers are resolved or explicitly routed
-- required local checks have run or are explicitly not available
-- workspace/apply state is clear
-- any traceability movement is deferred until evidence unless conservative
-  `Partial` is explicitly justified
+- the intended change is implemented
+- no known dead code or obsolete flow remains from the change
+- no invented fallback was introduced
+- tests or checks appropriate to the change have been run, or the absence of
+  such checks is explicitly stated
+- the code has been reviewed for logic, reuse, and maintainability
+- runtime state and generated files have been handled deliberately
+- the relevant commit checkpoint has been created when git is in use
 
-Execution closure is not acceptance.
-
-Acceptance still belongs to `TestCampaign-*` evidence, explicit user decision,
-or the project-specific acceptance bar declared in the overlay.
+If the code passes tests but fails the logic, reuse, or cleanup review, it is
+not technically closed.
