@@ -556,6 +556,16 @@ When writing files:
 
 Before handoff, validate the installed control plane.
 
+If shell access is available, run the deterministic validator from the
+destination project root:
+
+    ./tools/flowctl.sh doctor . --mode workspace
+
+If the result reports `errors=0`, the control plane passes structural lint and
+the manual checklist below may be skipped.
+
+If the tool is unavailable or shell access is not available, apply the checklist manually.
+
 Check at least:
 
 - `authorities/PROJECT-OVERLAY.md` exists and its project identity is no longer
@@ -652,6 +662,7 @@ The required install set is:
 - `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location
 - `CODE-BOOTSTRAP.md`
 - `CODE-WORKFLOW-CONTRACT.md`
+- `tools/flowctl.sh`
 - any minimum operational docs explicitly created during adoption
 
 The optional human-support set is:

@@ -80,10 +80,23 @@ Those installed copies are local references for future artifact creation.
 The repository also includes an extraordinary control-plane integrity audit.
 It is not part of the normal flow of work. Use it only when you suspect
 structural drift, after major framework refactors or migrations, or before
-publishing:
+publishing.
 
-- `python3 tools/control_plane_lint.py framework .`
-- `python3 tools/control_plane_lint.py workspace /path/to/adopted/project`
+`tools/flowctl.sh` is the primary cross-platform governance CLI (macOS, Linux,
+and Windows via Git Bash — no additional dependencies required):
+
+- `./tools/flowctl.sh doctor .`
+- `./tools/flowctl.sh doctor /path/to/adopted/project --mode workspace`
+
+A Python equivalent is also available for environments where Python 3 is
+preferred:
+
+- `python3 tools/flowctl.py doctor .`
+- `python3 tools/flowctl.py doctor /path/to/adopted/project --mode workspace`
+
+If neither tool is available (chat-only or no shell access), use the portable
+Markdown fallback:
+
 - `Read tools/CONTROL-PLANE-LINT-SPEC.md and execute it in framework or workspace mode`
 
 ---

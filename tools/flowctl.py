@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Run 'python3 tools/flowctl.py --help' before using this tool.
 """Deterministic CLI for flow-of-work governance checks.
 
 `flowctl` is intentionally boring: it validates document structure and gate
