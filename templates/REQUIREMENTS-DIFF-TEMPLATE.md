@@ -39,11 +39,14 @@ State whether this diff:
 
 **Editable:** [yes / no]
 
+**Diff index registration:** [active head / parked draft / superseded history / accepted history / rejected history]
+
 Rules:
 
 - only the current head diff in a change line is editable
+- the current head is the one named by `REQUIREMENTS_DIFF_INDEX.md`
 - opening a successor freezes predecessors as history
-- returning to older behavior requires a new latest diff, not rewriting history
+- returning to older behavior requires a new successor diff, not rewriting history
 
 ---
 

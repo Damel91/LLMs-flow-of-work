@@ -4,7 +4,7 @@ scope: development_control
 applies_to: multi-platform
 version: 0.1
 status: working_draft
-last_updated: YYYY-MM-DD
+last_updated: 2026-04-25
 ---
 
 # Flow Of Work Contract Index
@@ -52,6 +52,7 @@ They do not replace:
 
 - `authorities/baseline/REQUIREMENTS*` for product intent
 - `authorities/interactions/USE_CASES_AND_SEQUENCES.md` for scenario meaning
+- `authorities/diffs/REQUIREMENTS_DIFF_INDEX.md` for selecting the active diff
 - `authorities/diffs/REQUIREMENTS_DIFF_*` for active scope evolution
 - `authorities/impl/IMPL-*` for bounded execution
 - `authorities/campaigns/TestCampaign-*` for evidence

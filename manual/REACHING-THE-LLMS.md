@@ -524,8 +524,8 @@ This is one of the rules that keeps the framework audit-friendly.
 
 ### Only the head diff is editable
 
-If a diff is the latest statement of intent for that change line, you
-can still amend it.
+If `REQUIREMENTS_DIFF_INDEX.md` names a diff as the active head for the current
+initiative, you can still amend that diff.
 
 ### Opening a successor freezes the predecessor
 
@@ -541,8 +541,8 @@ history of what the project believed at that time.
 
 ### Reverting is additive, not historical rollback
 
-If you want to return to an older behavior, open a new latest diff that
-says so.
+If you want to return to an older behavior, open a new successor diff and
+register it as the active head in `REQUIREMENTS_DIFF_INDEX.md`.
 
 Do not reactivate an older diff directly.
 
@@ -693,7 +693,8 @@ Required by the currently tracked requirement set but not implemented.
 
 ### Head diff
 
-The latest editable diff in a change line.
+The editable diff named by `REQUIREMENTS_DIFF_INDEX.md` as the active head for
+the current initiative.
 
 ### Successor diff
 

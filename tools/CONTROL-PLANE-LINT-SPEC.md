@@ -101,6 +101,7 @@ The framework repo must contain at least:
 - `templates/PROJECT-OVERLAY.md`
 - `templates/IMPL-INDEX.md`
 - `templates/TRACEABILITY_MATRIX.md`
+- `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`
 - `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
 - `templates/IMPL-TEMPLATE.md`
 - `templates/TEST-CAMPAIGN-TEMPLATE.md`
@@ -142,6 +143,9 @@ It must:
 - route to `authorities/manual/MANUAL-BOOTSTRAP.md`
 - route to `CODE-BOOTSTRAP.md`
 - read or reference `CODE-WORKFLOW-CONTRACT.md`
+- read or reference `REQUIREMENTS_DIFF_INDEX.md` before the active diff
+- resolve `REQUIREMENTS_DIFF_INDEX.md` from the overlay document map instead
+  of hardcoding `authorities/diffs/REQUIREMENTS_DIFF_INDEX.md`
 
 If ordering or routing is missing: `error`.
 
@@ -175,6 +179,8 @@ It must:
 
 - include `authorities/manual/*` in the required install set
 - include `CODE-WORKFLOW-CONTRACT.md` in the required install set
+- include `REQUIREMENTS_DIFF_INDEX.md` in the required install set
+- include `REQUIREMENTS-DIFF-INDEX-TEMPLATE.md` in the framework adoption set
 - include the three category templates in the required install set:
   - `REQUIREMENTS-DIFF-TEMPLATE.md` at the final `diffs` location
   - `IMPL-TEMPLATE.md` at the final `impl` location
@@ -193,11 +199,26 @@ It must:
 
 - declare `authorities/manual/`
 - declare `CODE-WORKFLOW-CONTRACT.md` as a root-level steady-state file
+- declare `authorities/diffs/REQUIREMENTS_DIFF_INDEX.md`
 - declare the three category templates in the canonical destination folders
 - describe `STARTER.md` as temporary adoption-only root file, not steady-state
   control plane
 
 If missing: `error`.
+
+### 4.7 Diff Index Template Checks
+
+Check `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`.
+
+It must not duplicate current active state in header fields such as:
+
+- `Current active diff`
+- `Current implementation family`
+
+The `Current Active Diff` table is the only active-state source in the
+template.
+
+If duplicate header state exists: `error`.
 
 ---
 
@@ -359,6 +380,7 @@ It must contain rows for:
 - `Requirements baseline`
 - `Interactions`
 - `Requirement diffs`
+- `Requirement diff index`
 - `Implementation packets`
 - `Implementation packet index`
 - `Test campaigns`
@@ -371,14 +393,33 @@ For each row:
 - if the chosen path still contains placeholder text, emit `error`
 - if the chosen path does not exist, emit `error`
 
-Then verify the category creation templates exist at the resolved category
-locations:
+Then verify the standing files and category creation templates exist at the
+resolved category locations:
 
+- `REQUIREMENTS_DIFF_INDEX.md` at the resolved `Requirement diff index`
+  location
 - `REQUIREMENTS-DIFF-TEMPLATE.md` in the resolved `Requirement diffs` location
 - `IMPL-TEMPLATE.md` in the resolved `Implementation packets` location
 - `TEST-CAMPAIGN-TEMPLATE.md` in the resolved `Test campaigns` location
 
-If a category template is missing: `error`.
+If a required standing file or category template is missing: `error`.
+
+Also verify the resolved `Requirement diff index`:
+
+- exists
+- is a file
+- is named exactly `REQUIREMENTS_DIFF_INDEX.md`
+- does not duplicate active state in header fields
+- contains `## 3. Current Active Diff`
+- contains `## 4. Diff Ledger`
+- sets `Active state = none` when `Active diff = none`
+- sets `Active state = active head` when `Active diff` names a diff
+- declares at most one ledger row with `State in index = active head`
+- if `Active diff` is not `none`, the declared diff file exists in the
+  resolved `Requirement diffs` location and is registered as `active head` in
+  the ledger
+
+If any of these fail: `error`.
 
 ### 5.6 Workspace Pass Condition
 

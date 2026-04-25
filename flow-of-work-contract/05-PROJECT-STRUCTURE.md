@@ -2,7 +2,7 @@
 
 **Version:** 0.1
 **Status:** working_draft
-**Last updated:** YYYY-MM-DD
+**Last updated:** 2026-04-25
 
 ---
 
@@ -78,6 +78,7 @@ separation that the governance contract depends on.
     ├── interactions/                # use cases and interaction sequences
     │   └── USE_CASES_AND_SEQUENCES.md
     ├── diffs/                       # active and historical requirement diffs
+    │   ├── REQUIREMENTS_DIFF_INDEX.md
     │   ├── REQUIREMENTS-DIFF-TEMPLATE.md
     │   └── REQUIREMENTS_DIFF_*.md
     ├── impl/                        # implementation packet history
@@ -89,14 +90,16 @@ separation that the governance contract depends on.
         └── TestCampaign-*.md
 ```
 
-The three category templates shown in `diffs/`, `impl/`, and `campaigns/` are
-standing local references. They are copied by `STARTER.md` into the destination
-project so future sessions can create new artifacts without returning to the
-framework repository.
+The diff index and the three category templates shown in `diffs/`, `impl/`,
+and `campaigns/` are standing local references. They are copied by
+`STARTER.md` into the destination project so future sessions can select the
+active diff and create new artifacts without returning to the framework
+repository.
 
-They are not active diffs, active packets, or campaign evidence. A model must
-copy the relevant template, rename the copy according to the category naming
-rule, replace placeholders, and leave the installed template unchanged.
+The diff index is live project state. The templates are not active diffs,
+active packets, or campaign evidence. A model must copy the relevant template,
+rename the copy according to the category naming rule, replace placeholders,
+and leave the installed template unchanged.
 
 Temporary adoption-only root files may exist during active adoption, but
 they are not part of the canonical steady-state structure:
@@ -120,7 +123,7 @@ they are not part of the canonical steady-state structure:
 | `authorities/flow-of-work-contract/` | Workflow governance — how work is conducted | `00-INDEX.md` | Product requirements, IMPL packets |
 | `authorities/baseline/` | Stable accepted product intent | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Active diffs, implementation notes |
 | `authorities/interactions/` | Scenario and interaction contract | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Requirements baseline, IMPL packets |
-| `authorities/diffs/` | Current and historical scope evolution plus its local creation template | `01-LLM-SESSION-CONTRACT.md` | Accepted baseline text, test evidence |
+| `authorities/diffs/` | Active diff index, current and historical scope evolution, and local diff creation template | `01-LLM-SESSION-CONTRACT.md` | Accepted baseline text, test evidence |
 | `authorities/impl/` | Bounded execution history plus its local creation template | `01-LLM-SESSION-CONTRACT.md` | Requirements, test campaigns |
 | `authorities/campaigns/` | Validation evidence plus its local creation template | `04-TEST-AND-HANDOFF-CONTRACT.md` | Implementation plans, requirements |
 | `authorities/TRACEABILITY_MATRIX.md` | Accepted factual state across all layers | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Future intent, speculative status |
@@ -227,6 +230,16 @@ interactions, diffs, impl packets, and campaigns.
 Placing it inside any single subfolder would imply a layer membership it does
 not have. It is the cross-cutting factual state register for the entire
 authority stack.
+
+## 5.1 REQUIREMENTS_DIFF_INDEX.md Position
+
+The diff index lives inside `authorities/diffs/` because it governs only the
+requirements-diff layer. It identifies the active head diff and records diff
+succession state.
+
+It is not a requirements diff itself, not an IMPL packet, and not evidence.
+It must be installed in every adopted project even when no active diff exists.
+In that case its active diff field is `none`.
 
 ---
 

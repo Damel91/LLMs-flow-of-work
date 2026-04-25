@@ -16,18 +16,21 @@ Check for:
 - `CODE-WORKFLOW-CONTRACT.md`
 - `authorities/PROJECT-OVERLAY.md`
 - `authorities/flow-of-work-contract/00-INDEX.md`
-- `authorities/TRACEABILITY_MATRIX.md`
 
-Then read `authorities/PROJECT-OVERLAY.md` sec. 1, sec. 2, and sec. 10 if
-structure was adapted.
+Then read `authorities/PROJECT-OVERLAY.md` sec. 1, sec. 2, and sec. 10.
+Use the document map to resolve installed locations before checking
+location-adaptable files.
 
-Resolve the installed `IMPL-INDEX.md` location from the overlay when the
-document map declares an adapted impl path. Otherwise use the default
-`authorities/impl/IMPL-INDEX.md`.
+Resolve at least:
+
+- `TRACEABILITY_MATRIX.md`
+- `IMPL-INDEX.md`
+- `REQUIREMENTS_DIFF_INDEX.md`
+- the installed campaigns location
 
 If any required file is missing, or if the project name is still
-`[Project Name]`, or if the installed `IMPL-INDEX.md` is missing, the project
-is not initialized.
+`[Project Name]`, or if a resolved required control-plane file is missing, the
+project is not initialized.
 
 If the project is not initialized:
 
@@ -85,11 +88,12 @@ Read in this order:
 2. `authorities/flow-of-work-contract/00-INDEX.md`
 3. continue through the contract set in the order declared by `00-INDEX.md`
 4. `CODE-WORKFLOW-CONTRACT.md`
-5. `authorities/TRACEABILITY_MATRIX.md`
+5. the installed `TRACEABILITY_MATRIX.md` location declared by the overlay
 6. the installed `IMPL-INDEX.md` location declared by the overlay
-7. active `REQUIREMENTS_DIFF_*` in the installed diff location, if present
-8. active `IMPL-*` in the installed impl location, if present
-9. latest relevant `TestCampaign-*` in the installed campaigns location
+7. the installed `REQUIREMENTS_DIFF_INDEX.md` location declared by the overlay
+8. active `REQUIREMENTS_DIFF_*` named by the diff index, if present
+9. active `IMPL-*` in the installed impl location, if present
+10. `TestCampaign-*` linked by the active IMPL or active diff, if present
 
 Use the overlay and installed structure as the source of truth for adapted
 locations.

@@ -4,7 +4,7 @@ scope: development_control
 applies_to: multi-platform
 version: 0.3
 status: working_draft
-last_updated: 2026-04-12
+last_updated: 2026-04-25
 ---
 
 # LLM Session Contract
@@ -18,7 +18,8 @@ Use this sequence unless a project-specific overlay says otherwise:
    - existing-contract fix
    - new feature or product scope change
 3. If it is a new feature or product scope change, create or update a
-   head `REQUIREMENTS_DIFF_*`.
+   head `REQUIREMENTS_DIFF_*` and register it in
+   `REQUIREMENTS_DIFF_INDEX.md`.
 4. Create one atomic `IMPL-*` packet for the bounded execution slice.
 5. Execute all work the active LLM can safely implement and self-check
    inside that packet scope.
@@ -78,8 +79,8 @@ request.
 | Corrective bug fix inside accepted contract | Go to `IMPL-*` if non-trivial | No `REQUIREMENTS_DIFF_*` needed if product scope does not change |
 | Implementation drift fix | Go to `IMPL-*` | Canonical docs remain source of truth |
 | Documentation correction only | Apply docs change directly or via small `IMPL-*` | No traceability inflation |
-| New feature | Create or update the current head `REQUIREMENTS_DIFF_*` first | Product scope changes before implementation |
-| New workflow | Create or update the current head `REQUIREMENTS_DIFF_*` first | Includes approval flow or artifact lifecycle changes |
+| New feature | Create or update the current head `REQUIREMENTS_DIFF_*` and `REQUIREMENTS_DIFF_INDEX.md` first | Product scope changes before implementation |
+| New workflow | Create or update the current head `REQUIREMENTS_DIFF_*` and `REQUIREMENTS_DIFF_INDEX.md` first | Includes approval flow or artifact lifecycle changes |
 | Scenario or safety-boundary change | Stop and route through user | Requires explicit approval before execution |
 
 ### 4.1 Universal Governing Rules
@@ -95,7 +96,9 @@ request.
 7. The active LLM should complete all work inside its reliable execution and
    self-check boundary before handoff.
 8. `TRACEABILITY_MATRIX.md` is updated only from evidence.
-9. Diff mutability and succession are governed by
+9. The active diff is selected by `REQUIREMENTS_DIFF_INDEX.md`, not by filename
+   ordering or by stale status fields inside individual diff files.
+10. Diff mutability and succession are governed by
    `02-DOCSET-GOVERNANCE-CONTRACT.md`.
 
 ### 4.2 Concept Closure Checklist
@@ -162,18 +165,19 @@ capability.
 Every LLM session must be initialized with:
 
 1. Relevant current history:
-   - whether a governing head `REQUIREMENTS_DIFF_*` exists for the targeted
-     behavior, requirement family, or workflow surface
+   - the installed `REQUIREMENTS_DIFF_INDEX.md` at the project's actual
+     diff-index location declared by the overlay
+   - the active diff named by the index, if the index declares one
    - the installed `IMPL-INDEX.md` at the project's actual `impl` location
    - active `IMPL-*`, if present
-   - latest relevant `TestCampaign-*`
+   - `TestCampaign-*` linked by the active IMPL or active diff, if present
 2. Repository identity and purpose
 3. Canonical docs per `authorities/PROJECT-OVERLAY.md`:
    - the baseline documents at their installed project locations
    - the interaction document at its installed project location
    - `authorities/TRACEABILITY_MATRIX.md`
-   - if a governing head `REQUIREMENTS_DIFF_*` exists, it must be read before
-     the canonical docs are treated as the full governing set
+   - if `REQUIREMENTS_DIFF_INDEX.md` declares an active diff, that diff must be
+     read before the canonical docs are treated as the full governing set
 4. Governance constraints:
    - docs-first
    - user as master router
@@ -237,7 +241,8 @@ Required setup:
 
 The model must determine:
 
-- what canonical docs require now, including any governing active diff layer
+- what canonical docs require now, including the active diff named by
+  `REQUIREMENTS_DIFF_INDEX.md`
 - what the matrix says is implemented, partial, or gap
 - whether the request is within the accepted contract
 
@@ -268,6 +273,9 @@ When product scope changes, the model must decide whether to:
 
 That decision follows the mutability and succession rules from
 `02-DOCSET-GOVERNANCE-CONTRACT.md`.
+
+The chosen head or successor must be recorded in `REQUIREMENTS_DIFF_INDEX.md`
+before any implementation packet is produced.
 
 #### Phase C — IMPL Packet
 
@@ -358,6 +366,7 @@ default.
 Expected output:
 
 - one bounded `REQUIREMENTS_DIFF_*`
+- corresponding `REQUIREMENTS_DIFF_INDEX.md` registration or update
 - explicit new, modified, or removed requirement IDs
 - explicit statement whether the diff is an amended head diff or a successor
 - explicit impact on traceability

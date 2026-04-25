@@ -4,7 +4,7 @@ scope: documentation_control
 applies_to: multi-platform
 version: 0.3
 status: working_draft
-last_updated: 2026-04-12
+last_updated: 2026-04-25
 ---
 
 # Docset Governance Contract
@@ -13,17 +13,19 @@ last_updated: 2026-04-12
 
 1. The documentation system is layered, not flat.
 2. Each document type answers a different question and must keep one role.
-3. The active `REQUIREMENTS_DIFF_*` governs the current initiative until
-   acceptance and remains as durable historical contract record afterward.
-4. `IMPL-*` packets execute the active diff or accepted baseline, but do not
+3. `REQUIREMENTS_DIFF_INDEX.md` declares which diff is active.
+4. The active `REQUIREMENTS_DIFF_*` named by the diff index governs the current
+   initiative until acceptance and remains as durable historical contract
+   record afterward.
+5. `IMPL-*` packets execute the active diff or accepted baseline, but do not
    replace either.
-5. `TestCampaign-*` records evidence, not plan.
-6. `TRACEABILITY_MATRIX.md` records accepted fact only after evidence.
-7. When one document layer temporarily supersedes another, that precedence must
+6. `TestCampaign-*` records evidence, not plan.
+7. `TRACEABILITY_MATRIX.md` records accepted fact only after evidence.
+8. When one document layer temporarily supersedes another, that precedence must
    be explicit.
-8. Baseline is the stable bone structure; accepted diffs are not merged into
+9. Baseline is the stable bone structure; accepted diffs are not merged into
    baseline by default.
-9. Only the current head diff of a change line is editable; opening a
+10. Only the current head diff of a change line is editable; opening a
    successor freezes all predecessors as history.
 
 ## 1. Purpose
@@ -54,16 +56,21 @@ Use the following authority order when working on an active initiative:
 2. this document for document-layer authority and sync rules
 3. `03-BEHAVIORAL-DEFINITION-GATE.md` for blocked states caused by missing
    behavior definitions
-4. active `REQUIREMENTS_DIFF_*` for current product scope change
-5. canonical `REQUIREMENTS*` for accepted baseline intent
-6. `USE_CASES_AND_SEQUENCES.md` for scenario meaning
-7. active `IMPL-*` for bounded execution
-8. `TestCampaign-*` for acceptance evidence
-9. `TRACEABILITY_MATRIX.md` for accepted factual status
+4. `REQUIREMENTS_DIFF_INDEX.md` for selecting the active diff
+5. active `REQUIREMENTS_DIFF_*` for current product scope change
+6. canonical `REQUIREMENTS*` for accepted baseline intent
+7. `USE_CASES_AND_SEQUENCES.md` for scenario meaning
+8. active `IMPL-*` for bounded execution
+9. `TestCampaign-*` for acceptance evidence
+10. `TRACEABILITY_MATRIX.md` for accepted factual status
 
 Important distinction:
 
 - active diff governs current change intent
+- diff index identifies which diff is active and which diff is the editable
+  head of a change line
+- only one diff may be the active implementation target at a time; other
+  change lines may remain parked in the diff index ledger
 - baseline governs accepted stable bone structure
 - accepted diffs preserve accepted contract evolution and remain readable history
 - active diff may temporarily supersede affected use cases and sequences
@@ -77,6 +84,7 @@ Older diffs are historical records, not mutable working drafts.
 | Document | Role | Must not be used as |
 |---|---|---|
 | `REQUIREMENTS*` | Stable accepted bone structure | active feature diff or exhaustive history of every accepted change |
+| `REQUIREMENTS_DIFF_INDEX.md` | Active diff pointer and diff ledger | product behavior contract or evidence |
 | `REQUIREMENTS_DIFF_*` | Current product scope evolution and durable historical change record after acceptance | factual implementation proof |
 | `USE_CASES_AND_SEQUENCES.md` | Scenario contract, subject to scoped supersession by the active diff when explicitly declared | packet plan or matrix |
 | `IMPL-*` | Bounded execution initiative | final product contract |
@@ -88,12 +96,17 @@ Older diffs are historical records, not mutable working drafts.
 When a new `REQUIREMENTS_DIFF_*` is opened, it must identify propagation impact
 across the rest of the docset.
 
+Before implementation work starts, `REQUIREMENTS_DIFF_INDEX.md` must identify
+that diff as the current active head. If the index points elsewhere, the new
+diff is draft material only.
+
 Minimum propagation questions:
 
 1. Which baseline requirement statements are now stale or incomplete?
 2. Which use cases or sequences are temporarily superseded for this initiative?
 3. Which root `IMPL-*` is opened by this diff?
 4. Which traceability rows are expected to move only after acceptance?
+5. Does `REQUIREMENTS_DIFF_INDEX.md` point to this diff as active head?
 
 The active root `IMPL-*` should carry the initiative ledger for those
 propagation targets during execution.
@@ -103,17 +116,21 @@ propagation targets during execution.
 Use the following rules for multiple diffs touching the same requirement area
 or change line:
 
-1. The current head diff is the only editable diff in that line.
-2. A head diff should normally be amended in place while it is still the
+1. The active head diff named by `REQUIREMENTS_DIFF_INDEX.md` is the only
+   editable diff for implementation planning.
+2. Parked draft lines are non-governing until the index promotes one of them
+   to active head.
+3. A head diff should normally be amended in place while it is still the
    current working statement of intent.
-3. Opening a successor diff immediately freezes the predecessor as historical
+4. Opening a successor diff immediately freezes the predecessor as historical
    record, even if the predecessor has not yet been covered by an authoritative
    campaign.
-4. After a successor exists, the predecessor must not be rewritten. Any
-   correction, rollback, or refinement must be expressed in the current head
+5. After a successor exists, the predecessor must not be rewritten. Any
+   correction, rollback, or refinement must be expressed in the active head
    diff or in a newer successor.
-5. A previously superseded diff never becomes governing again directly. If the
-   user wants to return to an older behavior, a new latest diff must say so.
+6. A previously superseded diff never becomes governing again directly. If the
+   user wants to return to an older behavior, a new successor diff must say so
+   and be registered as the active head in `REQUIREMENTS_DIFF_INDEX.md`.
 
 Practical consequence:
 
@@ -154,12 +171,13 @@ When documents disagree, resolve them in this order:
 1. process rules from `01-LLM-SESSION-CONTRACT.md`
 2. doc-layer authority from this contract
 3. behavior blocking rules from `03-BEHAVIORAL-DEFINITION-GATE.md`
-4. active `REQUIREMENTS_DIFF_*`
-5. accepted baseline `REQUIREMENTS*`
-6. scenario meaning from `USE_CASES_AND_SEQUENCES.md`
-7. bounded execution details from active `IMPL-*`
-8. factual evidence from `TestCampaign-*`
-9. accepted status from `TRACEABILITY_MATRIX.md`
+4. `REQUIREMENTS_DIFF_INDEX.md` when deciding which diff is active
+5. active `REQUIREMENTS_DIFF_*`
+6. accepted baseline `REQUIREMENTS*`
+7. scenario meaning from `USE_CASES_AND_SEQUENCES.md`
+8. bounded execution details from active `IMPL-*`
+9. factual evidence from `TestCampaign-*`
+10. accepted status from `TRACEABILITY_MATRIX.md`
 
 If an active diff explicitly changes scenario meaning for a bounded scope, that
 scoped reading prevails over conflicting passages in
@@ -209,6 +227,8 @@ This keeps initiative-specific synchronization out of the global contracts.
 Do not:
 
 - treat the matrix as product scope authority
+- infer the active diff from the highest version number, latest modified file,
+  or stale status fields inside individual diff files
 - treat an active diff as accepted baseline after implementation but before
   evidence
 - update canonical baseline during an initiative without making supersession
@@ -216,7 +236,8 @@ Do not:
 - assume acceptance requires baseline merge
 - erase accepted diff history by silently absorbing it into baseline
 - edit a non-head diff after a successor exists
-- reactivate an older diff directly instead of opening a new latest diff
+- edit a diff that is not the active head named by `REQUIREMENTS_DIFF_INDEX.md`
+- reactivate an older diff directly instead of opening a new successor diff
 - use `IMPL-*` as product-law replacement for requirements
 - use a `TestCampaign-*` as if it were an implementation plan
 - leave conflicting document layers ambiguous

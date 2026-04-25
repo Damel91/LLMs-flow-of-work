@@ -66,6 +66,7 @@ OVERLAY_LOCATION_ROWS = {
     "Requirements baseline",
     "Interactions",
     "Requirement diffs",
+    "Requirement diff index",
     "Implementation packets",
     "Implementation packet index",
     "Test campaigns",
@@ -170,6 +171,20 @@ def parse_overlay_map(section_text: str) -> dict[str, tuple[str, str]]:
     return entries
 
 
+def clean_cell(value: str) -> str:
+    return value.strip().strip("`").strip()
+
+
+def parse_field_value_table(section_text: str) -> dict[str, str]:
+    table_rows = parse_markdown_table(section_text)
+    entries: dict[str, str] = {}
+    for row in table_rows[1:]:
+        if len(row) < 2:
+            continue
+        entries[normalize_label(row[0])] = clean_cell(row[1])
+    return entries
+
+
 def resolve_declared_path(
     result: LintResult,
     root: Path,
@@ -193,6 +208,128 @@ def resolve_declared_path(
     if not path.is_absolute():
         path = root / path
     return path
+
+
+def resolve_active_diff_path(diff_dir: Path, active_diff: str) -> Path:
+    active_path = Path(active_diff)
+    if active_path.is_absolute():
+        return active_path
+    return diff_dir / active_path
+
+
+def validate_diff_index(
+    result: LintResult,
+    index_path: Path,
+    diff_dir: Path,
+) -> None:
+    if not index_path.exists():
+        return
+    if not index_path.is_file():
+        result.error(
+            "diff-index-not-file",
+            f"Requirement diff index path is not a file: {index_path}",
+        )
+        return
+    if index_path.name != "REQUIREMENTS_DIFF_INDEX.md":
+        result.error(
+            "diff-index-wrong-name",
+            f"Requirement diff index must be named REQUIREMENTS_DIFF_INDEX.md: {index_path}",
+        )
+
+    index_text = read_text(result, index_path)
+    strong_fields = parse_strong_fields(index_text)
+    for duplicate_field in ("current active diff", "current implementation family"):
+        if duplicate_field in strong_fields:
+            result.error(
+                "diff-index-duplicate-state",
+                f"REQUIREMENTS_DIFF_INDEX.md duplicates active state in header field: {duplicate_field}",
+            )
+
+    active_section = extract_section(index_text, "## 3. Current Active Diff")
+    if not active_section:
+        result.error(
+            "diff-index-active-section-missing",
+            "REQUIREMENTS_DIFF_INDEX.md missing section: ## 3. Current Active Diff",
+        )
+        return
+
+    active_fields = parse_field_value_table(active_section)
+    active_diff = active_fields.get("active diff")
+    active_state = active_fields.get("active state")
+    if not active_diff:
+        result.error(
+            "diff-index-active-diff-missing",
+            "Current Active Diff table does not define Active diff",
+        )
+        return
+    if not active_state:
+        result.error(
+            "diff-index-active-state-missing",
+            "Current Active Diff table does not define Active state",
+        )
+        return
+
+    active_diff_lower = active_diff.lower()
+    active_state_lower = active_state.lower()
+    if active_diff_lower == "none" and active_state_lower != "none":
+        result.error(
+            "diff-index-state-mismatch",
+            "Active state must be none when Active diff is none",
+        )
+    if active_diff_lower != "none" and active_state_lower != "active head":
+        result.error(
+            "diff-index-state-mismatch",
+            "Active state must be active head when Active diff names a diff",
+        )
+    if active_diff_lower != "none":
+        if "[" in active_diff or "]" in active_diff:
+            result.error(
+                "diff-index-active-placeholder",
+                f"Active diff is still placeholder-like: {active_diff}",
+            )
+        else:
+            active_path = resolve_active_diff_path(diff_dir, active_diff)
+            if not active_path.exists():
+                result.error(
+                    "diff-index-active-missing",
+                    f"Active diff declared by REQUIREMENTS_DIFF_INDEX.md does not exist: {active_path}",
+                )
+            elif not active_path.is_file():
+                result.error(
+                    "diff-index-active-not-file",
+                    f"Active diff declared by REQUIREMENTS_DIFF_INDEX.md is not a file: {active_path}",
+                )
+
+    ledger_section = extract_section(index_text, "## 4. Diff Ledger")
+    if not ledger_section:
+        result.error(
+            "diff-index-ledger-missing",
+            "REQUIREMENTS_DIFF_INDEX.md missing section: ## 4. Diff Ledger",
+        )
+        return
+    ledger_rows = parse_markdown_table(ledger_section)
+    active_rows = [
+        row
+        for row in ledger_rows[1:]
+        if len(row) >= 3 and clean_cell(row[2]).lower() == "active head"
+    ]
+    if len(active_rows) > 1:
+        result.error(
+            "diff-index-multiple-active-heads",
+            "Diff ledger declares more than one active head",
+        )
+    if active_diff_lower != "none":
+        active_name = Path(active_diff).name
+        has_active_ledger_row = any(
+            clean_cell(row[0]) in {active_diff, active_name}
+            for row in active_rows
+            if row
+        )
+        if not has_active_ledger_row:
+            result.error(
+                "diff-index-ledger-mismatch",
+                "Active diff is not registered as active head in the diff ledger",
+            )
 
 
 def check_allowed_value(
@@ -238,6 +375,7 @@ def check_framework_mode(result: LintResult) -> None:
         "templates/PROJECT-OVERLAY.md",
         "templates/IMPL-INDEX.md",
         "templates/TRACEABILITY_MATRIX.md",
+        "templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md",
         "templates/REQUIREMENTS-DIFF-TEMPLATE.md",
         "templates/IMPL-TEMPLATE.md",
         "templates/TEST-CAMPAIGN-TEMPLATE.md",
@@ -269,6 +407,7 @@ def check_framework_mode(result: LintResult) -> None:
         "templates/PROJECT-OVERLAY.md",
         "templates/IMPL-INDEX.md",
         "templates/TRACEABILITY_MATRIX.md",
+        "templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md",
         "templates/REQUIREMENTS-DIFF-TEMPLATE.md",
         "templates/IMPL-TEMPLATE.md",
         "templates/TEST-CAMPAIGN-TEMPLATE.md",
@@ -331,6 +470,16 @@ def check_framework_mode(result: LintResult) -> None:
             "agent-code-workflow-contract",
             "AGENT-TEMPLATE.md does not reference CODE-WORKFLOW-CONTRACT.md",
         )
+    if "REQUIREMENTS_DIFF_INDEX.md" not in agent_template:
+        result.error(
+            "agent-diff-index",
+            "AGENT-TEMPLATE.md does not read REQUIREMENTS_DIFF_INDEX.md before the active diff",
+        )
+    if "authorities/diffs/REQUIREMENTS_DIFF_INDEX.md" in agent_template:
+        result.error(
+            "agent-hardcoded-diff-index",
+            "AGENT-TEMPLATE.md hardcodes the diff index path instead of resolving it from the overlay",
+        )
 
     overlay_template = read_text(result, root / "templates/PROJECT-OVERLAY.md")
     for required_heading in (
@@ -369,7 +518,18 @@ def check_framework_mode(result: LintResult) -> None:
             "starter-install-set-code-workflow",
             "STARTER.md required install set does not include CODE-WORKFLOW-CONTRACT.md",
         )
+    if "REQUIREMENTS_DIFF_INDEX.md" not in starter:
+        result.error(
+            "starter-install-set-diff-index",
+            "STARTER.md required install set does not include REQUIREMENTS_DIFF_INDEX.md",
+        )
+    if "REQUIREMENTS-DIFF-INDEX-TEMPLATE.md" not in starter:
+        result.error(
+            "starter-install-set-diff-index-template",
+            "STARTER.md required install set does not include REQUIREMENTS-DIFF-INDEX-TEMPLATE.md",
+        )
     for template_name in (
+        "REQUIREMENTS-DIFF-INDEX-TEMPLATE.md",
         "REQUIREMENTS-DIFF-TEMPLATE.md",
         "IMPL-TEMPLATE.md",
         "TEST-CAMPAIGN-TEMPLATE.md",
@@ -404,6 +564,11 @@ def check_framework_mode(result: LintResult) -> None:
             "structure-code-workflow-contract",
             "05-PROJECT-STRUCTURE.md does not declare CODE-WORKFLOW-CONTRACT.md",
         )
+    if "REQUIREMENTS_DIFF_INDEX.md" not in structure_doc:
+        result.error(
+            "structure-diff-index",
+            "05-PROJECT-STRUCTURE.md does not declare REQUIREMENTS_DIFF_INDEX.md",
+        )
     for template_name in (
         "REQUIREMENTS-DIFF-TEMPLATE.md",
         "IMPL-TEMPLATE.md",
@@ -419,6 +584,15 @@ def check_framework_mode(result: LintResult) -> None:
             "structure-temporary-root",
             "05-PROJECT-STRUCTURE.md does not describe STARTER.md as the temporary adoption-only root file",
         )
+
+    diff_index_template = read_text(result, root / "templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md")
+    diff_index_fields = parse_strong_fields(diff_index_template)
+    for duplicate_field in ("current active diff", "current implementation family"):
+        if duplicate_field in diff_index_fields:
+            result.error(
+                "diff-index-template-duplicate-state",
+                f"REQUIREMENTS-DIFF-INDEX-TEMPLATE.md duplicates active state in header field: {duplicate_field}",
+            )
 
 
 def check_workspace_mode(result: LintResult) -> None:
@@ -612,6 +786,35 @@ def check_workspace_mode(result: LintResult) -> None:
                 "category-template-missing",
                 f"Missing category template at resolved '{row_name}' location: {template_path}",
             )
+
+    if "Requirement diff index" in location_map:
+        default_location, actual_location = location_map["Requirement diff index"]
+        index_path = resolve_declared_path(
+            result,
+            root,
+            default_location,
+            actual_location,
+            "Requirement diff index",
+        )
+        if index_path is not None and not index_path.exists():
+            result.error(
+                "diff-index-missing",
+                f"Missing REQUIREMENTS_DIFF_INDEX.md at resolved location: {index_path}",
+            )
+        if index_path is not None:
+            diff_dir = index_path.parent
+            if "Requirement diffs" in location_map:
+                diff_default, diff_actual = location_map["Requirement diffs"]
+                resolved_diff_dir = resolve_declared_path(
+                    result,
+                    root,
+                    diff_default,
+                    diff_actual,
+                    "Requirement diffs",
+                )
+                if resolved_diff_dir is not None:
+                    diff_dir = resolved_diff_dir
+            validate_diff_index(result, index_path, diff_dir)
 
 
 def main() -> int:

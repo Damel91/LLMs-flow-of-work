@@ -66,12 +66,13 @@ Before starting the guided procedure, read in this order:
 5. `templates/IMPL-INDEX.md`
 6. `templates/TRACEABILITY_MATRIX.md`
 7. `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
-8. `templates/IMPL-TEMPLATE.md`
-9. `templates/TEST-CAMPAIGN-TEMPLATE.md`
-10. `CODE-WORKFLOW-CONTRACT.md`
-11. `CODE-BOOTSTRAP.md`
-12. `manual/REACHING-THE-LLMS.md`
-13. `manual/MANUAL-BOOTSTRAP.md`
+8. `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`
+9. `templates/IMPL-TEMPLATE.md`
+10. `templates/TEST-CAMPAIGN-TEMPLATE.md`
+11. `CODE-WORKFLOW-CONTRACT.md`
+12. `CODE-BOOTSTRAP.md`
+13. `manual/REACHING-THE-LLMS.md`
+14. `manual/MANUAL-BOOTSTRAP.md`
 
 Goal:
 
@@ -333,6 +334,7 @@ receives:
 - `authorities/flow-of-work-contract/*`
 - `authorities/manual/*`
 - `IMPL-INDEX.md` at the final `impl` location
+- `REQUIREMENTS_DIFF_INDEX.md` at the final diff-index location
 - `REQUIREMENTS-DIFF-TEMPLATE.md` at the final `diffs` location
 - `IMPL-TEMPLATE.md` at the final `impl` location
 - `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location
@@ -420,6 +422,8 @@ If the structure result is `default` or `adapted_direct_copy`:
   `authorities/TRACEABILITY_MATRIX.md`
 - copy `manual/*` directly into the destination as `authorities/manual/`
 - copy `templates/IMPL-INDEX.md` directly into the final `impl` location
+- copy `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md` directly into the final
+  `diffs` location as `REQUIREMENTS_DIFF_INDEX.md`
 - copy `templates/REQUIREMENTS-DIFF-TEMPLATE.md` directly into the final
   `diffs` location
 - copy `templates/IMPL-TEMPLATE.md` directly into the final `impl` location
@@ -446,6 +450,7 @@ If the structure result is `structure_override`:
    - `flow-of-work-contract/05-PROJECT-STRUCTURE.md`
    - `CODE-BOOTSTRAP.md`
    - `CODE-WORKFLOW-CONTRACT.md`
+   - `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`
    - any other starter-needed source files
 3. derive inside `.starter-work/`:
    - the final project-specific `AGENT.md`
@@ -456,6 +461,8 @@ If the structure result is `structure_override`:
    - `templates/PROJECT-OVERLAY.md` -> `authorities/PROJECT-OVERLAY.md`
    - `templates/TRACEABILITY_MATRIX.md` -> `authorities/TRACEABILITY_MATRIX.md`
    - `manual/*` -> `authorities/manual/`
+   - `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md` -> the final `diffs`
+     location as `REQUIREMENTS_DIFF_INDEX.md`
    - `templates/IMPL-INDEX.md` -> the final `impl` location chosen by the user
    - `templates/REQUIREMENTS-DIFF-TEMPLATE.md` -> the final `diffs` location
      chosen by the user
@@ -560,6 +567,8 @@ Check at least:
 - `CODE-WORKFLOW-CONTRACT.md` exists
 - the installed `IMPL-INDEX.md` exists at the final location declared by the
   overlay
+- the installed `REQUIREMENTS_DIFF_INDEX.md` exists at the final location
+  declared by the overlay's `Requirement diff index` row
 - the installed `REQUIREMENTS-DIFF-TEMPLATE.md` exists at the final `diffs`
   location declared by the overlay
 - the installed `IMPL-TEMPLATE.md` exists at the final `impl` location
@@ -637,6 +646,7 @@ The required install set is:
 - `authorities/flow-of-work-contract/*`
 - `authorities/manual/*`
 - `IMPL-INDEX.md` at the final `impl` location
+- `REQUIREMENTS_DIFF_INDEX.md` at the final diff-index location
 - `REQUIREMENTS-DIFF-TEMPLATE.md` at the final `diffs` location
 - `IMPL-TEMPLATE.md` at the final `impl` location
 - `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location

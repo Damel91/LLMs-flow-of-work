@@ -229,6 +229,7 @@ If this project has adapted the default structure from
 | Requirements baseline | `authorities/baseline/` | [actual path] |
 | Interactions | `authorities/interactions/` | [actual path] |
 | Requirement diffs | `authorities/diffs/` | [actual path] |
+| Requirement diff index | `authorities/diffs/REQUIREMENTS_DIFF_INDEX.md` | [actual path] |
 | Implementation packets | `authorities/impl/` | [actual path] |
 | Implementation packet index | `authorities/impl/IMPL-INDEX.md` | [actual path] |
 | Test campaigns | `authorities/campaigns/` | [actual path] |
