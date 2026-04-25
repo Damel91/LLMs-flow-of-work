@@ -371,6 +371,7 @@ def check_framework_mode(result: LintResult) -> None:
         "CODE-WORKFLOW-CONTRACT.md",
         "WHY.md",
         "tools/CONTROL-PLANE-LINT-SPEC.md",
+        "tools/flowctl.py",
         "templates/AGENT-TEMPLATE.md",
         "templates/PROJECT-OVERLAY.md",
         "templates/IMPL-INDEX.md",

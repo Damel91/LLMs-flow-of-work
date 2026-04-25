@@ -12,10 +12,14 @@ Use it when:
 - you are doing an extraordinary repository-integrity check, not normal
   initiative work
 
-This spec does not replace the mechanical validator in
-`tools/control_plane_lint.py`.
-It mirrors its minimum checks in a form that any sufficiently capable model can
-execute by reading the target repository.
+This spec does not replace the deterministic local tools:
+
+- `tools/flowctl.py` is the operator-facing governance CLI.
+- `tools/control_plane_lint.py` is the lower-level structural validator used by
+  `flowctl doctor`.
+
+It mirrors their minimum checks in a form that any sufficiently capable model
+can execute by reading the target repository.
 
 This audit is not part of the normal flow of work.
 Do not run it by default in every session.
@@ -98,6 +102,7 @@ The framework repo must contain at least:
 - `CODE-WORKFLOW-CONTRACT.md`
 - `WHY.md`
 - `templates/AGENT-TEMPLATE.md`
+- `tools/flowctl.py`
 - `templates/PROJECT-OVERLAY.md`
 - `templates/IMPL-INDEX.md`
 - `templates/TRACEABILITY_MATRIX.md`
