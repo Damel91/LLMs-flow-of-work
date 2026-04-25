@@ -2,9 +2,9 @@
 doc_type: behavioral_definition_gate
 scope: execution_blocking
 applies_to: multi-platform
-version: 0.2
-status: working_draft
-last_updated: 2026-04-03
+version: 0.3
+status: working
+last_updated: 2026-04-25
 ---
 
 # Behavioral Definition Gate
@@ -62,6 +62,41 @@ Blocked means:
 - do not implement the ambiguous behavior
 - do not infer the behavior from intention alone
 - do not hide the ambiguity behind a structural refactor
+
+### 3.1 Clear Gate Criteria
+
+The gate is clear only if all behavior needed for the current packet can be
+answered from an authoritative source.
+
+Minimum criteria:
+
+- behavior owner is identified
+- user-visible or runtime outcome is defined
+- relevant inputs, events, or triggers are defined
+- expected output, schema, state transition, or side effect is defined
+- fallback, error, or clarification behavior is defined or explicitly out of
+  scope
+- the authority source is named with enough precision to re-read it
+
+If any required behavior affects runtime execution, prompt output, state
+transition, persistence, or user-facing flow and lacks authority, the gate is
+blocked.
+
+### 3.2 Gate Record
+
+Every implementation packet that can affect behavior must record:
+
+- gate status: `clear` or `blocked`
+- authority type: `requirements_diff`, `use_case`, `sequence`,
+  `user_instruction`, or `working_code_reference`
+- authority reference: document path and section, user instruction, or declared
+  reference code path
+- whether runtime or user-visible behavior is affected
+- whether fallback or error behavior is affected, or explicitly out of scope
+
+If the gate is `blocked`, implementation must stop and the packet must record
+the missing behavior, why the current documents are insufficient, and the
+required decision.
 
 ## 4. User Interaction Layer Rule
 

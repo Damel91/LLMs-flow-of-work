@@ -60,11 +60,11 @@ requirement state.
 
 ## 2. Functional Traceability
 
-| ID(s) | Requirement summary | IMPL packet(s) | Primary evidence | Status | Notes |
-|---|---|---|---|---|---|
-| `FR-XXX-01` | [one-line summary of the requirement] | `IMPL-NN`, `IMPL-NN.M` | `path/to/file.ext`, `path/to/other.ext` | Implemented | [concise factual note, citing authoritative test evidence] |
-| `FR-XXX-02`, `FR-XXX-03` | [grouped requirements covered by the same change] | `IMPL-NN` | `path/to/file.ext` | Partial | [implemented in code; awaiting first authoritative campaign, or describe validated drift / missing coverage] |
-| `FR-YYY-01` | [requirement not yet implemented] | — | — | Gap | [optional: pointer to the diff that introduced it] |
+| ID(s) | Requirement summary | IMPL packet(s) | Behavior gate | Primary evidence | Status | Notes |
+|---|---|---|---|---|---|---|
+| `FR-XXX-01` | [one-line summary of the requirement] | `IMPL-NN`, `IMPL-NN.M` | clear | `path/to/file.ext`, `path/to/other.ext` | Implemented | [concise factual note, citing authoritative test evidence] |
+| `FR-XXX-02`, `FR-XXX-03` | [grouped requirements covered by the same change] | `IMPL-NN` | clear | `path/to/file.ext` | Partial | [implemented in code; awaiting first authoritative campaign, or describe validated drift / missing coverage] |
+| `FR-YYY-01` | [requirement not yet implemented] | — | not_applicable | — | Gap | [optional: pointer to the diff that introduced it] |
 
 **Column conventions:**
 
@@ -79,6 +79,12 @@ requirement state.
   state of this row, in chronological order. Multiple packets are normal for
   long-lived requirements. Use `—` if the requirement has not yet been
   touched by any packet.
+- **Behavior gate** — `clear`, `blocked`, or `not_applicable`. Use
+  `not_applicable` only when no linked packet has attempted behavioral
+  implementation yet, or when the row records a purely documentary state that
+  cannot affect runtime, prompt output, state transition, persistence, or
+  user-facing flow. A row must not become `Implemented` if a linked packet has
+  behavior gate `blocked`.
 - **Primary evidence** — the file paths or artifacts that materialize the
   requirement in the current repo. For `Implemented` and `Partial` rows this
   field is required. For `Gap` rows it is `—`.

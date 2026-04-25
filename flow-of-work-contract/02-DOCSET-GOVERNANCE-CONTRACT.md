@@ -3,7 +3,7 @@ doc_type: docset_governance_contract
 scope: documentation_control
 applies_to: multi-platform
 version: 0.3
-status: working_draft
+status: working
 last_updated: 2026-04-25
 ---
 

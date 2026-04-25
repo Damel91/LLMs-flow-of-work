@@ -66,13 +66,19 @@ Minimum expected set:
 State whether behavior is sufficiently defined.
 
 **Gate status:** [clear / blocked]
+**Authority type:** [requirements_diff / use_case / sequence / user_instruction / working_code_reference / not_applicable]
+**Authority reference:** [document path + section, explicit user instruction, or declared reference code path]
+**Runtime/user-visible behavior affected:** [yes / no]
+**Fallback/error behavior affected:** [yes / no / out_of_scope]
 
-If clear, name the authority:
+The gate is clear only if the packet can answer all required behavioral
+questions from an authoritative source:
 
-- [accepted use case or sequence]
-- [accepted requirements diff]
-- [explicit user instruction]
-- [declared working-code reference]
+- behavior owner
+- runtime or user-visible outcome
+- relevant inputs, events, or triggers
+- output, schema, state transition, or side effect
+- fallback, error, or clarification behavior, unless explicitly out of scope
 
 If blocked, record the missing behavior and stop implementation.
 

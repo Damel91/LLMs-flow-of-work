@@ -3,8 +3,8 @@ doc_type: test_and_handoff_contract
 scope: validation_control
 applies_to: multi-platform
 version: 0.4
-status: working_draft
-last_updated: 2026-04-12
+status: working
+last_updated: 2026-04-25
 ---
 
 # Test And Handoff Contract

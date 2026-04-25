@@ -1,7 +1,7 @@
 # 05 — Project Structure
 
 **Version:** 0.1
-**Status:** working_draft
+**Status:** working
 **Last updated:** 2026-04-25
 
 ---
