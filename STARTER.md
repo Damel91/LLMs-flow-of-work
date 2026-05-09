@@ -17,8 +17,8 @@ This repository contains:
   software projects without losing control over time
 - one session entrypoint template (`templates/AGENT-TEMPLATE.md`) that destination
   projects install at root
-- a project overlay template, supporting installation templates, and document
-  creation templates
+- a project overlay template, supporting installation, navigation, helper, and
+  document creation templates
 - a manual directory containing the front-facing operating manual, its
   onboarding bootstrap, and supporting notes
 - one adoption procedure:
@@ -60,19 +60,27 @@ Declare your scenario before proceeding.
 Before starting the guided procedure, read in this order:
 
 1. `flow-of-work-contract/00-INDEX.md`
-2. `flow-of-work-contract/05-PROJECT-STRUCTURE.md`
-3. `templates/PROJECT-OVERLAY.md`
-4. `templates/AGENT-TEMPLATE.md`
-5. `templates/IMPL-INDEX.md`
-6. `templates/TRACEABILITY_MATRIX.md`
-7. `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
-8. `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`
-9. `templates/IMPL-TEMPLATE.md`
-10. `templates/TEST-CAMPAIGN-TEMPLATE.md`
-11. `CODE-WORKFLOW-CONTRACT.md`
-12. `CODE-BOOTSTRAP.md`
-13. `manual/REACHING-THE-LLMS.md`
-14. `manual/MANUAL-BOOTSTRAP.md`
+2. `flow-of-work-contract/01-LLM-SESSION-CONTRACT.md`
+3. `flow-of-work-contract/02-DOCSET-GOVERNANCE-CONTRACT.md`
+4. `flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md`
+5. `flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md`
+6. `flow-of-work-contract/05-PROJECT-STRUCTURE.md`
+7. `templates/PROJECT-OVERLAY.md`
+8. `templates/AGENT-TEMPLATE.md`
+9. `templates/IMPL-INDEX.md`
+10. `templates/TRACEABILITY_MATRIX.md`
+11. `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
+12. `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`
+13. `templates/IMPL-TEMPLATE.md`
+14. `templates/REVIEW-INDEX-TEMPLATE.md`
+15. `templates/REVIEW-TEMPLATE.md`
+16. `templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md`
+17. `templates/TEST-CAMPAIGN-TEMPLATE.md`
+18. `templates/TEST-ENVIRONMENT-STARTUP-TEMPLATE.md`
+19. `CODE-WORKFLOW-CONTRACT.md`
+20. `CODE-BOOTSTRAP.md`
+21. `manual/REACHING-THE-LLMS.md`
+22. `manual/MANUAL-BOOTSTRAP.md`
 
 Goal:
 
@@ -82,8 +90,8 @@ Goal:
 - understand what must be project-specific
 - understand how the code bootstrap is installed and later activated
 - understand how the manual is installed and later used for user onboarding
-- understand that document creation templates are drafting aids, not living
-  project artifacts
+- understand that document creation templates are drafting aids, while installed
+  indexes and helpers become local navigation/support documents
 
 ---
 
@@ -213,7 +221,9 @@ Ask:
 
 "What is your current familiarity with the framework manual: not started,
 basic, operational, or do you want the installed project to skip guided manual
-onboarding?"
+onboarding? Use operational only if you have covered the working loop,
+Partial, campaign constructibility, scope issues, diff history, review holds,
+campaign indexes, environment startup helpers, and blocker ledgers."
 
 Record one of:
 
@@ -249,6 +259,7 @@ If the user chooses `structure_override`, record:
   - `interactions`
   - `diffs`
   - `impl`
+  - `reviews`
   - `campaigns`
 - whether the final `05-PROJECT-STRUCTURE.md` must be rewritten from the
   framework canonical version
@@ -262,8 +273,8 @@ bootstrap anchors remain fixed: `AGENT.md` stays at root; `authorities/`
 remains the authority root; `authorities/manual/`, `PROJECT-OVERLAY.md`, the
 contract set, and `TRACEABILITY_MATRIX.md` keep their framework locations.
 `IMPL-INDEX.md` follows the final location of the `impl` layer you choose. If
-your chosen `impl`, `diffs`, or `campaigns` locations would make direct
-template paths false, this is a `structure_override` case."
+your chosen `impl`, `diffs`, `reviews`, or `campaigns` locations would make
+direct template paths false, this is a `structure_override` case."
 
 ### Step 10 — Existing documentation mapping
 
@@ -279,6 +290,7 @@ Then classify with the user:
 - what becomes `interactions`
 - what becomes `diffs`
 - what becomes `impl`
+- what becomes `reviews`
 - what becomes `campaigns`
 - what should stay archived and not govern the new system
 
@@ -337,9 +349,14 @@ receives:
 - `REQUIREMENTS_DIFF_INDEX.md` at the final diff-index location
 - `REQUIREMENTS-DIFF-TEMPLATE.md` at the final `diffs` location
 - `IMPL-TEMPLATE.md` at the final `impl` location
+- `REVIEW-INDEX.md` at the final `reviews` location
+- `REVIEW-TEMPLATE.md` at the final `reviews` location
+- `TEST-CAMPAIGN-INDEX.md` at the final `campaigns` location
 - `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location
+- `TEST-ENVIRONMENT-STARTUP.md` at the final `campaigns` location
 - `CODE-BOOTSTRAP.md`
 - `CODE-WORKFLOW-CONTRACT.md`
+- `tools/flowctl.sh`
 
 `TRACEABILITY_MATRIX.md` is always installed as a template. Its content may be
 empty or skeletal, but the file itself is part of the operational control
@@ -358,6 +375,7 @@ Populate `authorities/PROJECT-OVERLAY.md` with:
 - behavioral reference
 - runtime context, if declared
 - document location map for the final adopted layout
+- operational tooling commands in overlay sec. 11
 
 For overlay section 8:
 
@@ -427,13 +445,33 @@ If the structure result is `default` or `adapted_direct_copy`:
 - copy `templates/REQUIREMENTS-DIFF-TEMPLATE.md` directly into the final
   `diffs` location
 - copy `templates/IMPL-TEMPLATE.md` directly into the final `impl` location
+- copy `templates/REVIEW-INDEX-TEMPLATE.md` directly into the final `reviews`
+  location as `REVIEW-INDEX.md`
+- copy `templates/REVIEW-TEMPLATE.md` directly into the final `reviews`
+  location
+- copy `templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md` directly into the final
+  `campaigns` location as `TEST-CAMPAIGN-INDEX.md`
 - copy `templates/TEST-CAMPAIGN-TEMPLATE.md` directly into the final
   `campaigns` location
+- copy `templates/TEST-ENVIRONMENT-STARTUP-TEMPLATE.md` directly into the
+  final `campaigns` location as `TEST-ENVIRONMENT-STARTUP.md`
 - copy `flow-of-work-contract/*` directly into the destination contract set
 - copy `CODE-BOOTSTRAP.md` directly into the destination as
   `CODE-BOOTSTRAP.md`
 - copy `CODE-WORKFLOW-CONTRACT.md` directly into the destination as
   `CODE-WORKFLOW-CONTRACT.md`
+- copy `tools/flowctl.sh` directly into the destination as `tools/flowctl.sh`
+
+After copying `tools/flowctl.sh`, make it operational in the destination
+project. When filesystem shell access is available on macOS, Linux, or Windows
+through Git Bash, run from the destination project root:
+
+    chmod +x tools/flowctl.sh
+
+The canonical invocation remains `bash tools/flowctl.sh ...` because it works
+even when executable-bit preservation is unreliable. The executable bit is still
+installed so local operators can also run `./tools/flowctl.sh ...` in
+chmod-compatible shells.
 
 No structure-override workspace is required in this branch.
 The starter may still use a private working copy of `templates/AGENT-TEMPLATE.md`
@@ -451,6 +489,8 @@ If the structure result is `structure_override`:
    - `CODE-BOOTSTRAP.md`
    - `CODE-WORKFLOW-CONTRACT.md`
    - `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`
+   - `templates/REVIEW-INDEX-TEMPLATE.md`
+   - `templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md`
    - any other starter-needed source files
 3. derive inside `.starter-work/`:
    - the final project-specific `AGENT.md`
@@ -467,10 +507,19 @@ If the structure result is `structure_override`:
    - `templates/REQUIREMENTS-DIFF-TEMPLATE.md` -> the final `diffs` location
      chosen by the user
    - `templates/IMPL-TEMPLATE.md` -> the final `impl` location chosen by the user
+   - `templates/REVIEW-INDEX-TEMPLATE.md` -> the final `reviews` location as
+     `REVIEW-INDEX.md`
+   - `templates/REVIEW-TEMPLATE.md` -> the final `reviews` location chosen by
+     the user
+   - `templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md` -> the final `campaigns`
+     location as `TEST-CAMPAIGN-INDEX.md`
    - `templates/TEST-CAMPAIGN-TEMPLATE.md` -> the final `campaigns` location
      chosen by the user
+   - `templates/TEST-ENVIRONMENT-STARTUP-TEMPLATE.md` -> the final
+     `campaigns` location as `TEST-ENVIRONMENT-STARTUP.md`
    - the contract set
    - `CODE-WORKFLOW-CONTRACT.md` -> `CODE-WORKFLOW-CONTRACT.md`
+   - `tools/flowctl.sh` -> `tools/flowctl.sh`
 5. replace only the file(s) that must become project-specific:
    - `AGENT.md`
    - `authorities/flow-of-work-contract/00-INDEX.md`
@@ -489,14 +538,17 @@ canonical default.
 When the starter derives `AGENT.md` in the private workspace, it may rewrite:
 
 - first-read paths
-- traceability and IMPL index paths
-- diffs and campaigns paths
+- IMPL index path
+- diffs, reviews, and campaigns paths
 - any other structural references needed so that the next session can start
   from `AGENT.md` alone and still find the control plane
 
+Do not rewrite `TRACEABILITY_MATRIX.md` away from
+`authorities/TRACEABILITY_MATRIX.md`.
+
 The working `AGENT.md` source may temporarily still contain template-only
-bootstrap text such as `Initialization Check` and adoption fallback routing.
-Those parts belong to the template stage, not to the final adopted project.
+placeholders or adoption fallback routing. Those parts belong to the template
+stage, not to the final adopted project.
 
 When the starter derives `00-INDEX.md` in the private workspace, it may
 rewrite:
@@ -512,14 +564,28 @@ may rewrite:
 
 - the canonical tree shown to the next session
 - the authority table entries
-- the location statements for baseline, interactions, diffs, impl, campaigns,
-  and traceability
+- the location statements for baseline, interactions, diffs, impl, reviews, and
+  campaigns
+
+`TRACEABILITY_MATRIX.md` remains a fixed bootstrap anchor at
+`authorities/TRACEABILITY_MATRIX.md`; do not derive an alternate traceability
+location.
 
 If `CODE-BOOTSTRAP.md` needs project-specific structural references in order to
 operate coherently later, the starter may derive a final copy in
 `.starter-work/` and promote that copy into the destination project.
 
 If no such changes are required, copy the framework file directly.
+
+After installing or deriving `tools/flowctl.sh`, run the same activation step
+from the destination project root when filesystem shell access is available on
+macOS, Linux, or Windows through Git Bash:
+
+    chmod +x tools/flowctl.sh
+
+If chmod-style permissions are unavailable, keep `bash tools/flowctl.sh ...` as
+the supported invocation and record that executable-bit activation could not be
+verified in the handoff notes.
 
 If the user wants the minimum operational docset immediately:
 
@@ -552,28 +618,28 @@ When writing files:
 - do not let `.starter-work/` or transient adaptation notes survive into the
   final destination project
 
-### Step 12.4 — Finalization checks and final AGENT promotion
+### Step 12.4 — Final AGENT promotion and workspace validation
 
-Before handoff, validate the installed control plane.
+Before handoff, perform a starter preflight on the installed control plane.
 
-If shell access is available, run the deterministic validator from the
-destination project root:
-
-    ./tools/flowctl.sh doctor . --mode workspace
-
-If the result reports `errors=0`, the control plane passes structural lint and
-the manual checklist below may be skipped.
-
-If the tool is unavailable or shell access is not available, apply the checklist manually.
+This preflight checks the installed files and overlay state before the final
+runtime `AGENT.md` is promoted. It does not replace the deterministic workspace
+doctor.
 
 Check at least:
 
 - `authorities/PROJECT-OVERLAY.md` exists and its project identity is no longer
   `[Project Name]`
 - `authorities/flow-of-work-contract/00-INDEX.md` exists
+- `authorities/flow-of-work-contract/01-LLM-SESSION-CONTRACT.md` exists
+- `authorities/flow-of-work-contract/02-DOCSET-GOVERNANCE-CONTRACT.md` exists
+- `authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md` exists
+- `authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md` exists
+- `authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md` exists
 - `authorities/TRACEABILITY_MATRIX.md` exists
 - `authorities/manual/MANUAL-BOOTSTRAP.md` exists
 - `authorities/manual/REACHING-THE-LLMS.md` exists
+- `CODE-BOOTSTRAP.md` exists
 - `CODE-WORKFLOW-CONTRACT.md` exists
 - the installed `IMPL-INDEX.md` exists at the final location declared by the
   overlay
@@ -583,8 +649,29 @@ Check at least:
   location declared by the overlay
 - the installed `IMPL-TEMPLATE.md` exists at the final `impl` location
   declared by the overlay
+- the installed `REVIEW-INDEX.md` exists at the final `reviews` location
+  declared by the overlay
+- the installed `REVIEW-TEMPLATE.md` exists at the final `reviews` location
+  declared by the overlay
+- the installed `TEST-CAMPAIGN-INDEX.md` exists at the final `campaigns`
+  location declared by the overlay
 - the installed `TEST-CAMPAIGN-TEMPLATE.md` exists at the final `campaigns`
   location declared by the overlay
+- the installed `TEST-ENVIRONMENT-STARTUP.md` exists at the final `campaigns`
+  location declared by the overlay
+- `tools/flowctl.sh` exists in the destination project
+- `tools/flowctl.sh` has been activated with `chmod +x tools/flowctl.sh` when
+  the available shell supports chmod-style permissions
+- overlay sec. 11 records the installed `flowctl.sh` commands for:
+  - runtime state inspection
+  - runtime route inspection
+  - overlay location resolution
+  - workspace doctor
+  - governance status
+  - active diff inspection
+  - handoff checks
+  - IMPL gate checks
+  - traceability matrix checks
 - if the structure was adapted, the overlay document map matches the files
   actually installed
 - overlay sec. 8 declares a non-placeholder manual onboarding state
@@ -600,28 +687,41 @@ Check at least:
 If these checks do not pass, do not hand off the project as ready.
 Fix the destination control plane first.
 
-After these checks pass, promote the final installed `AGENT.md`.
+After the preflight passes, promote the final installed `AGENT.md`.
 
 The starter may derive this final `AGENT.md` from the template even when the
 structure is not overridden. The goal is to leave a runtime-ready entrypoint,
-not a bootstrap-checking one.
+not an adoption procedure.
 
 This finalization is mandatory for every successful adoption path.
-The installed project must never keep the raw template's bootstrap-checking
-form as its final `AGENT.md`.
+The installed project must never keep the raw template form as its final
+`AGENT.md`.
 
 The final installed `AGENT.md` should:
 
 - keep the manual-bootstrap handoff
 - keep the code-bootstrap handoff
 - keep the `CODE-WORKFLOW-CONTRACT.md` read and hard-stop reference
-- keep the normal read order
+- keep the lightweight runtime boot sequence
+- use overlay sec. 10 for installed locations
+- use overlay sec. 11 for operational tooling
 - keep only essential runtime hard stops
 - resolve installed paths coherently when structure was adapted
-- remove the template-only `Initialization Check` section
-- remove the template-only adoption fallback routing to `STARTER.md`
+- remove unresolved placeholders and adoption fallback routing to `STARTER.md`
 - keep no adoption-procedure logic once the starter has validated the
   destination control plane successfully
+
+After the final `AGENT.md` has been promoted, run the deterministic validator
+from the destination project root when shell access is available:
+
+    chmod +x tools/flowctl.sh
+    bash tools/flowctl.sh doctor . --mode workspace
+
+If the result does not report `errors=0`, do not hand off the project as ready.
+Fix the destination control plane first.
+
+If shell access is unavailable, apply the preflight checklist and final
+`AGENT.md` checks manually.
 
 In no-filesystem mode, simulate the same finalization privately and output only
 the final promoted `AGENT.md`, not the raw working source.
@@ -659,11 +759,25 @@ The required install set is:
 - `REQUIREMENTS_DIFF_INDEX.md` at the final diff-index location
 - `REQUIREMENTS-DIFF-TEMPLATE.md` at the final `diffs` location
 - `IMPL-TEMPLATE.md` at the final `impl` location
+- `REVIEW-INDEX.md` at the final `reviews` location
+- `REVIEW-TEMPLATE.md` at the final `reviews` location
+- `TEST-CAMPAIGN-INDEX.md` at the final `campaigns` location
 - `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location
+- `TEST-ENVIRONMENT-STARTUP.md` at the final `campaigns` location
 - `CODE-BOOTSTRAP.md`
 - `CODE-WORKFLOW-CONTRACT.md`
 - `tools/flowctl.sh`
 - any minimum operational docs explicitly created during adoption
+
+When filesystem shell access is available on macOS, Linux, or Windows through
+Git Bash, the starter must run `chmod +x tools/flowctl.sh` in the destination
+project before handoff. If executable-bit activation cannot be verified, the
+handoff must state that the supported invocation is `bash tools/flowctl.sh ...`.
+
+The Python validator remains available in the framework repository for
+operators who prefer Python 3. It is not part of the required installed
+workspace set unless the user explicitly asks to copy both `tools/flowctl.py`
+and its helper `tools/control_plane_lint.py`.
 
 The optional human-support set is:
 
@@ -740,11 +854,12 @@ If `adoption mode = code_first`, conclude with:
 from `AGENT.md` at the project root. If overlay sec. 8 still declares manual
 onboarding pending or in progress, `AGENT.md` will first route that session
 into `authorities/manual/MANUAL-BOOTSTRAP.md`. After manual onboarding is
-completed or explicitly skipped, overlay sec. 9 still declares
+completed or explicitly skipped, the same `AGENT.md` routing chain evaluates
+overlay sec. 9. If it still declares
 `code bootstrap mode = local_code_first_derivation` and
-`code bootstrap status = pending`, so the next first operational task is to
-run `CODE-BOOTSTRAP.md` before normal initiative work begins. Normal code work
-after bootstrap is governed by `CODE-WORKFLOW-CONTRACT.md`."
+`code bootstrap status = pending`, `AGENT.md` runs `CODE-BOOTSTRAP.md` before
+normal initiative work begins. Normal code work after bootstrap is governed by
+`CODE-WORKFLOW-CONTRACT.md`."
 
 Otherwise conclude with:
 

@@ -50,7 +50,7 @@ Signals:
 
 In this mode:
 
-- read overlay sec. 1, sec. 2, sec. 8, and sec. 9 before starting
+- read overlay sec. 1, sec. 2, sec. 3, sec. 8, and sec. 9 before starting
 - use overlay sec. 8 as the source of truth for manual-onboarding state
 - update overlay sec. 8 conservatively as the user progresses
 
@@ -120,9 +120,10 @@ Read and discuss it in these blocks:
 3. `How To Start A Real Project`, `The Working Loop`,
    `The Important Distinction: Handoff Readiness vs Campaign Constructibility`
 4. `How To Read Partial`, `How To Handle Scope Issues Found By Campaign`,
-   `How To Treat Diffs Over Time`, `The Most Common Mistakes`,
-   `What Changes With Different Model Types`, `Minimal Glossary`,
-   `Final Advice`
+   `How To Treat Diffs Over Time`
+5. review holds, campaign indexes, environment startup helpers, blocker
+   ledgers, `The Most Common Mistakes`, `What Changes With Different Model
+   Types`, `Minimal Glossary`, `Final Advice`
 
 For each block:
 
@@ -143,8 +144,9 @@ In installed-project mode, update overlay sec. 8 conservatively:
   - `manual readiness level = basic`
   - `last manual checkpoint = The Core Operating Rules`
   - `manual override acknowledged = no`
-- after block 4, if the user has also covered the working loop, campaign
-  constructibility, `Partial`, scope issues, and diff history:
+- after block 5, if the user has also covered the working loop, campaign
+  constructibility, `Partial`, scope issues, diff history, review holds,
+  campaign indexes, environment startup helpers, and blocker ledgers:
   - `manual bootstrap status = completed`
   - `manual readiness level = operational`
   - `last manual checkpoint = Final Advice`
@@ -173,6 +175,10 @@ Do not mark the user `operational` unless they have covered, at minimum:
 - the difference between implementation closure and behavioral authority
 - the difference between live surfaces and stubs/probes when judging campaign
   authority
+- when to use `REVIEW-INDEX.md` and `REVIEW-*` instead of chat memory
+- how `TEST-CAMPAIGN-INDEX.md` differs from campaign evidence
+- when a live campaign should reference `TEST-ENVIRONMENT-STARTUP.md`
+- why a `PARTIAL` or failed campaign needs a blocker ledger
 
 In installed-project mode:
 
@@ -214,7 +220,8 @@ Use these meanings:
     distinctions of campaign timing or diff history
 - `completed / operational`
   - the user has also covered the working loop, campaign constructibility,
-    `Partial`, scope issues, and diff precedence over time
+    `Partial`, scope issues, diff precedence over time, review holds, campaign
+    indexes, environment startup helpers, and blocker ledgers
 
 Never infer readiness from style, confidence, or prior engineering seniority
 alone. Use only actual coverage of the manual's operating concepts.
@@ -222,6 +229,6 @@ alone. Use only actual coverage of the manual's operating concepts.
 In installed-project mode, after completion:
 
 - if overlay sec. 9 still declares a pending code-bootstrap run, return control
-  so normal `AGENT.md` routing can send the next session into
-  `CODE-BOOTSTRAP.md`
+  to `AGENT.md` so the current routing chain can evaluate sec. 9 and execute
+  `CODE-BOOTSTRAP.md` when it is still active
 - otherwise return control to normal project work

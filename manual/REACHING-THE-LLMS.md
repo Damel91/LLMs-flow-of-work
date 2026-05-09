@@ -41,8 +41,8 @@ Typical failure modes:
 - the traceability matrix becomes optimistic instead of factual
 - later sessions cannot tell what is history and what is still governing
 
-This framework solves those problems by separating five things that are
-usually mixed together:
+This framework solves those problems by separating five core authorities that
+are usually mixed together:
 
 - stable product structure
 - current contract change
@@ -59,6 +59,20 @@ The names used here are:
 - `TRACEABILITY_MATRIX.md`
 
 That separation is the core of the method.
+
+The framework also keeps a few navigation and support documents beside those
+authorities:
+
+- `REQUIREMENTS_DIFF_INDEX.md` names the active diff head
+- `IMPL-INDEX.md` names execution state and packet families
+- `REVIEW-INDEX.md` and `REVIEW-*` preserve active clarification or review holds
+- `TEST-CAMPAIGN-INDEX.md` helps find current, accepted, partial, and deferred
+  campaigns
+- `TEST-ENVIRONMENT-STARTUP.md` records repeatable setup for live or integration
+  campaigns
+
+Those documents do not replace the five core authorities. They make the
+authorities findable and keep unresolved holds from living only in chat.
 
 ---
 
@@ -264,6 +278,20 @@ Use these to understand:
 - what files are touched
 - what the packet is expected to prove before handoff
 
+### `REVIEW-INDEX.md` and `REVIEW-*`
+
+Use these when a question, risk, acceptance hold, or packet-boundary concern
+must survive beyond the current conversation.
+
+They tell you:
+
+- what is still unresolved
+- whether it blocks all work or only a specific slice
+- which IMPL, campaign, or acceptance path is affected
+
+A review is not an implementation packet and not evidence. It is a hold or
+clarification record.
+
 ### `TestCampaign-*`
 
 Use these to understand:
@@ -272,6 +300,25 @@ Use these to understand:
 - by whom
 - under what conditions
 - with what outcome
+
+### `TEST-CAMPAIGN-INDEX.md`
+
+Use this to navigate campaign state.
+
+It tells you:
+
+- which campaigns belong to the active diff or IMPL family
+- which campaigns are accepted, partial, deferred, or historical
+- which active reviews constrain campaign interpretation
+
+The index is not evidence. Open the campaign document for the actual evidence.
+
+### `TEST-ENVIRONMENT-STARTUP.md`
+
+Use this when live or integration campaigns need repeatable startup, preflight,
+reset, inspection, or shutdown.
+
+It is a reusable helper, not a campaign result.
 
 ### `TRACEABILITY_MATRIX.md`
 
@@ -332,7 +379,9 @@ then read:
 - the overlay
 - the contracts
 - the matrix
-- the current relevant diff and IMPL history
+- the active diff index and current relevant diff
+- the IMPL index and active IMPL history
+- review and campaign indexes when they reference the active scope
 
 This is how sessions become resumable instead of conversationally
 fragile.
@@ -367,6 +416,9 @@ Let the model:
 - review its own changes
 
 But do not confuse this with acceptance.
+
+If the self-check exposes a question that cannot be resolved inside the current
+packet, put it in a `REVIEW-*` record instead of leaving it as chat memory.
 
 ### Step 5. Decide whether a meaningful campaign is possible
 
@@ -406,6 +458,10 @@ The campaign validates behavior against:
 
 not just against changed files.
 
+If the campaign uses a real runtime surface, reference the environment startup
+helper when one exists. If the result is `PARTIAL`, `FAIL`, or accepted with
+constraints, record a blocker ledger and update the campaign index.
+
 ### Step 8. Let evidence settle the status
 
 After campaign:
@@ -414,6 +470,8 @@ After campaign:
 - `Partial` if still constrained, incomplete, or only partly covered
 - new `Gap` or `Partial` rows if the campaign revealed a scope issue and
   a new diff is opened
+- campaign index updated to reflect result and acceptance state
+- review index updated if the campaign opens or resolves a hold
 
 ---
 
@@ -476,6 +534,19 @@ Bad `Partial` notes:
 
 Those are lifecycle or opinion, not factual status.
 
+There is a separate but related campaign result called `PARTIAL`.
+
+A `PARTIAL` campaign can be accepted only when the campaign separates:
+
+- what passed
+- what failed or was not run
+- which blockers remain
+- where each blocker is routed next
+
+That routing belongs in the campaign blocker ledger and campaign index. The
+matrix only records the factual requirement status that the accepted evidence
+supports.
+
 ---
 
 ## How To Handle Scope Issues Found By Campaign
@@ -507,6 +578,8 @@ Then:
 - keep existing matrix rows factual if they still describe the repo
 - introduce new or corrected requirement IDs as `Gap` by default, or
   `Partial` if some corrected behavior already exists
+- use a `REVIEW-*` hold when the right next step is a decision or boundary
+  clarification rather than immediate implementation
 
 Do **not** invent new matrix states like:
 
@@ -515,6 +588,11 @@ Do **not** invent new matrix states like:
 - superseded-in-progress
 
 That lifecycle nuance belongs in the diff and IMPL layers.
+
+If the campaign shows that the IMPL packet itself had the wrong boundary, do
+not patch around it casually. Preserve valid decisions, mark the old packet as
+absorbed or superseded in the IMPL index, and create the corrected packet or
+implementation family.
 
 ---
 
@@ -675,6 +753,32 @@ Not the implementation plan.
 
 The factual requirement-state register.
 Not the project board.
+
+### `REVIEW-INDEX.md`
+
+The navigation register for active review holds and clarification records.
+Read it before touching a scope it says is held.
+
+### `REVIEW-*`
+
+A durable review or clarification record.
+Not an IMPL packet and not evidence.
+
+### `TEST-CAMPAIGN-INDEX.md`
+
+The campaign navigation register.
+It helps find campaign state, but the individual campaign document remains the
+evidence artifact.
+
+### `TEST-ENVIRONMENT-STARTUP.md`
+
+Reusable live or integration campaign setup.
+Not a campaign result.
+
+### Blocker ledger
+
+The table inside a partial or failed campaign that names each blocker, its
+classification, resolution, and destination.
 
 ### `Implemented`
 

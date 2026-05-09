@@ -14,9 +14,12 @@ Use it when:
 
 This spec does not replace the deterministic local tools:
 
-- `tools/flowctl.py` is the operator-facing governance CLI.
+- `tools/flowctl.sh` is the primary cross-platform governance CLI installed
+  into adopted workspaces.
+- `tools/flowctl.py` is the Python 3 equivalent normally run from the framework
+  repository unless its helper is copied too.
 - `tools/control_plane_lint.py` is the lower-level structural validator used by
-  `flowctl doctor`.
+  the Python `flowctl doctor`.
 
 It mirrors their minimum checks in a form that any sufficiently capable model
 can execute by reading the target repository.
@@ -101,15 +104,22 @@ The framework repo must contain at least:
 - `CODE-BOOTSTRAP.md`
 - `CODE-WORKFLOW-CONTRACT.md`
 - `WHY.md`
-- `templates/AGENT-TEMPLATE.md`
+- `tools/CONTROL-PLANE-LINT-SPEC.md`
+- `tools/flowctl.sh`
 - `tools/flowctl.py`
+- `tools/control_plane_lint.py`
+- `templates/AGENT-TEMPLATE.md`
 - `templates/PROJECT-OVERLAY.md`
 - `templates/IMPL-INDEX.md`
 - `templates/TRACEABILITY_MATRIX.md`
 - `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`
 - `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
 - `templates/IMPL-TEMPLATE.md`
+- `templates/REVIEW-INDEX-TEMPLATE.md`
+- `templates/REVIEW-TEMPLATE.md`
+- `templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md`
 - `templates/TEST-CAMPAIGN-TEMPLATE.md`
+- `templates/TEST-ENVIRONMENT-STARTUP-TEMPLATE.md`
 - `manual/MANUAL-BOOTSTRAP.md`
 - `manual/REACHING-THE-LLMS.md`
 - `flow-of-work-contract/00-INDEX.md`
@@ -163,6 +173,7 @@ It must contain:
 - `## 8. Manual Onboarding State`
 - `## 9. Code Bootstrap State`
 - `## 10. Document Location Map`
+- `## 11. Operational Tooling`
 
 It must also define fields for:
 
@@ -173,8 +184,30 @@ It must also define fields for:
 - `Code bootstrap status`
 - `Code bootstrap source type`
 - `Code bootstrap requested output`
+- `Runtime state command`
+- `Route command`
+- `Location command`
+- `Governance status command`
+- `Active diff command`
+- `Workspace doctor command`
+- `Handoff command`
+- `IMPL check command`
+- `Traceability check command`
 
-Missing section or field: `error`.
+Operational tooling commands must name the installed `flowctl.sh` command for
+the relevant operation:
+
+- runtime state inspection uses `state`
+- runtime route inspection uses `route`
+- overlay location resolution uses `where`
+- governance status uses `status`
+- active diff inspection uses `active-diff`
+- workspace doctor uses `doctor`
+- handoff checks use `handoff`
+- IMPL gate checks use `check impl`
+- traceability matrix checks use `check matrix`
+
+Missing section, missing field, or unrelated command: `error`.
 
 ### 4.5 STARTER Checks
 
@@ -184,12 +217,20 @@ It must:
 
 - include `authorities/manual/*` in the required install set
 - include `CODE-WORKFLOW-CONTRACT.md` in the required install set
+- include `tools/flowctl.sh` in the required install set
+- require `chmod +x tools/flowctl.sh` during filesystem adoption when the
+  available shell supports chmod-style permissions
 - include `REQUIREMENTS_DIFF_INDEX.md` in the required install set
 - include `REQUIREMENTS-DIFF-INDEX-TEMPLATE.md` in the framework adoption set
-- include the three category templates in the required install set:
+- include the standing index/helper templates and category templates in the
+  required install set:
   - `REQUIREMENTS-DIFF-TEMPLATE.md` at the final `diffs` location
   - `IMPL-TEMPLATE.md` at the final `impl` location
+  - `REVIEW-INDEX.md` at the final `reviews` location
+  - `REVIEW-TEMPLATE.md` at the final `reviews` location
+  - `TEST-CAMPAIGN-INDEX.md` at the final `campaigns` location
   - `TEST-CAMPAIGN-TEMPLATE.md` at the final `campaigns` location
+  - `TEST-ENVIRONMENT-STARTUP.md` at the final `campaigns` location
 - include `STARTER.md` in the non-install set
 - describe overlay sec. 8 routing before overlay sec. 9 routing in the final
   handoff logic
@@ -205,7 +246,8 @@ It must:
 - declare `authorities/manual/`
 - declare `CODE-WORKFLOW-CONTRACT.md` as a root-level steady-state file
 - declare `authorities/diffs/REQUIREMENTS_DIFF_INDEX.md`
-- declare the three category templates in the canonical destination folders
+- declare the standing indexes, environment helper, and category templates in
+  the canonical destination folders
 - describe `STARTER.md` as temporary adoption-only root file, not steady-state
   control plane
 
@@ -238,13 +280,24 @@ The adopted workspace must contain at least:
 - `AGENT.md`
 - `CODE-BOOTSTRAP.md`
 - `CODE-WORKFLOW-CONTRACT.md`
+- `tools/flowctl.sh`
 - `authorities/PROJECT-OVERLAY.md`
 - `authorities/TRACEABILITY_MATRIX.md`
 - `authorities/flow-of-work-contract/00-INDEX.md`
+- `authorities/flow-of-work-contract/01-LLM-SESSION-CONTRACT.md`
+- `authorities/flow-of-work-contract/02-DOCSET-GOVERNANCE-CONTRACT.md`
+- `authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md`
+- `authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md`
+- `authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md`
 - `authorities/manual/MANUAL-BOOTSTRAP.md`
 - `authorities/manual/REACHING-THE-LLMS.md`
 
 If one is missing: `error`.
+
+When filesystem metadata is available, `tools/flowctl.sh` should be executable
+after starter adoption. If executable-bit activation cannot be verified on the
+current platform, `bash tools/flowctl.sh ...` remains the supported invocation
+and the handoff should say so.
 
 ### 5.2 Runtime AGENT Checks
 
@@ -277,7 +330,15 @@ The following fields must exist and hold valid values:
 - `Code bootstrap status`
 - `Code bootstrap source type`
 - `Code bootstrap requested output`
-- `Procedure completed`
+- `Runtime state command`
+- `Route command`
+- `Location command`
+- `Governance status command`
+- `Active diff command`
+- `Workspace doctor command`
+- `Handoff command`
+- `IMPL check command`
+- `Traceability check command`
 
 Valid values:
 
@@ -333,10 +394,8 @@ Valid values:
   - `new_impl_required`
   - `implementation_candidate`
   - `unknown`
-- `Procedure completed`:
-  - `yes`
-  - `no`
-  - `in-progress`
+Operational tooling commands must name the installed `flowctl.sh` command for
+the relevant operation.
 
 Invalid or missing value: `error`.
 
@@ -372,9 +431,19 @@ Apply these rules:
    `code bootstrap source type` must not be `none` or `local_project`.
    Otherwise: `error`.
 
-8. If `procedure completed = yes`, the overlay should not still leave core
-   adoption fields at `unknown`.
-   Remaining `unknown` values: `error`.
+8. Operational tooling commands must exist for:
+   - workspace doctor
+   - runtime state inspection
+   - runtime route inspection
+   - overlay location resolution
+   - governance status
+   - active diff inspection
+   - handoff checks
+   - IMPL gate checks
+   - traceability matrix checks
+
+   Each command must use `flowctl.sh` and the matching subcommand.
+   Missing or unrelated command: `error`.
 
 ### 5.5 Document Location Map Checks
 
@@ -388,7 +457,11 @@ It must contain rows for:
 - `Requirement diff index`
 - `Implementation packets`
 - `Implementation packet index`
+- `Review records`
+- `Review index`
 - `Test campaigns`
+- `Test campaign index`
+- `Test environment startup helper`
 - `Traceability matrix`
 
 For each row:
@@ -397,6 +470,8 @@ For each row:
 - otherwise use the declared actual path
 - if the chosen path still contains placeholder text, emit `error`
 - if the chosen path does not exist, emit `error`
+- the `Traceability matrix` row must keep `Actual location = default`;
+  otherwise emit `error`
 
 Then verify the standing files and category creation templates exist at the
 resolved category locations:
@@ -405,7 +480,12 @@ resolved category locations:
   location
 - `REQUIREMENTS-DIFF-TEMPLATE.md` in the resolved `Requirement diffs` location
 - `IMPL-TEMPLATE.md` in the resolved `Implementation packets` location
+- `REVIEW-INDEX.md` at the resolved `Review index` location
+- `REVIEW-TEMPLATE.md` in the resolved `Review records` location
+- `TEST-CAMPAIGN-INDEX.md` at the resolved `Test campaign index` location
 - `TEST-CAMPAIGN-TEMPLATE.md` in the resolved `Test campaigns` location
+- `TEST-ENVIRONMENT-STARTUP.md` at the resolved `Test environment startup
+  helper` location
 
 If a required standing file or category template is missing: `error`.
 
@@ -435,6 +515,10 @@ The workspace passes only if:
 - overlay fields are valid
 - overlay cross-field rules hold
 - the declared document map resolves to existing paths
+- required standing indexes, category templates, and startup helper exist at the
+  resolved locations
+- the resolved `REQUIREMENTS_DIFF_INDEX.md` passes the active-head and ledger
+  consistency checks
 
 ---
 

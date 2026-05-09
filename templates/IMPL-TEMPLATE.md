@@ -6,6 +6,9 @@
 **Governing diff:** [REQUIREMENTS_DIFF_* / none]
 **Governing baseline:** [baseline requirement references]
 **Related requirements:** [requirement IDs]
+**Packet type:** [root initiative / root family / executable subpacket / corrective follow-up]
+**Parent packet:** [none / IMPL-N]
+**Supersedes or absorbs:** [none / IMPL-* / spec path]
 
 > This is a bounded execution packet.
 > It is not product law and not acceptance evidence.
@@ -21,6 +24,26 @@ State the implementation objective in one or two paragraphs.
 
 The goal must describe one coherent initiative. If unrelated objectives appear
 here, split the work into separate IMPL packets.
+
+### 1.1 Packet Boundary
+
+State the execution boundary explicitly.
+
+| Field | Value |
+|---|---|
+| Boundary type | [single executable packet / planned family / subpacket] |
+| Executes | [active diff packet, baseline requirement, or corrective bug] |
+| Depends on | [none / IMPL-* / campaign / review] |
+| Blocks | [none / later IMPL-* / campaign / acceptance] |
+
+If this packet replaces or absorbs another packet, record:
+
+| Source packet / document | Preserved decisions | Boundary correction |
+|---|---|---|
+| [IMPL-* or spec] | [what remains valid] | [why this packet is the new execution source] |
+
+Do not execute an absorbed packet as an active source after this replacement is
+registered in the IMPL index.
 
 ---
 
@@ -55,9 +78,15 @@ Minimum expected set:
 
 - `authorities/PROJECT-OVERLAY.md`
 - relevant contract files
+- installed `REQUIREMENTS_DIFF_INDEX.md`
+- installed `IMPL-INDEX.md`
+- installed `REVIEW-INDEX.md`
 - relevant baseline documents
 - governing `REQUIREMENTS_DIFF_*`, if product scope is changing
 - current `TRACEABILITY_MATRIX.md`
+- installed `TEST-CAMPAIGN-INDEX.md`, when validation state affects this packet
+- `TEST-ENVIRONMENT-STARTUP.md`, when a live or integration campaign path
+  affects this packet
 
 ---
 
@@ -137,6 +166,12 @@ Required evidence before matrix update:
 - [code references plus model review for conservative Partial]
 - [explicit user acceptance]
 
+Partial acceptance routing, if applicable:
+
+| Potential blocker | Expected routing if campaign is PARTIAL |
+|---|---|
+| [blocker] | [same packet / dependent follow-up / new IMPL / successor diff / replacement family] |
+
 ---
 
 ## 9. Traceability Impact
@@ -149,6 +184,11 @@ Expected matrix movement after evidence exists.
 
 Do not update `TRACEABILITY_MATRIX.md` during execution unless the project has
 explicit evidence sufficient for the target status.
+
+For requirements introduced by an active successor diff but not yet
+implemented, prefer `Gap` with a note pointing to the active diff or planned
+packet. Do not add matrix lifecycle states such as `pending`, `deferred`, or
+`planned`.
 
 ---
 

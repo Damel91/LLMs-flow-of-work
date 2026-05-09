@@ -2,9 +2,9 @@
 doc_type: llm_session_contract
 scope: development_control
 applies_to: multi-platform
-version: 0.3
+version: 0.4
 status: working
-last_updated: 2026-04-25
+last_updated: 2026-05-09
 ---
 
 # LLM Session Contract
@@ -20,7 +20,9 @@ Use this sequence unless a project-specific overlay says otherwise:
 3. If it is a new feature or product scope change, create or update a
    head `REQUIREMENTS_DIFF_*` and register it in
    `REQUIREMENTS_DIFF_INDEX.md`.
-4. Create one atomic `IMPL-*` packet for the bounded execution slice.
+4. Create one atomic executable `IMPL-*` packet, or a root `IMPL-*` family with
+   atomic subpackets when the initiative is coherent but too broad for one safe
+   execution slice.
 5. Execute all work the active LLM can safely implement and self-check
    inside that packet scope.
 6. Run model-side code review.
@@ -92,7 +94,8 @@ request.
    behavior definitions.
 4. The user is the routing authority for scenario or structural changes.
 5. New feature or product scope changes require a `REQUIREMENTS_DIFF_*` first.
-6. Non-trivial execution must be bounded by one atomic `IMPL-*`.
+6. Non-trivial execution must be bounded by one atomic executable `IMPL-*`, or
+   by a root `IMPL-*` family whose subpackets are atomic executable slices.
 7. The active LLM should complete all work inside its reliable execution and
    self-check boundary before handoff.
 8. `TRACEABILITY_MATRIX.md` is updated only from evidence.
@@ -128,24 +131,27 @@ open and implementation must either:
 - stop and reopen the diff, or
 - explicitly document the deferred dimension before coding continues.
 
-### 4.3 Atomic IMPL Rule
+### 4.3 Bounded IMPL Initiative Rule
 
-One IMPL packet must describe one bounded initiative.
+One IMPL packet or root IMPL family must describe one bounded initiative.
 
 Rules:
 
-- `IMPL-N` = one standalone initiative
-- `IMPL-N.1` = dependent follow-up on `IMPL-N`
-- `IMPL-N.2` = further dependent follow-up on `IMPL-N`
+- `IMPL-N` = one standalone executable initiative, or one root initiative family
+- `IMPL-N.0`, `IMPL-N.1`, etc. = dependent packets under `IMPL-N`
 - `IMPL-M` = next independent initiative
+- when `IMPL-N` is a planned family, decimal packets are the atomic executable
+  slices inside that family
 
 An IMPL packet must not bundle unrelated initiatives just to reduce file count.
 
 The boundary is capability-based, not artificially tiny:
 
-- one IMPL may contain multiple coordinated code changes
+- one atomic executable IMPL may contain multiple coordinated code changes
 - those changes must still belong to one coherent objective
 - the packet ends where human-only validation becomes necessary
+- a root family may coordinate multiple executable subpackets, but each
+  subpacket must have a clear responsibility boundary
 
 ## 5. Platform Session Setup
 
@@ -168,9 +174,15 @@ Every LLM session must be initialized with:
    - the installed `REQUIREMENTS_DIFF_INDEX.md` at the project's actual
      diff-index location declared by the overlay
    - the active diff named by the index, if the index declares one
+   - the installed `REVIEW-INDEX.md` at the project's actual review-index
+     location declared by the overlay
+   - active `REVIEW-*` records whose scope overlaps the requested work, if any
    - the installed `IMPL-INDEX.md` at the project's actual `impl` location
    - active `IMPL-*`, if present
+   - the installed `TEST-CAMPAIGN-INDEX.md` at the project's actual campaign-index
+     location declared by the overlay
    - `TestCampaign-*` linked by the active IMPL or active diff, if present
+   - `TEST-ENVIRONMENT-STARTUP.md` when a linked campaign references it
 2. Repository identity and purpose
 3. Canonical docs per `authorities/PROJECT-OVERLAY.md`:
    - the baseline documents at their installed project locations
@@ -181,7 +193,7 @@ Every LLM session must be initialized with:
 4. Governance constraints:
    - docs-first
    - user as master router
-   - atomic IMPL rule
+   - bounded IMPL initiative rule
    - validation before traceability update
    - project-specific protected subsystem rules from `authorities/PROJECT-OVERLAY.md`
 
@@ -228,7 +240,7 @@ Required setup:
 |---|---|---|---|
 | Docs review | Canonical docs + matrix | classification of request | Must happen first |
 | Requirements diff | New feature or product scope change | `REQUIREMENTS_DIFF_*` | Required only when product scope changes |
-| IMPL | Accepted requirement scope or fix scope | one atomic `IMPL-*` | Required for non-trivial execution |
+| IMPL | Accepted requirement scope or fix scope | one atomic `IMPL-*`, or one root family with atomic subpackets | Required for non-trivial execution |
 | Execution | active IMPL | code or docs changes | Must stay inside packet scope and inside the LLM capability boundary |
 | Model review | changed code + active IMPL + docs | findings / residual risks | Pre-test quality gate |
 | Readiness and behavior gates | implemented result + review | handoff decision or blocked state | Blocks premature validation |
@@ -279,9 +291,10 @@ before any implementation packet is produced.
 
 #### Phase C — IMPL Packet
 
-All non-trivial execution work must be bound to one atomic `IMPL-*`.
+All non-trivial execution work must be bound to one atomic executable `IMPL-*`,
+or to one root `IMPL-*` family whose currently executed subpacket is atomic.
 
-An IMPL packet must include at least:
+An IMPL packet or executable subpacket must include at least:
 
 - goal
 - packet scope
@@ -316,6 +329,10 @@ The model reviews:
 
 - canonical docs
 - active IMPL
+- active review holds that overlap the changed scope
+- campaign index and linked campaign evidence when test or acceptance state is
+  affected
+- environment startup helper when a live campaign path is affected
 - changed code
 
 Review output must be:
@@ -375,7 +392,8 @@ Expected output:
 
 Expected output:
 
-- one atomic `IMPL-*`
+- one atomic `IMPL-*`, or one root `IMPL-*` family plus the current executable
+  subpacket
 - explicit requirement references
 - explicit packet scope
 - explicit self-check boundary

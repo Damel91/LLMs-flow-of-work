@@ -9,7 +9,6 @@ records. It does not call models, judge product merit, or accept work.
 from __future__ import annotations
 
 import argparse
-import re
 import sys
 from pathlib import Path
 
@@ -55,6 +54,32 @@ REQUIRED_IMPL_GATE_FIELDS = [
     "fallback/error behavior affected",
 ]
 
+LOCATION_ALIASES = {
+    "baseline": "Requirements baseline",
+    "requirements baseline": "Requirements baseline",
+    "interactions": "Interactions",
+    "diffs": "Requirement diffs",
+    "requirement diffs": "Requirement diffs",
+    "diff-index": "Requirement diff index",
+    "requirement diff index": "Requirement diff index",
+    "impl": "Implementation packets",
+    "implementation packets": "Implementation packets",
+    "impl-index": "Implementation packet index",
+    "implementation packet index": "Implementation packet index",
+    "reviews": "Review records",
+    "review records": "Review records",
+    "review-index": "Review index",
+    "review index": "Review index",
+    "campaigns": "Test campaigns",
+    "test campaigns": "Test campaigns",
+    "campaign-index": "Test campaign index",
+    "test campaign index": "Test campaign index",
+    "startup-helper": "Test environment startup helper",
+    "test environment startup helper": "Test environment startup helper",
+    "traceability": "Traceability matrix",
+    "traceability matrix": "Traceability matrix",
+}
+
 
 def parse_frontmatter(text: str) -> dict[str, str]:
     if not text.startswith("---\n"):
@@ -89,7 +114,19 @@ def detect_mode(root: Path) -> str:
     return "unknown"
 
 
-def find_overlay_diff_index(root: Path) -> Path | None:
+def resolve_existing_target(target: str) -> Path | None:
+    root = Path(target).resolve()
+    if not root.exists() or not root.is_dir():
+        return None
+    return root
+
+
+def resolve_workspace_file(root: Path, value: str) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else root / path
+
+
+def overlay_location(root: Path, row_name: str) -> Path | None:
     overlay = root / "authorities" / "PROJECT-OVERLAY.md"
     if not overlay.exists():
         return None
@@ -99,10 +136,19 @@ def find_overlay_diff_index(root: Path) -> Path | None:
     if not map_section:
         return None
     location_map = parse_overlay_map(map_section)
-    row = location_map.get("Requirement diff index")
+    row = location_map.get(row_name)
     if not row:
         return None
-    return resolve_declared_path(result, root, row[0], row[1], "Requirement diff index")
+    return resolve_declared_path(result, root, row[0], row[1], row_name)
+
+
+def diff_dir_for_index(root: Path, index_path: Path) -> Path:
+    diff_dir = overlay_location(root, "Requirement diffs")
+    return diff_dir if diff_dir else index_path.parent
+
+
+def find_overlay_diff_index(root: Path) -> Path | None:
+    return overlay_location(root, "Requirement diff index")
 
 
 def find_diff_index(root: Path) -> Path | None:
@@ -110,8 +156,6 @@ def find_diff_index(root: Path) -> Path | None:
     candidates = [
         overlay_path,
         root / "authorities" / "diffs" / "REQUIREMENTS_DIFF_INDEX.md",
-        root / "docs" / "REQUIREMENTS_DIFF_INDEX.md",
-        root / "REQUIREMENTS_DIFF_INDEX.md",
     ]
     for candidate in candidates:
         if candidate and candidate.exists() and candidate.is_file():
@@ -149,15 +193,41 @@ def emit_issues(result: LintResult) -> int:
     return result.emit()
 
 
+def merge_issues(target: LintResult, source: LintResult) -> None:
+    target.issues.extend(source.issues)
+
+
+def runtime_route(fields: dict[str, str]) -> tuple[str, str, str | None]:
+    manual_status = clean_cell(fields.get("manual bootstrap status", ""))
+    code_mode = clean_cell(fields.get("code bootstrap mode", ""))
+    code_status = clean_cell(fields.get("code bootstrap status", ""))
+
+    if manual_status in {"pending", "in-progress"}:
+        return (
+            "manual-bootstrap",
+            f"manual bootstrap status = {manual_status}",
+            "authorities/manual/MANUAL-BOOTSTRAP.md",
+        )
+    if code_mode != "not_required" and code_status in {"pending", "in-progress"}:
+        return (
+            "code-bootstrap",
+            f"code bootstrap mode = {code_mode}, status = {code_status}",
+            "CODE-BOOTSTRAP.md",
+        )
+    return ("normal-work", "manual and code bootstrap state do not require diversion", None)
+
+
 def command_doctor(args: argparse.Namespace) -> int:
-    root = Path(args.target).resolve()
+    root = resolve_existing_target(args.target)
+    if root is None:
+        missing = Path(args.target).resolve()
+        result = LintResult(args.mode, missing)
+        result.error("target-missing", f"Target path does not exist: {missing}")
+        return emit_issues(result)
     mode = args.mode
     if mode == "auto":
         mode = detect_mode(root)
     result = LintResult(mode, root)
-    if not root.exists():
-        result.error("target-missing", f"Target path does not exist: {root}")
-        return emit_issues(result)
     if mode == "framework":
         check_framework_mode(result)
     elif mode == "workspace":
@@ -168,7 +238,10 @@ def command_doctor(args: argparse.Namespace) -> int:
 
 
 def command_status(args: argparse.Namespace) -> int:
-    root = Path(args.target).resolve()
+    root = resolve_existing_target(args.target)
+    if root is None:
+        print(f"ERROR: target path does not exist: {Path(args.target).resolve()}")
+        return 1
     mode = detect_mode(root)
     print(f"Mode: {mode}")
     print(f"Target: {root}")
@@ -194,7 +267,10 @@ def command_status(args: argparse.Namespace) -> int:
 
 
 def command_active_diff_show(args: argparse.Namespace) -> int:
-    root = Path(args.target).resolve()
+    root = resolve_existing_target(args.target)
+    if root is None:
+        print(f"ERROR: target path does not exist: {Path(args.target).resolve()}")
+        return 1
     index_path = find_diff_index(root)
     if not index_path:
         print(f"ERROR: no REQUIREMENTS_DIFF_INDEX.md found under {root}")
@@ -211,9 +287,134 @@ def command_active_diff_show(args: argparse.Namespace) -> int:
     print(f"Active state: {active_state}")
     if active_diff and active_diff.lower() != "none":
         path = Path(active_diff)
-        resolved = path if path.is_absolute() else index_path.parent / path
+        resolved = path if path.is_absolute() else diff_dir_for_index(root, index_path) / path
         print(f"Resolved path: {resolved}")
         print(f"Exists: {'yes' if resolved.exists() else 'no'}")
+    return 0
+
+
+def command_state(args: argparse.Namespace) -> int:
+    root = resolve_existing_target(args.target)
+    if root is None:
+        print(f"ERROR: target path does not exist: {Path(args.target).resolve()}")
+        return 1
+    mode = detect_mode(root)
+    print(f"Mode: {mode}")
+    print(f"Target: {root}")
+    if mode != "workspace":
+        print("ERROR: state requires an adopted workspace target")
+        return 1
+
+    overlay = root / "authorities" / "PROJECT-OVERLAY.md"
+    if not overlay.exists():
+        print(f"ERROR: PROJECT-OVERLAY.md not found under {root}")
+        return 1
+    fields = parse_strong_fields(overlay.read_text(encoding="utf-8"))
+
+    for label, key in (
+        ("Manual bootstrap status", "manual bootstrap status"),
+        ("Manual readiness level", "manual readiness level"),
+        ("Code bootstrap mode", "code bootstrap mode"),
+        ("Code bootstrap status", "code bootstrap status"),
+        ("Code bootstrap source type", "code bootstrap source type"),
+        ("Code bootstrap requested output", "code bootstrap requested output"),
+    ):
+        print(f"{label}: {clean_cell(fields.get(key, 'unknown'))}")
+
+    index_path = find_diff_index(root)
+    if index_path:
+        active_fields = active_diff_info(index_path)
+        active_diff = active_fields.get("active diff", "unknown")
+        active_state = active_fields.get("active state", "unknown")
+        print(f"Requirement diff index: {index_path}")
+        print(f"Active diff: {active_diff}")
+        print(f"Active state: {active_state}")
+        if active_diff and active_diff.lower() != "none":
+            path = Path(active_diff)
+            resolved = path if path.is_absolute() else diff_dir_for_index(root, index_path) / path
+            print(f"Active diff resolved path: {resolved}")
+            print(f"Active diff exists: {'yes' if resolved.exists() else 'no'}")
+    else:
+        print("Requirement diff index: not found")
+
+    route, _, _ = runtime_route(fields)
+    print(f"Route: {route}")
+    return 0
+
+
+def command_route(args: argparse.Namespace) -> int:
+    root = resolve_existing_target(args.target)
+    if root is None:
+        print(f"ERROR: target path does not exist: {Path(args.target).resolve()}")
+        return 1
+    if detect_mode(root) != "workspace":
+        print("ERROR: route requires an adopted workspace target")
+        return 1
+    overlay = root / "authorities" / "PROJECT-OVERLAY.md"
+    if not overlay.exists():
+        print(f"ERROR: PROJECT-OVERLAY.md not found under {root}")
+        return 1
+    fields = parse_strong_fields(overlay.read_text(encoding="utf-8"))
+    route, reason, document = runtime_route(fields)
+    print(f"Route: {route}")
+    if route != "normal-work":
+        print(f"Reason: {reason}")
+        print(f"Document: {document}")
+    return 0
+
+
+def command_where(args: argparse.Namespace) -> int:
+    if not args.values:
+        target = "."
+        alias = ""
+    elif len(args.values) == 1:
+        target = "."
+        alias = args.values[0]
+    elif len(args.values) == 2:
+        target = args.values[0]
+        alias = args.values[1]
+    else:
+        print("ERROR: where accepts at most target and key")
+        return 1
+
+    root = resolve_existing_target(target)
+    if root is None:
+        print(f"ERROR: target path does not exist: {Path(target).resolve()}")
+        return 1
+    if detect_mode(root) != "workspace":
+        print("ERROR: where requires an adopted workspace target")
+        return 1
+    if not alias:
+        print(
+            "Known keys: "
+            + ", ".join(
+                [
+                    "baseline",
+                    "interactions",
+                    "diffs",
+                    "diff-index",
+                    "impl",
+                    "impl-index",
+                    "reviews",
+                    "review-index",
+                    "campaigns",
+                    "campaign-index",
+                    "startup-helper",
+                    "traceability",
+                ]
+            )
+        )
+        return 0
+
+    row = LOCATION_ALIASES.get(normalize_label(alias))
+    if row is None:
+        print(f"ERROR: unknown location key: {alias}")
+        return 1
+    path = overlay_location(root, row)
+    if path is None:
+        print(f"ERROR: could not resolve overlay location for: {row}")
+        return 1
+    print(path)
     return 0
 
 
@@ -349,6 +550,23 @@ def command_check_matrix(args: argparse.Namespace) -> int:
     return emit_issues(check_matrix_file(Path(args.path).resolve()))
 
 
+def command_handoff(args: argparse.Namespace) -> int:
+    root = resolve_existing_target(args.target)
+    if root is None:
+        missing = Path(args.target).resolve()
+        result = LintResult("handoff", missing)
+        result.error("target-missing", f"Target path does not exist: {missing}")
+        return emit_issues(result)
+
+    result = LintResult("handoff", root)
+    check_workspace_mode(result)
+    for impl_path in args.impl:
+        merge_issues(result, check_impl_file(resolve_workspace_file(root, impl_path)))
+    if args.matrix:
+        merge_issues(result, check_matrix_file(resolve_workspace_file(root, args.matrix)))
+    return emit_issues(result)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="flowctl",
@@ -370,11 +588,29 @@ def build_parser() -> argparse.ArgumentParser:
     status.add_argument("target", nargs="?", default=".")
     status.set_defaults(func=command_status)
 
+    state = sub.add_parser("state", help="Show workspace runtime state")
+    state.add_argument("target", nargs="?", default=".")
+    state.set_defaults(func=command_state)
+
+    route = sub.add_parser("route", help="Show deterministic workspace route")
+    route.add_argument("target", nargs="?", default=".")
+    route.set_defaults(func=command_route)
+
+    where = sub.add_parser("where", help="Resolve a document location from overlay sec. 10")
+    where.add_argument("values", nargs="*")
+    where.set_defaults(func=command_where)
+
     active = sub.add_parser("active-diff", help="Inspect active requirement diff")
     active_sub = active.add_subparsers(dest="active_command", required=True)
     active_show = active_sub.add_parser("show", help="Show active diff from REQUIREMENTS_DIFF_INDEX.md")
     active_show.add_argument("target", nargs="?", default=".")
     active_show.set_defaults(func=command_active_diff_show)
+
+    handoff = sub.add_parser("handoff", help="Run workspace handoff checks")
+    handoff.add_argument("target", nargs="?", default=".")
+    handoff.add_argument("--impl", action="append", default=[], help="IMPL packet path to check")
+    handoff.add_argument("--matrix", help="Traceability matrix path to check")
+    handoff.set_defaults(func=command_handoff)
 
     check = sub.add_parser("check", help="Run focused artifact checks")
     check_sub = check.add_subparsers(dest="check_command", required=True)

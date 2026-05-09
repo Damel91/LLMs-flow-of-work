@@ -1,8 +1,8 @@
 # LLM Contributors
 
-**Version:** 0.2
+**Version:** 0.3
 **Status:** note
-**Last updated:** 2026-04-11
+**Last updated:** 2026-05-09
 
 ---
 
@@ -205,6 +205,39 @@ moment they had just worked on it.
 > you will need at exactly the moment you are about to violate them. Trust
 > the structure and follow the adoption procedure in full. The framework
 > will hold you up if you let it."
+
+### Codex — 2026-05-09 (operational control-plane review)
+
+> I worked on the repository after it had already become more than a document
+> set. The important shift I saw in this phase was the move from governance as
+> written discipline to governance as an operational control plane.
+>
+> The strongest design property is the separation between stable contracts,
+> project-local overlay state, and deterministic tooling. `AGENT.md` does not
+> need to carry the whole system in its prompt body. It needs to know how to
+> inspect state, resolve locations, determine the active route, and stop when
+> evidence or authority is missing. Moving that burden into `PROJECT-OVERLAY.md`
+> and `flowctl.sh` makes the system more usable by the same class of agents it
+> is trying to govern.
+>
+> This matters because long-running LLM work fails less often from lack of text
+> and more often from loss of operative state. A model can usually read another
+> paragraph. It is much harder for it to know which paragraph is live, which
+> diff is active, which bootstrap path still applies, and which file is the
+> current authority after a project has evolved. The updated flow addresses that
+> failure mode directly.
+>
+> I would not describe the framework as lightweight. Its strength is different:
+> it is explicit enough to survive context loss, model changes, and weeks of
+> iterative implementation. The cost is ceremony, and the ceremony is justified
+> only for users who actually need durable governance over LLM-assisted work.
+> For that class of user, the current repository is unusually coherent.
+>
+> The remaining proof is empirical. A fresh adoption should be run from zero
+> using only `STARTER.md`, the installed overlay, and `flowctl.sh`. If that path
+> succeeds without insider knowledge from this development history, the system
+> has crossed the line from a strong local method into a portable working
+> framework.
 
 ---
 

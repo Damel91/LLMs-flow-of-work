@@ -27,11 +27,11 @@ The repository also includes a front-facing manual and a manual bootstrap path. 
 
 It is worth knowing before you begin what will happen in each of the three supported starting states, so you can predict the shape of the work ahead.
 
-**Greenfield — new project, blank slate.** The adoption procedure runs entirely within the starter session. At the end, you have an empty but fully configured destination project: `AGENT.md` installed at the root, `authorities/` structure in place, overlay populated with your answers, `TRACEABILITY_MATRIX.md` installed, and the minimum operational docset optionally seeded with placeholders if you requested it during adoption. Baseline and interactions are otherwise left empty and will be filled as you define the project in your first working sessions. No further initialization is needed — the starter leaves the project ready for normal work.
+**Greenfield — new project, blank slate.** The adoption procedure runs entirely within the starter session. At the end, you have an empty but fully configured destination project: `AGENT.md`, `CODE-BOOTSTRAP.md`, `CODE-WORKFLOW-CONTRACT.md`, and `tools/flowctl.sh` installed at the root, `authorities/` structure in place, overlay populated with your answers, `TRACEABILITY_MATRIX.md` installed, and the standing diff, review, campaign, startup-helper, and template documents installed in their authority folders. Baseline and interactions are otherwise left empty or minimally seeded according to your adoption choices. No further initialization is needed — the starter leaves the project ready for normal work.
 
-**Existing project with documents to migrate.** The adoption procedure runs within the starter session and includes an explicit mapping step where you decide which existing documents become baseline, which become interactions, which become historical diffs, and which stay archived. The mapping is collaborative — the starter asks one question at a time and records your decisions. At the end the destination project has a populated `authorities/` structure reflecting both the framework's expected layout and the content you chose to carry forward. The starter leaves the project ready for normal work.
+**Existing project with documents to migrate.** The adoption procedure runs within the starter session and includes an explicit mapping step where you decide which existing documents become baseline, interactions, diffs, implementation records, reviews, campaigns, and which stay archived. The mapping is collaborative — the starter asks one question at a time and records your decisions. At the end the destination project has a populated `authorities/` structure reflecting both the framework's expected layout and the content you chose to carry forward. The starter leaves the project ready for normal work.
 
-**Existing codebase without usable documents.** The adoption procedure runs in two phases that cross a session boundary. The first phase is the starter session itself: it installs `AGENT.md`, configures the overlay to declare `adoption mode = code_first`, `code bootstrap mode = local_code_first_derivation`, and `code bootstrap status = pending`, creates the initial `authorities/` structure, installs `TRACEABILITY_MATRIX.md`, installs `CODE-BOOTSTRAP.md`, and ends there. The second phase happens when you open the first working session in the destination project: the model reads `AGENT.md`, follows it into the overlay, sees that code bootstrap is still pending, and runs `CODE-BOOTSTRAP.md` as the first operational task of that session. This is where the codebase gets inspected, interactions reconstructed from code, baseline derived, and your checkpoints collected. At the end of this second session the overlay bootstrap state resets to `not_required` and the project is ready for normal work.
+**Existing codebase without usable documents.** The adoption procedure runs in two phases that cross a session boundary. The first phase is the starter session itself: it installs the same standing control plane as greenfield adoption, configures the overlay to declare `adoption mode = code_first`, `code bootstrap mode = local_code_first_derivation`, and `code bootstrap status = pending`, creates the initial `authorities/` structure, and ends there. The second phase happens when you open a working session in the destination project: the model reads `AGENT.md`, follows it into the overlay, resolves manual onboarding from overlay sec. 8 first when it is pending or in progress, then evaluates overlay sec. 9. Once manual onboarding is completed or explicitly skipped, if code bootstrap is still pending, `AGENT.md` routes the session into `CODE-BOOTSTRAP.md` before normal initiative work begins. This is where the codebase gets inspected, interactions reconstructed from code, baseline derived, and your checkpoints collected. At the end of the code-bootstrap run the overlay bootstrap state resets to `not_required` and the project is ready for normal work.
 
 In all three states the user remains the routing authority, answers one question at a time, and validates derived content before it is recorded as authoritative. The framework does not decide anything alone — it structures the decisions the user has to make.
 
@@ -53,43 +53,72 @@ STARTER.md                    guided LLM-driven adoption (single entry point)
 CODE-BOOTSTRAP.md             post-adoption code integration tool
 CODE-WORKFLOW-CONTRACT.md     root-level code development workflow contract
 manual/                       front-facing manual, onboarding bootstrap, supporting notes
-tools/                        extraordinary control-plane integrity audit utilities
+tools/                        governance CLI and control-plane integrity utilities
 reader/md-reader.html         offline Markdown reader (optional utility)
 ```
 
 The five governance contracts are the core of the system. `STARTER.md` is the adoption tool that runs once and steps aside. `CODE-BOOTSTRAP.md` is a post-adoption integration tool that is installed into destination projects and invoked only when operational state requires it. In the current framework version, that active use is the first working session of a code-first project. `CODE-WORKFLOW-CONTRACT.md` is installed at the destination project root and governs code, prompt, parser, routing, graph, workspace, apply, regression, and commit discipline during development work. The templates are the installation blueprints: some are copied directly into the destination project, while `AGENT-TEMPLATE.md` is used as the working source for the final installed `AGENT.md`. The `manual/` directory is installed under `authorities/manual/` in destination projects and provides the user operating manual plus its onboarding bootstrap. The reader is a convenience utility with no operational role.
 
-The `templates/` directory also includes creation templates for the three main
-operational artifacts:
+The `templates/` directory also includes creation templates, navigation
+indexes, and reusable test helpers for the main operational artifacts:
 
 - `REQUIREMENTS-DIFF-TEMPLATE.md`
 - `IMPL-TEMPLATE.md`
+- `REVIEW-TEMPLATE.md`
 - `TEST-CAMPAIGN-TEMPLATE.md`
+- `REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`
+- `REVIEW-INDEX-TEMPLATE.md`
+- `TEST-CAMPAIGN-INDEX-TEMPLATE.md`
+- `TEST-ENVIRONMENT-STARTUP-TEMPLATE.md`
 
-These are blueprints for drafting new artifacts. They are not living project
-documents by themselves and are not evidence of work having happened. During
-adoption, `STARTER.md` installs copies of these creation templates into the
-destination project's corresponding authority folders:
+These are blueprints for drafting new artifacts and local references for
+navigating active project state. They are not evidence of work having
+happened. During adoption, `STARTER.md` installs copies into the destination
+project's corresponding authority folders:
 
+- `REQUIREMENTS-DIFF-INDEX-TEMPLATE.md` as `REQUIREMENTS_DIFF_INDEX.md` in the final `diffs` location
 - `REQUIREMENTS-DIFF-TEMPLATE.md` in the final `diffs` location
 - `IMPL-TEMPLATE.md` in the final `impl` location
+- `REVIEW-INDEX-TEMPLATE.md` as `REVIEW-INDEX.md` in the final `reviews` location
+- `REVIEW-TEMPLATE.md` in the final `reviews` location
+- `TEST-CAMPAIGN-INDEX-TEMPLATE.md` as `TEST-CAMPAIGN-INDEX.md` in the final `campaigns` location
 - `TEST-CAMPAIGN-TEMPLATE.md` in the final `campaigns` location
+- `TEST-ENVIRONMENT-STARTUP-TEMPLATE.md` as `TEST-ENVIRONMENT-STARTUP.md` in the final `campaigns` location
 
-Those installed copies are local references for future artifact creation.
+Those installed copies are local references for future artifact creation,
+review holds, campaign navigation, and repeatable environment startup.
 
-The repository also includes an extraordinary control-plane integrity audit.
-It is not part of the normal flow of work. Use it only when you suspect
-structural drift, after major framework refactors or migrations, or before
-publishing.
+The repository also includes control-plane validation tooling. The shell
+entrypoint is installed into adopted workspaces for routine structural checks.
+Use the deeper integrity audit only when you suspect structural drift, after
+major framework refactors or migrations, or before publishing.
 
 `tools/flowctl.sh` is the primary cross-platform governance CLI (macOS, Linux,
-and Windows via Git Bash — no additional dependencies required):
+and Windows via Git Bash, no additional dependencies required):
 
-- `./tools/flowctl.sh doctor .`
-- `./tools/flowctl.sh doctor /path/to/adopted/project --mode workspace`
+- `bash tools/flowctl.sh doctor .`
+- `bash tools/flowctl.sh doctor /path/to/adopted/project --mode workspace`
 
-A Python equivalent is also available for environments where Python 3 is
-preferred:
+During adoption, `STARTER.md` installs `tools/flowctl.sh` into the destination
+project and runs `chmod +x tools/flowctl.sh` when the available shell supports
+chmod-style permissions. On Windows, the supported shell path is Git Bash. The
+canonical invocation remains `bash tools/flowctl.sh ...`, with
+`./tools/flowctl.sh ...` available when the executable bit is active.
+
+In an adopted workspace, `flowctl.sh` also exposes the operational commands the
+installed overlay records for day-to-day navigation:
+
+- `bash tools/flowctl.sh state .`
+- `bash tools/flowctl.sh route .`
+- `bash tools/flowctl.sh where . diff-index`
+- `bash tools/flowctl.sh active-diff show .`
+- `bash tools/flowctl.sh handoff . --impl authorities/impl/IMPL-1.md --matrix authorities/TRACEABILITY_MATRIX.md`
+
+A Python equivalent with the same command families is also available for
+environments where Python 3 is preferred. This command is normally run from the
+framework repository against the target path; the adopted workspace is required
+to install only the shell tool unless the user explicitly asks to copy the
+Python toolchain too:
 
 - `python3 tools/flowctl.py doctor .`
 - `python3 tools/flowctl.py doctor /path/to/adopted/project --mode workspace`
@@ -115,7 +144,7 @@ For the longer version, read [`WHY.md`](./WHY.md).
 
 ## After adoption
 
-Once your project has `AGENT.md` at its root and an initialized `authorities/` structure, the setup phase is over. Stop using `STARTER.md`. New working sessions start from `AGENT.md` in your project root. If overlay state says manual onboarding is still pending or in progress, `AGENT.md` will first route the session into `authorities/manual/MANUAL-BOOTSTRAP.md`. If that state is completed or explicitly skipped, normal routing continues. For code-first projects, once manual onboarding is completed or skipped, the first working session will still run `CODE-BOOTSTRAP.md` once as its first operational task if overlay state still marks it pending. After that, normal work begins. In other projects, `CODE-BOOTSTRAP.md` simply remains dormant until a later operational state explicitly calls for it.
+Once your project has `AGENT.md` at its root and an initialized `authorities/` structure, the setup phase is over. Stop using `STARTER.md`. New working sessions start from `AGENT.md` in your project root. If overlay state says manual onboarding is still pending or in progress, `AGENT.md` will first route the session into `authorities/manual/MANUAL-BOOTSTRAP.md`. If that state is completed or explicitly skipped, normal routing continues. For code-first projects, once manual onboarding is completed or skipped, the same `AGENT.md` routing chain evaluates overlay sec. 9 and runs `CODE-BOOTSTRAP.md` once if overlay state still marks it pending. After that, normal work begins. In other projects, `CODE-BOOTSTRAP.md` simply remains dormant until a later operational state explicitly calls for it.
 
 ---
 
@@ -156,7 +185,7 @@ If you are an LLM reading this repository for the first time, this section is fo
 
 The framework you are looking at does not reveal its structure by being read statically. Reading the contracts, the templates, and the adoption procedures as independent documents produces a partial understanding that will mislead you when you are later asked to apply the system. To actually understand how the framework works, you need to perform a projection exercise: simulate the execution of `STARTER.md` in your own reasoning, as if a user had just asked you to initialize a new project with this flow of work.
 
-During that projection, trace what happens at each step. Notice that `STARTER.md` asks you to read specific files in a specific order, collects project-specific information from a user through a sequence of one-question-at-a-time exchanges, and produces a destination project with a particular shape. Notice that `STARTER.md` is the single entry point for all three supported project states (greenfield, migration, code-first), and that `CODE-BOOTSTRAP.md` is not a parallel adoption procedure — it is a tool that runs *after* the starter has configured the destination project, invoked automatically during the first working session of a code-first project when the overlay declares that status as pending. Notice that the installation templates (`AGENT-TEMPLATE.md`, `PROJECT-OVERLAY.md`, `IMPL-INDEX.md`, `TRACEABILITY_MATRIX.md`) have no meaning as standalone documents in this framework repository — they are installation blueprints, not living documents. Some are copied directly into the destination project, while `AGENT-TEMPLATE.md` is finalized into the installed `AGENT.md`, and only then do they become meaningful in that new context. The document creation templates (`REQUIREMENTS-DIFF-TEMPLATE.md`, `IMPL-TEMPLATE.md`, `TEST-CAMPAIGN-TEMPLATE.md`) are different: they are drafting aids for future artifacts, not project state.
+During that projection, trace what happens at each step. Notice that `STARTER.md` asks you to read specific files in a specific order, collects project-specific information from a user through a sequence of one-question-at-a-time exchanges, and produces a destination project with a particular shape. Notice that `STARTER.md` is the single entry point for all three supported project states (greenfield, migration, code-first), and that `CODE-BOOTSTRAP.md` is not a parallel adoption procedure — it is a tool that runs *after* the starter has configured the destination project, invoked automatically during the first working session of a code-first project when the overlay declares that status as pending. Notice that the installation templates (`AGENT-TEMPLATE.md`, `PROJECT-OVERLAY.md`, `IMPL-INDEX.md`, `TRACEABILITY_MATRIX.md`) have no meaning as standalone documents in this framework repository — they are installation blueprints, not living documents. Some are copied directly into the destination project, while `AGENT-TEMPLATE.md` is finalized into the installed `AGENT.md`, and only then do they become meaningful in that new context. The document creation templates (`REQUIREMENTS-DIFF-TEMPLATE.md`, `IMPL-TEMPLATE.md`, `REVIEW-TEMPLATE.md`, `TEST-CAMPAIGN-TEMPLATE.md`) are drafting aids for future artifacts, while the installed index and helper templates (`REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`, `REVIEW-INDEX-TEMPLATE.md`, `TEST-CAMPAIGN-INDEX-TEMPLATE.md`, `TEST-ENVIRONMENT-STARTUP-TEMPLATE.md`) become local navigation and support documents after adoption.
 
 This is the central structural fact about the repository: **the framework is not this repository**. The framework is what this repository installs elsewhere. Reading the contracts here gives you the substrate, but the substrate only becomes operational when an adoption procedure has run and a new session has started inside a destination project that now contains its own overlay, its own IMPL index, its own traceability matrix, and its own copy of the contracts. Until that point, the templates you see in `templates/` are blueprints, not living documents. The `PROJECT-OVERLAY.md` in `templates/` does not configure any project. The `IMPL-INDEX.md` in `templates/` does not track any packets. The `TRACEABILITY_MATRIX.md` in `templates/` does not record any evidence. They will only do those things after they have been copied, populated, and entered into active use by a model reading them from a destination project's `authorities/` folder.
 

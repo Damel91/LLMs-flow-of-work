@@ -82,8 +82,18 @@ Use `State in index` values such as:
 - `accepted history`
 - `rejected history`
 
+When a diff is the current implementation target, keep `State in index` set to
+`active head`. Record planning nuance such as "first implementation family
+generated" or "implemented - evidence pending" in the `Role` column or in the
+`Current Active Diff` table, not as alternate active states.
+
 Older diffs remain auditable history. They should not be edited once a
 successor becomes the current head.
+
+`Implementation family` may name a single root `IMPL-*` or a root family with
+subpackets. If the active diff has generated only the first family, state that
+remaining diff packets are still pending rather than implying full
+implementation planning is complete.
 
 ---
 

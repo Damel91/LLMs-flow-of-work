@@ -2,7 +2,7 @@
 
 **Version:** 0.2
 **Status:** working_draft
-**Last updated:** 2026-04-12
+**Last updated:** YYYY-MM-DD
 **Revision note:** Initial empty matrix. Will be populated from factual
 implementation evidence and authoritative `TestCampaign-*` outcomes.
 
@@ -56,6 +56,11 @@ Do not introduce lifecycle labels such as `pending`, `deferred`, or `planned`
 as matrix statuses. Those belong to diff / IMPL management, not to factual
 requirement state.
 
+When a successor diff introduces corrected requirements that are not yet
+implemented, record them as `Gap` by default and point the Notes column to the
+active successor diff or planned IMPL family. Do not create a special
+in-between matrix status for "carried forward" work.
+
 ---
 
 ## 2. Functional Traceability
@@ -92,7 +97,8 @@ requirement state.
 - **Notes** — concise factual annotations. Acceptable content: test
   references (e.g. `T4 PASS in TestCampaign-IMPL-25`), known constraints,
   scoped follow-ups, whether a `Partial` row is still awaiting first
-  authoritative campaign, and which superseding diff governs a changed area.
+  authoritative campaign, which superseding diff governs a changed area, and
+  which active successor diff carries unresolved blockers.
   Unacceptable content: future intent, opinions, planning, speculation.
 
 ---
@@ -233,15 +239,16 @@ not silently fixed.
 | Installed interaction document | Defines the scenarios that `TestCampaign-*` exercises, subject to scoped supersession by the governing active diff. The matrix does not duplicate scenarios. |
 | Installed `IMPL-*` packet set | Cited in the IMPL packet(s) column. Packet lifecycle state is separate (see `IMPL-INDEX.md`). |
 | Installed `TestCampaign-*` set | The primary form of evidence. Section 5 of this matrix may inline a recent campaign summary. |
-| `authorities/PROJECT-OVERLAY.md` | Declares the actual location of this file if the project adapted the default structure. |
+| `authorities/PROJECT-OVERLAY.md` | Confirms that this file remains fixed at `authorities/TRACEABILITY_MATRIX.md`. |
 
 ---
 
 ## 8. Project Adaptation
 
 If the project has adapted the default structure (see
-`flow-of-work-contract/05-PROJECT-STRUCTURE.md` section 6), record the
-actual location of this matrix in `authorities/PROJECT-OVERLAY.md`
+`flow-of-work-contract/05-PROJECT-STRUCTURE.md` section 6), keep this matrix at
+`authorities/TRACEABILITY_MATRIX.md`. Do not move it into a layer folder or
+declare an alternate matrix location in `authorities/PROJECT-OVERLAY.md`
 section 10.
 
 If the project uses requirement IDs in a different scheme than the

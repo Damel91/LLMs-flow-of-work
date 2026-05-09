@@ -31,9 +31,10 @@ This tool runs in two legitimate situations:
   `code bootstrap mode = local_code_first_derivation`
 - `PROJECT-OVERLAY.md` sec. 9 declares `code bootstrap status = pending`
   (or `in-progress` if a previous session did not finish)
-- the first working session has just started
 - the model has read `AGENT.md` and followed it into the overlay
-- the overlay state has directed the model to execute this file
+- `AGENT.md` has already resolved overlay sec. 8 manual onboarding state
+  when that state was pending or in progress
+- the overlay sec. 9 state has directed the model to execute this file
 
 ### B. Explicit external-source integration
 
@@ -71,6 +72,8 @@ It does:
   integration scope is not obvious
 - optional creation of a temporary integration brief for non-trivial external
   intake
+- proposal or user-approved creation of review holds when derivation exposes
+  unresolved clarification, acceptance, or packet-boundary concerns
 - proposal of new `IMPL-*` packets when reverse engineering reveals work that
   should be tracked explicitly
 
@@ -231,11 +234,20 @@ The brief is the commitment point that prevents silent scope expansion.
 Before starting derivation or targeted integration, read in this order:
 
 1. `authorities/PROJECT-OVERLAY.md` (the destination project's overlay)
-2. `authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md`
-3. `authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md`
-4. any existing destination content in the installed baseline and interaction
+2. `authorities/flow-of-work-contract/00-INDEX.md`
+3. `authorities/flow-of-work-contract/01-LLM-SESSION-CONTRACT.md`
+4. `authorities/flow-of-work-contract/02-DOCSET-GOVERNANCE-CONTRACT.md`
+5. `authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md`
+6. `authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md`
+7. `authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md`
+8. the installed `REQUIREMENTS_DIFF_INDEX.md` location declared by the overlay
+9. the installed `IMPL-INDEX.md` location declared by the overlay
+10. the installed `REVIEW-INDEX.md` location declared by the overlay
+11. the installed `TEST-CAMPAIGN-INDEX.md` location declared by the overlay
+12. any existing destination content in the installed baseline and interaction
    locations declared by the overlay
-5. the relevant source code itself — entry points, major modules, test surfaces
+13. the relevant source code itself — entry points, major modules, test
+    surfaces
 
 If mode = `external_source_integration` and source documentation exists inside
 the declared scope:
@@ -255,6 +267,8 @@ Goal:
 - understand the destination project's declared structure
 - understand which destination locations would receive derived or integrated
   material
+- understand which active review holds, implementation packets, or campaign
+  records already constrain the scope
 - understand what the relevant source actually does
 - do only as much reading as the chosen depth and intent justify
 
@@ -405,12 +419,18 @@ Name each incoherence explicitly, ask the user to decide which source should
 govern for this integration task, and update the derived materials only after
 that decision.
 
+If an incoherence must constrain future implementation, validation, or
+acceptance after this run, propose a `REVIEW-*` record and update
+`REVIEW-INDEX.md` only after user agreement. Use a review hold when the issue
+is a decision, clarification, or boundary concern rather than a bounded
+implementation task.
+
 If mode = `external_source_integration`, record the contradiction in
 `CODE-BOOTSTRAP-BRIEF.md` if the brief exists.
 
 ---
 
-## 11. Propose IMPL Packets When Needed
+## 11. Propose Review Holds Or IMPL Packets When Needed
 
 If the derivation or integration reveals work that should be tracked as an
 explicit bounded initiative — behavior clarified but code and docs diverge,
@@ -419,7 +439,12 @@ repaired, traceability that requires a known implementation follow-up, or an
 external integration that cannot be completed safely in one pass — propose
 new `IMPL-*` packets.
 
-Do not open the packets automatically without user agreement.
+If the derivation reveals a blocker that is not ready to execute because it
+needs a decision, acceptance judgment, scope clarification, or packet-boundary
+correction, propose a `REVIEW-*` record instead.
+
+Do not open packets or review records automatically without user agreement.
+When a review record is opened, update `REVIEW-INDEX.md` in the same change.
 
 ---
 
@@ -438,7 +463,10 @@ If mode = `local_code_first_derivation`:
   - what was derived from code
   - what was validated by the user
   - what remains open
+  - whether review holds were opened or recommended
   - whether new `IMPL-*` packets are recommended
+  - whether campaign index or environment startup helper changes are needed
+    before the first validation campaign
   - that the destination project is now in normal operational mode
 
 If mode = `external_source_integration`:
@@ -456,6 +484,7 @@ If mode = `external_source_integration`:
   - what was intentionally not analyzed
   - what is now understood sufficiently
   - what remains unknown
+  - whether review holds were opened or recommended
   - whether the integration can proceed
   - whether new `IMPL-*` packets are recommended
   - whether `CODE-BOOTSTRAP-BRIEF.md` should be deleted or retained
@@ -474,6 +503,9 @@ an explicit user decision calls for it.
 - Do not write final traceability claims as if requirements were already
   fully validated.
 - Do not open `IMPL-*` packets automatically without user confirmation.
+- Do not open `REVIEW-*` records automatically without user confirmation.
+- Do not leave unresolved bootstrap decisions in chat when they constrain later
+  implementation, validation, or acceptance.
 - Do not confuse bug review with system-level reverse engineering.
 - Do not begin broad external-source analysis before classifying intent,
   authority, depth, and scope.
@@ -481,7 +513,11 @@ an explicit user decision calls for it.
 - Do not confuse understanding a source with integrating that source.
 - Do not leave `CODE-BOOTSTRAP-BRIEF.md` standing by default after it has
   served its purpose.
-- Do not install, modify, or overwrite `AGENT.md`, the overlay structure, or
-  any control-plane file that the adoption procedure already placed.
+- Do not reinstall, structurally replace, or overwrite `AGENT.md`, the overlay
+  schema, or the adopted control-plane structure that the adoption procedure
+  already placed.
+- Do not treat this restriction as a ban on the scoped operational updates this
+  tool explicitly owns, such as overlay sec. 9 close-out, derived baseline or
+  interaction drafts, seeded traceability, or agreed review/index updates.
 - Do not assume filesystem access. If you do not have it, return the output as
   content in the conversation and let the user place it.

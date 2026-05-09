@@ -59,7 +59,6 @@ VALID_VALUES = {
         "implementation_candidate",
         "unknown",
     },
-    "procedure completed": {"yes", "no", "in-progress"},
 }
 
 OVERLAY_LOCATION_ROWS = {
@@ -69,8 +68,24 @@ OVERLAY_LOCATION_ROWS = {
     "Requirement diff index",
     "Implementation packets",
     "Implementation packet index",
+    "Review records",
+    "Review index",
     "Test campaigns",
+    "Test campaign index",
+    "Test environment startup helper",
     "Traceability matrix",
+}
+
+OPERATIONAL_TOOLING_COMMANDS = {
+    "runtime state command": ("flowctl.sh", "state"),
+    "route command": ("flowctl.sh", "route"),
+    "location command": ("flowctl.sh", "where"),
+    "governance status command": ("flowctl.sh", "status"),
+    "active diff command": ("flowctl.sh", "active-diff"),
+    "workspace doctor command": ("flowctl.sh", "doctor"),
+    "handoff command": ("flowctl.sh", "handoff"),
+    "impl check command": ("flowctl.sh", "check impl"),
+    "traceability check command": ("flowctl.sh", "check matrix"),
 }
 
 
@@ -371,7 +386,9 @@ def check_framework_mode(result: LintResult) -> None:
         "CODE-WORKFLOW-CONTRACT.md",
         "WHY.md",
         "tools/CONTROL-PLANE-LINT-SPEC.md",
+        "tools/flowctl.sh",
         "tools/flowctl.py",
+        "tools/control_plane_lint.py",
         "templates/AGENT-TEMPLATE.md",
         "templates/PROJECT-OVERLAY.md",
         "templates/IMPL-INDEX.md",
@@ -379,7 +396,11 @@ def check_framework_mode(result: LintResult) -> None:
         "templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md",
         "templates/REQUIREMENTS-DIFF-TEMPLATE.md",
         "templates/IMPL-TEMPLATE.md",
+        "templates/REVIEW-INDEX-TEMPLATE.md",
+        "templates/REVIEW-TEMPLATE.md",
+        "templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md",
         "templates/TEST-CAMPAIGN-TEMPLATE.md",
+        "templates/TEST-ENVIRONMENT-STARTUP-TEMPLATE.md",
         "manual/MANUAL-BOOTSTRAP.md",
         "manual/REACHING-THE-LLMS.md",
         "flow-of-work-contract/00-INDEX.md",
@@ -411,7 +432,11 @@ def check_framework_mode(result: LintResult) -> None:
         "templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md",
         "templates/REQUIREMENTS-DIFF-TEMPLATE.md",
         "templates/IMPL-TEMPLATE.md",
+        "templates/REVIEW-INDEX-TEMPLATE.md",
+        "templates/REVIEW-TEMPLATE.md",
+        "templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md",
         "templates/TEST-CAMPAIGN-TEMPLATE.md",
+        "templates/TEST-ENVIRONMENT-STARTUP-TEMPLATE.md",
         "manual/MANUAL-BOOTSTRAP.md",
         "manual/REACHING-THE-LLMS.md",
         "flow-of-work-contract/00-INDEX.md",
@@ -474,7 +499,7 @@ def check_framework_mode(result: LintResult) -> None:
     if "REQUIREMENTS_DIFF_INDEX.md" not in agent_template:
         result.error(
             "agent-diff-index",
-            "AGENT-TEMPLATE.md does not read REQUIREMENTS_DIFF_INDEX.md before the active diff",
+            "AGENT-TEMPLATE.md does not reference active diff selection through REQUIREMENTS_DIFF_INDEX.md",
         )
     if "authorities/diffs/REQUIREMENTS_DIFF_INDEX.md" in agent_template:
         result.error(
@@ -487,6 +512,7 @@ def check_framework_mode(result: LintResult) -> None:
         "## 8. Manual Onboarding State",
         "## 9. Code Bootstrap State",
         "## 10. Document Location Map",
+        "## 11. Operational Tooling",
     ):
         if required_heading not in overlay_template:
             result.error(
@@ -507,6 +533,21 @@ def check_framework_mode(result: LintResult) -> None:
                 "overlay-missing-field",
                 f"PROJECT-OVERLAY.md missing field template: {required_field}",
             )
+    overlay_template_fields = parse_strong_fields(overlay_template)
+    for key, required_fragments in OPERATIONAL_TOOLING_COMMANDS.items():
+        command = overlay_template_fields.get(key)
+        if command is None:
+            result.error(
+                "overlay-missing-field",
+                f"PROJECT-OVERLAY.md missing operational tooling field template: {key}",
+            )
+            continue
+        for fragment in required_fragments:
+            if fragment not in command:
+                result.error(
+                    "operational-tool-command-invalid",
+                    f"Operational tooling command '{key}' must contain '{fragment}'",
+                )
 
     starter = read_text(result, root / "STARTER.md")
     if "- `authorities/manual/*`" not in starter:
@@ -518,6 +559,16 @@ def check_framework_mode(result: LintResult) -> None:
         result.error(
             "starter-install-set-code-workflow",
             "STARTER.md required install set does not include CODE-WORKFLOW-CONTRACT.md",
+        )
+    if "tools/flowctl.sh" not in starter:
+        result.error(
+            "starter-install-set-flowctl-sh",
+            "STARTER.md required install set does not include tools/flowctl.sh",
+        )
+    if "chmod +x tools/flowctl.sh" not in starter:
+        result.error(
+            "starter-flowctl-chmod",
+            "STARTER.md does not activate tools/flowctl.sh with chmod +x during filesystem adoption",
         )
     if "REQUIREMENTS_DIFF_INDEX.md" not in starter:
         result.error(
@@ -533,7 +584,11 @@ def check_framework_mode(result: LintResult) -> None:
         "REQUIREMENTS-DIFF-INDEX-TEMPLATE.md",
         "REQUIREMENTS-DIFF-TEMPLATE.md",
         "IMPL-TEMPLATE.md",
+        "REVIEW-INDEX-TEMPLATE.md",
+        "REVIEW-TEMPLATE.md",
+        "TEST-CAMPAIGN-INDEX-TEMPLATE.md",
         "TEST-CAMPAIGN-TEMPLATE.md",
+        "TEST-ENVIRONMENT-STARTUP-TEMPLATE.md",
     ):
         if template_name not in starter:
             result.error(
@@ -573,7 +628,11 @@ def check_framework_mode(result: LintResult) -> None:
     for template_name in (
         "REQUIREMENTS-DIFF-TEMPLATE.md",
         "IMPL-TEMPLATE.md",
+        "REVIEW-INDEX.md",
+        "REVIEW-TEMPLATE.md",
+        "TEST-CAMPAIGN-INDEX.md",
         "TEST-CAMPAIGN-TEMPLATE.md",
+        "TEST-ENVIRONMENT-STARTUP.md",
     ):
         if template_name not in structure_doc:
             result.error(
@@ -602,9 +661,15 @@ def check_workspace_mode(result: LintResult) -> None:
         "AGENT.md",
         "CODE-BOOTSTRAP.md",
         "CODE-WORKFLOW-CONTRACT.md",
+        "tools/flowctl.sh",
         "authorities/PROJECT-OVERLAY.md",
         "authorities/TRACEABILITY_MATRIX.md",
         "authorities/flow-of-work-contract/00-INDEX.md",
+        "authorities/flow-of-work-contract/01-LLM-SESSION-CONTRACT.md",
+        "authorities/flow-of-work-contract/02-DOCSET-GOVERNANCE-CONTRACT.md",
+        "authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md",
+        "authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md",
+        "authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md",
         "authorities/manual/MANUAL-BOOTSTRAP.md",
         "authorities/manual/REACHING-THE-LLMS.md",
     ]
@@ -652,9 +717,23 @@ def check_workspace_mode(result: LintResult) -> None:
         "code bootstrap status",
         "code bootstrap source type",
         "code bootstrap requested output",
-        "procedure completed",
     ):
         check_allowed_value(result, overlay_fields, key)
+
+    for key, required_fragments in OPERATIONAL_TOOLING_COMMANDS.items():
+        command = overlay_fields.get(key)
+        if command is None:
+            result.error(
+                "operational-tool-command-missing",
+                f"PROJECT-OVERLAY.md missing operational tooling command: {key}",
+            )
+            continue
+        for fragment in required_fragments:
+            if fragment not in command:
+                result.error(
+                    "operational-tool-command-invalid",
+                    f"Operational tooling command '{key}' must contain '{fragment}'",
+                )
 
     manual_status = overlay_fields.get("manual bootstrap status")
     manual_level = overlay_fields.get("manual readiness level")
@@ -717,22 +796,6 @@ def check_workspace_mode(result: LintResult) -> None:
     if adoption_mode == "code_first" and code_mode == "not_required" and code_status == "not_required":
         result.ok("code_first project appears to have completed or reset its code bootstrap state")
 
-    if overlay_fields.get("procedure completed") == "yes":
-        for key in (
-            "adoption mode",
-            "adoption procedure",
-            "manual bootstrap status",
-            "manual readiness level",
-            "manual override acknowledged",
-            "code bootstrap mode",
-            "code bootstrap status",
-        ):
-            if overlay_fields.get(key) == "unknown":
-                result.error(
-                    "unknown-post-adoption",
-                    f"Overlay field '{key}' is still unknown after procedure completed = yes",
-                )
-
     map_section = extract_section(overlay_text, "## 10. Document Location Map")
     if not map_section:
         result.error(
@@ -746,6 +809,13 @@ def check_workspace_mode(result: LintResult) -> None:
             result.error(
                 "overlay-map-row-missing",
                 f"Document location map missing row: {row_name}",
+            )
+    if "Traceability matrix" in location_map:
+        _, actual_location = location_map["Traceability matrix"]
+        if clean_cell(actual_location).lower() != "default":
+            result.error(
+                "traceability-location-not-fixed",
+                "Traceability matrix must remain at authorities/TRACEABILITY_MATRIX.md with Actual location = default",
             )
     for row_name, (default_location, actual_location) in location_map.items():
         path = resolve_declared_path(
@@ -766,6 +836,7 @@ def check_workspace_mode(result: LintResult) -> None:
     required_category_templates = {
         "Requirement diffs": "REQUIREMENTS-DIFF-TEMPLATE.md",
         "Implementation packets": "IMPL-TEMPLATE.md",
+        "Review records": "REVIEW-TEMPLATE.md",
         "Test campaigns": "TEST-CAMPAIGN-TEMPLATE.md",
     }
     for row_name, template_name in required_category_templates.items():

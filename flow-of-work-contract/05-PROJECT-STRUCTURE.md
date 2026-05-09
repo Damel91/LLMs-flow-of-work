@@ -1,8 +1,8 @@
 # 05 — Project Structure
 
-**Version:** 0.1
+**Version:** 0.2
 **Status:** working
-**Last updated:** 2026-04-25
+**Last updated:** 2026-05-09
 
 ---
 
@@ -30,14 +30,16 @@ stack, inside a single dedicated folder called `authorities/`.
 In steady-state operation, four root-level files may be present because models
 and users must find them immediately, without navigating: `AGENT.md`,
 `README.md`, `CODE-BOOTSTRAP.md`, and `CODE-WORKFLOW-CONTRACT.md`.
-Everything else lives inside `authorities/`.
+Authority documents beyond those root anchors live inside `authorities/`.
+Runtime code, tests, release artifacts, and installed governance utilities use
+dedicated root folders.
 
 Temporary exception during adoption:
 
 - `STARTER.md` may be used at repository root only while adoption or migration
   is actively in progress
-- they are adoption artifacts, not steady-state control-plane files
-- they must be removed or excluded once adoption is complete
+- it is an adoption artifact, not a steady-state control-plane file
+- it must be removed or excluded once adoption is complete
 
 **Separation is not cosmetic.** Different folders represent different layers of
 authority. Placing a document in the wrong folder breaks the authority
@@ -56,7 +58,9 @@ separation that the governance contract depends on.
 ├── src/                             # project source code
 ├── config/                          # configuration files
 ├── tests/                           # automated test code and harnesses
-├── release/                         # release-related artifacts (see section 4)
+├── tools/                           # installed governance CLI and project tools
+│   └── flowctl.sh                   # workspace control-plane validator
+├── release/                         # release-related artifacts (see section 4.7)
 └── authorities/                     # all project authority documents
     ├── PROJECT-OVERLAY.md           # project-specific configuration
     ├── TRACEABILITY_MATRIX.md       # cross-cutting factual state register
@@ -85,19 +89,27 @@ separation that the governance contract depends on.
     │   ├── IMPL-INDEX.md
     │   ├── IMPL-TEMPLATE.md
     │   └── IMPL-*.md
+    ├── reviews/                     # review holds and clarification records
+    │   ├── REVIEW-INDEX.md
+    │   ├── REVIEW-TEMPLATE.md
+    │   └── REVIEW-*.md
     └── campaigns/                   # test evidence
+        ├── TEST-CAMPAIGN-INDEX.md
         ├── TEST-CAMPAIGN-TEMPLATE.md
+        ├── TEST-ENVIRONMENT-STARTUP.md
         └── TestCampaign-*.md
 ```
 
-The diff index and the three category templates shown in `diffs/`, `impl/`,
-and `campaigns/` are standing local references. They are copied by
-`STARTER.md` into the destination project so future sessions can select the
-active diff and create new artifacts without returning to the framework
-repository.
+The diff index, review index, campaign index, environment startup helper, and
+category templates shown in `diffs/`, `impl/`, `reviews/`, and `campaigns/`
+are standing local references. They are copied by `STARTER.md` into the
+destination project so future sessions can select the active diff, track
+review holds, navigate campaigns, reuse environment startup procedure, and
+create new artifacts without returning to the framework repository.
 
-The diff index is live project state. The templates are not active diffs,
-active packets, or campaign evidence. A model must copy the relevant template,
+The diff index, review index, and campaign index are live navigation state.
+The templates and startup helper are not active diffs, active packets, review
+findings, or campaign evidence. A model must copy the relevant template,
 rename the copy according to the category naming rule, replace placeholders,
 and leave the installed template unchanged.
 
@@ -116,7 +128,8 @@ they are not part of the canonical steady-state structure:
 | `src/` | Project source code | Project-specific | Authority documents, test evidence |
 | `config/` | Configuration files | Project-specific | Source code, authority documents |
 | `tests/` | Automated test code and harnesses | `04-TEST-AND-HANDOFF-CONTRACT.md` | TestCampaign documents (those belong in campaigns/) |
-| `release/` | Release artifacts — see section 4.5 | Project-specific | Authority documents, source code |
+| `tools/` | Installed governance CLI and project utility scripts | `05-PROJECT-STRUCTURE.md` and project-specific tool policy | Authority documents, product requirements, campaign evidence |
+| `release/` | Release artifacts — see section 4.7 | Project-specific | Authority documents, source code |
 | `authorities/` | Full project authority docset | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Source code, build artifacts |
 | `authorities/PROJECT-OVERLAY.md` | Project-specific configuration and language settings | Updated via guided init or explicit user decision | Generic governance rules (those belong in flow-of-work-contract/) |
 | `authorities/manual/` | User operating manual, onboarding bootstrap, and supporting manual notes | Explicit user decision and framework publication | Product requirements, IMPL packets, test evidence |
@@ -125,7 +138,8 @@ they are not part of the canonical steady-state structure:
 | `authorities/interactions/` | Scenario and interaction contract | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Requirements baseline, IMPL packets |
 | `authorities/diffs/` | Active diff index, current and historical scope evolution, and local diff creation template | `01-LLM-SESSION-CONTRACT.md` | Accepted baseline text, test evidence |
 | `authorities/impl/` | Bounded execution history plus its local creation template | `01-LLM-SESSION-CONTRACT.md` | Requirements, test campaigns |
-| `authorities/campaigns/` | Validation evidence plus its local creation template | `04-TEST-AND-HANDOFF-CONTRACT.md` | Implementation plans, requirements |
+| `authorities/reviews/` | Review holds, clarification records, and local review templates | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Implementation plans, campaign evidence |
+| `authorities/campaigns/` | Validation evidence, campaign navigation, environment helper, and local campaign creation template | `04-TEST-AND-HANDOFF-CONTRACT.md` | Implementation plans, requirements |
 | `authorities/TRACEABILITY_MATRIX.md` | Accepted factual state across all layers | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Future intent, speculative status |
 
 ---
@@ -189,7 +203,29 @@ It is not a product requirements document, not an IMPL packet, and not test
 evidence. It must be referenced by the installed `AGENT.md` read order and hard
 stops.
 
-### 4.5 tests/
+### 4.5 tools/
+
+Contains installed workflow utilities and project-local helper scripts.
+
+The default installed framework utility is:
+
+- `tools/flowctl.sh`
+
+The starter must install it as an operational shell tool. On macOS, Linux, and
+Windows through Git Bash, the starter runs `chmod +x tools/flowctl.sh` from the
+destination project root after copying it. The portable invocation remains
+`bash tools/flowctl.sh ...`; `./tools/flowctl.sh ...` is available when the
+executable bit is active.
+
+This folder is not an authority-document layer. It may contain executable or
+portable tooling used to inspect the project, but product requirements,
+implementation packets, reviews, and campaign evidence still belong under
+`authorities/`.
+
+If a project later adds its own tools, keep them operational and avoid turning
+this folder into a documentation archive.
+
+### 4.6 tests/
 
 Contains automated test code and harnesses — unit tests, integration tests,
 regression tests, and any deterministic local test runners the project uses.
@@ -203,7 +239,7 @@ This folder is distinct from `authorities/campaigns/`. The difference is:
 A regression test lives in `tests/`. The record of running it lives in
 `authorities/campaigns/`. Do not conflate the two.
 
-### 4.6 release/
+### 4.7 release/
 
 Contains release-related artifacts. The exact content depends on the nature
 of the project and may include any combination of:
@@ -241,6 +277,34 @@ It is not a requirements diff itself, not an IMPL packet, and not evidence.
 It must be installed in every adopted project even when no active diff exists.
 In that case its active diff field is `none`.
 
+## 5.2 REVIEW-INDEX.md Position
+
+The review index lives inside `authorities/reviews/` because it governs only
+review holds and clarification records. It identifies active reviews that may
+block or qualify execution in another layer.
+
+It is not a review finding itself, not an implementation packet, and not test
+evidence. It must be installed in every adopted project even when no active
+review exists. In that case its active review list is empty.
+
+## 5.3 TEST-CAMPAIGN-INDEX.md Position
+
+The campaign index lives inside `authorities/campaigns/` because it governs
+campaign navigation and validation evidence lookup. It records active,
+accepted, partial, deferred, and historical campaign references.
+
+It is not campaign evidence by itself. It must be installed in every adopted
+project even when no campaign has been run yet.
+
+## 5.4 TEST-ENVIRONMENT-STARTUP.md Position
+
+The environment startup helper lives inside `authorities/campaigns/` because
+it supports repeatable validation. It records stable runtime startup,
+preflight, reset, shutdown, and known-environment constraints that test
+campaigns can reference instead of duplicating setup prose.
+
+It is not a campaign result and must not be treated as acceptance evidence.
+
 ---
 
 ## 6. Adaptation Rules
@@ -249,15 +313,15 @@ The structure above is the canonical starting point. Projects may adapt it
 within these constraints:
 
 **Allowed:**
-- Renaming `baseline/`, `interactions/`, `impl/`, `diffs/`, or `campaigns/`
-  to names that better fit the project domain.
+- Renaming `baseline/`, `interactions/`, `impl/`, `diffs/`, `reviews/`, or
+  `campaigns/` to names that better fit the project domain.
 - Adding subfolders inside any layer folder to organize growing document sets.
 - Adding project-specific document types inside the appropriate layer folder.
 
 **Not allowed:**
 - Merging two layer folders into one. The separation of baseline, diffs, impl,
-  and campaigns is structural, not cosmetic. Merging them recreates the
-  management problem this structure is designed to solve.
+  reviews, and campaigns is structural, not cosmetic. Merging them recreates
+  the management problem this structure is designed to solve.
 - Moving `AGENT.md` or `README.md` out of the root.
 - Placing authority documents outside `authorities/`.
 - Moving `authorities/manual/` out of `authorities/` or turning it into a

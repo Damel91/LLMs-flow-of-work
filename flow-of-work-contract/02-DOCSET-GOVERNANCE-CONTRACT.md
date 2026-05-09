@@ -2,9 +2,9 @@
 doc_type: docset_governance_contract
 scope: documentation_control
 applies_to: multi-platform
-version: 0.3
+version: 0.4
 status: working
-last_updated: 2026-04-25
+last_updated: 2026-05-09
 ---
 
 # Docset Governance Contract
@@ -27,6 +27,11 @@ last_updated: 2026-04-25
    baseline by default.
 10. Only the current head diff of a change line is editable; opening a
    successor freezes all predecessors as history.
+11. A root `IMPL-*` may define an implementation family; dependent packets
+    execute slices inside that family.
+12. If an `IMPL-*` packet has the wrong boundary but contains valid decisions,
+    preserve those decisions in the active diff or replacement family instead
+    of executing the packet as written.
 
 ## 1. Purpose
 
@@ -37,6 +42,7 @@ layers coexist:
 - active and accepted requirement diffs
 - scenario and use-case definitions
 - implementation packets
+- review and clarification holds
 - test campaigns
 - the traceability matrix
 
@@ -61,8 +67,14 @@ Use the following authority order when working on an active initiative:
 6. canonical `REQUIREMENTS*` for accepted baseline intent
 7. `USE_CASES_AND_SEQUENCES.md` for scenario meaning
 8. active `IMPL-*` for bounded execution
-9. `TestCampaign-*` for acceptance evidence
-10. `TRACEABILITY_MATRIX.md` for accepted factual status
+9. `REVIEW-INDEX.md` for active review hold discovery
+10. active `Review-*` / `REVIEW-*` records for holds that constrain execution
+   or acceptance
+11. `TEST-CAMPAIGN-INDEX.md` for campaign navigation and acceptance-state lookup
+12. `TEST-ENVIRONMENT-STARTUP.md` for reusable validation startup procedure,
+    when a campaign references it
+13. `TestCampaign-*` for acceptance evidence
+14. `TRACEABILITY_MATRIX.md` for accepted factual status
 
 Important distinction:
 
@@ -88,6 +100,10 @@ Older diffs are historical records, not mutable working drafts.
 | `REQUIREMENTS_DIFF_*` | Current product scope evolution and durable historical change record after acceptance | factual implementation proof |
 | `USE_CASES_AND_SEQUENCES.md` | Scenario contract, subject to scoped supersession by the active diff when explicitly declared | packet plan or matrix |
 | `IMPL-*` | Bounded execution initiative | final product contract |
+| `REVIEW-INDEX.md` | Active review hold and clarification navigation | evidence or implementation packet |
+| `Review-*` / `REVIEW-*` | Clarification, risk, or acceptance hold record | implementation packet or evidence |
+| `TEST-CAMPAIGN-INDEX.md` | Campaign navigation, campaign acceptance state, and active review links | validation evidence |
+| `TEST-ENVIRONMENT-STARTUP.md` | Reusable environment startup and preflight procedure for campaigns | campaign result or acceptance evidence |
 | `TestCampaign-*` | Executed validation evidence | implementation plan |
 | `TRACEABILITY_MATRIX.md` | Accepted repo reality | future intent |
 
@@ -104,9 +120,11 @@ Minimum propagation questions:
 
 1. Which baseline requirement statements are now stale or incomplete?
 2. Which use cases or sequences are temporarily superseded for this initiative?
-3. Which root `IMPL-*` is opened by this diff?
+3. Which root `IMPL-*` or root implementation family is opened by this diff?
 4. Which traceability rows are expected to move only after acceptance?
 5. Does `REQUIREMENTS_DIFF_INDEX.md` point to this diff as active head?
+6. Are any earlier IMPL packets absorbed, replaced, or preserved as design
+   input rather than executed directly?
 
 The active root `IMPL-*` should carry the initiative ledger for those
 propagation targets during execution.
@@ -176,8 +194,9 @@ When documents disagree, resolve them in this order:
 6. accepted baseline `REQUIREMENTS*`
 7. scenario meaning from `USE_CASES_AND_SEQUENCES.md`
 8. bounded execution details from active `IMPL-*`
-9. factual evidence from `TestCampaign-*`
-10. accepted status from `TRACEABILITY_MATRIX.md`
+9. active review holds for affected scope
+10. factual evidence from `TestCampaign-*`
+11. accepted status from `TRACEABILITY_MATRIX.md`
 
 If an active diff explicitly changes scenario meaning for a bounded scope, that
 scoped reading prevails over conflicting passages in
@@ -222,6 +241,50 @@ The root packet should identify:
 
 This keeps initiative-specific synchronization out of the global contracts.
 
+### 8.1 IMPL Families And Subpackets
+
+A root `IMPL-*` may be an executable packet or a planned decomposition.
+
+Use a planned decomposition when the initiative is architecturally coherent but
+too broad for one safe execution slice. In that case:
+
+- the root packet defines the boundary, governing diff, sequencing, and
+  acceptance gate for the whole family
+- decimal subpackets define executable slices
+- each subpacket must have a clear write or responsibility scope
+- the IMPL index must list the root and every generated subpacket
+- the root remains the family ledger until the family is accepted, superseded,
+  or cancelled
+
+Subpacket execution must not change the product contract by itself. If a
+subpacket reveals that the governing diff is wrong or incomplete, route through
+the active diff or a successor diff.
+
+### 8.2 Packet Boundary Correction And Absorption
+
+Sometimes a packet is not wrong in substance but wrong in boundary.
+
+Examples:
+
+- it solves only half of an architectural problem
+- it mixes an implementation patch with a broader product or architecture
+  contract
+- it carries useful backend, data, or configuration decisions but cannot be
+  executed safely as an isolated change
+
+When this happens:
+
+1. Do not execute the packet merely because it exists.
+2. Identify which decisions remain valid.
+3. Move those decisions into the active diff, a replacement root IMPL family,
+   or a dedicated spec document if the project uses one.
+4. Mark the old packet as absorbed, superseded, or cancelled in the IMPL index.
+5. Remove or freeze the old packet as an active execution source so there is
+   one current authority for the work.
+
+The replacement document must state what it preserves and what boundary it
+changes. This keeps history auditable without leaving two competing plans.
+
 ## 9. Prohibited Behaviors
 
 Do not:
@@ -241,6 +304,8 @@ Do not:
 - use `IMPL-*` as product-law replacement for requirements
 - use a `TestCampaign-*` as if it were an implementation plan
 - leave conflicting document layers ambiguous
+- execute an IMPL packet after its boundary has been declared wrong
+- keep both an absorbed packet and its replacement as active execution sources
 
 ## 10. Project Overlay
 

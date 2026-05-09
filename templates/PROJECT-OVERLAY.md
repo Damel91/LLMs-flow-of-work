@@ -1,6 +1,6 @@
 # Project Overlay
 
-**Version:** 0.1
+**Version:** 0.2
 **Status:** working_draft
 **Last updated:** YYYY-MM-DD
 
@@ -74,14 +74,16 @@ sessions. The model responds and reasons in this language.
 
 **Documentation language:** [language]
 The language used to produce all documents in this project — contracts,
-requirements, IMPL packets, test campaigns, and the traceability matrix.
+requirements, requirement diffs and indexes, IMPL packets and indexes, review
+records and indexes, test campaigns and indexes, environment startup helpers,
+and the traceability matrix.
 
 These two fields are independent. The model must not infer the documentation
 language from the conversation language.
 
-The slug of every IMPL packet, REQUIREMENTS_DIFF, and TestCampaign file must
-be written in the documentation language, in uppercase, with words separated
-by hyphens.
+The slug of every IMPL packet, `REVIEW-*` record, `REQUIREMENTS_DIFF_*`, and
+`TestCampaign-*` file must be written in the documentation language, in
+uppercase, with words separated by hyphens.
 
 Example: documentation language is English → `IMPL-01-CONTEXT-POLICY.md`.
 Example: documentation language is Italian → `IMPL-01-POLICY-CONTESTO.md`.
@@ -181,13 +183,14 @@ Readiness:
 - `basic` means the user has covered the mental model, operating rules, and
   document roles enough to work conservatively
 - `operational` means the user has also covered the working loop, `Partial`,
-  campaign constructibility, scope issues, and diff history enough for normal
-  framework use
+  campaign constructibility, scope issues, diff history, review holds,
+  campaign indexes, environment startup helpers, and blocker ledgers enough
+  for normal framework use
 - `unknown` only during incomplete setup
 
 If `manual bootstrap status` is `pending` or `in-progress`, `AGENT.md` should
-route the next working session into the installed manual bootstrap before
-normal initiative work begins.
+route the current working session into the installed manual bootstrap before
+checking code-bootstrap state or normal initiative work.
 
 If `manual bootstrap status = skipped_by_user`, `manual override acknowledged`
 must be `yes`.
@@ -214,8 +217,9 @@ Use:
   external source through `CODE-BOOTSTRAP.md`
 - `unknown` only during incomplete setup
 
-If `code bootstrap status` is `pending` or `in-progress`, the next working
-session must run `CODE-BOOTSTRAP.md` before normal initiative work begins.
+If `code bootstrap status` is `pending` or `in-progress`, `AGENT.md` must run
+`CODE-BOOTSTRAP.md` after overlay sec. 8 no longer requires manual bootstrap and
+before normal initiative work begins.
 
 ---
 
@@ -232,36 +236,63 @@ If this project has adapted the default structure from
 | Requirement diff index | `authorities/diffs/REQUIREMENTS_DIFF_INDEX.md` | [actual path] |
 | Implementation packets | `authorities/impl/` | [actual path] |
 | Implementation packet index | `authorities/impl/IMPL-INDEX.md` | [actual path] |
+| Review records | `authorities/reviews/` | [actual path] |
+| Review index | `authorities/reviews/REVIEW-INDEX.md` | [actual path] |
 | Test campaigns | `authorities/campaigns/` | [actual path] |
-| Traceability matrix | `authorities/TRACEABILITY_MATRIX.md` | [actual path] |
+| Test campaign index | `authorities/campaigns/TEST-CAMPAIGN-INDEX.md` | [actual path] |
+| Test environment startup helper | `authorities/campaigns/TEST-ENVIRONMENT-STARTUP.md` | [actual path] |
+| Traceability matrix | `authorities/TRACEABILITY_MATRIX.md` | default |
 
 If no adaptations were made, write `default` in the Actual location column.
+The traceability matrix is a fixed bootstrap anchor; keep its Actual location
+as `default`.
 
 ---
 
-## 11. Adoption Status
+## 11. Operational Tooling
 
-Tracks whether the adoption procedure has been completed.
+This section records the project-local `flowctl.sh` commands available to the
+active model.
 
-**Procedure completed:** [yes / no / in-progress]
-**Completed on:** [YYYY-MM-DD or —]
-**Completed by:** [model name or user]
+It is not adoption history and it is not the routing source for manual or code
+bootstrap. Runtime routing comes from sec. 8 and sec. 9.
 
-Documents created during adoption:
+Use these commands when they match the current operational need instead of
+loading extra governance detail into `AGENT.md`.
 
-| Document | Created | Location |
-|---|---|---|
-| `REQUIREMENTS.md` | [yes / no] | [path] |
-| `REQUIREMENTS_FUNCTIONAL.md` | [yes / no] | [path] |
-| `REQUIREMENTS_NON_FUNCTIONAL.md` | [yes / no] | [path] |
-| `USE_CASES_AND_SEQUENCES.md` | [yes / no] | [path] |
-| `TRACEABILITY_MATRIX.md` | [yes / no] | [path] |
-| `IMPL-INDEX.md` | [yes / no] | [path] |
-| `manual/` | [yes / no] | [path] |
+**Tool activation command:** `chmod +x tools/flowctl.sh`
+The starter runs this during installation when the available shell supports
+chmod-style permissions. On Windows, this assumes Git Bash. If activation cannot
+be verified, keep using `bash tools/flowctl.sh ...`.
 
-Optional human-support artifacts retained:
+**Runtime state command:** `bash tools/flowctl.sh state .`
+Use to inspect bootstrap flags, active diff state, and the deterministic route.
 
-| Artifact | Retained | Location |
-|---|---|---|
-| `reader/` | [yes / no] | [path or —] |
-| `beginning/STARTER-DIFF.md` | [yes / no] | [path or —] |
+**Route command:** `bash tools/flowctl.sh route .`
+Use when the next runtime path is unclear.
+
+**Location command:** `bash tools/flowctl.sh where . diff-index`
+Use to resolve installed document locations from overlay sec. 10. Replace
+`diff-index` with another supported location key when needed.
+
+**Governance status command:** `bash tools/flowctl.sh status .`
+Use to inspect the current governance mode and active diff state.
+
+**Active diff command:** `bash tools/flowctl.sh active-diff show .`
+Use before implementation planning when the active requirement diff is unclear.
+
+**Workspace doctor command:** `bash tools/flowctl.sh doctor . --mode workspace`
+Use after adoption, after control-plane structure changes, and before handoff
+when a session changes governance files.
+
+**Handoff command:** `bash tools/flowctl.sh handoff .`
+Use before handoff when a session changed governance files, an IMPL packet, or
+the traceability matrix. Add `--impl path` or `--matrix path` when a focused
+artifact check is needed in the same run.
+
+**IMPL check command:** `bash tools/flowctl.sh check impl [path]`
+Use before handoff for an IMPL packet whose behavioral gate was added or
+modified.
+
+**Traceability check command:** `bash tools/flowctl.sh check matrix authorities/TRACEABILITY_MATRIX.md`
+Use before handoff when traceability rows were added or modified.

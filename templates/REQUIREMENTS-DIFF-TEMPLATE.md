@@ -3,6 +3,7 @@
 **Version:** 0.1
 **Status:** Template reference
 **Created:** YYYY-MM-DD
+**Activated:** [YYYY-MM-DD / not active]
 **Governing baseline:** [baseline document references]
 **Change line:** [short change-family name]
 **Head status:** [head / superseded by REQUIREMENTS_DIFF_* / historical]
@@ -37,6 +38,8 @@ State whether this diff:
 
 **Superseded by:** [none / REQUIREMENTS_DIFF_*]
 
+**Absorbed design inputs:** [none / IMPL-* / spec path / review path]
+
 **Editable:** [yes / no]
 
 **Diff index registration:** [active head / parked draft / superseded history / accepted history / rejected history]
@@ -47,6 +50,8 @@ Rules:
 - the current head is the one named by `REQUIREMENTS_DIFF_INDEX.md`
 - opening a successor freezes predecessors as history
 - returning to older behavior requires a new successor diff, not rewriting history
+- if an earlier IMPL or spec is absorbed, preserve valid decisions here and
+  make clear that the old document is no longer the active execution source
 
 ---
 
@@ -143,6 +148,24 @@ If behavior depends on existing working code, name the reference explicitly.
 | Root IMPL | [expected root IMPL ID or TBD] |
 | Test campaign | [expected campaign scope or TBD] |
 | Traceability matrix | [expected Gap / Partial / Implemented movement after evidence] |
+
+If the diff opens a root implementation family, name the root family and first
+packet explicitly. If later packets remain intentionally late, state that so
+the IMPL index and campaign index do not imply full execution readiness.
+
+---
+
+## 8.1 Implementation Packet Split
+
+Use this section when the diff is broad enough to require multiple packets.
+
+| Packet | Purpose | Prerequisite | Execution status |
+|---|---|---|---|
+| [R.0 / IMPL-N] | [root boundary or first slice] | [none] | [not generated / planned / implemented] |
+| [R.1 / IMPL-N.1] | [slice] | [packet] | [not generated / planned / implemented] |
+
+The packet split is planning authority only. It becomes executable when the
+corresponding `IMPL-*` packet exists and is registered in the IMPL index.
 
 ---
 

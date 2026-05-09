@@ -2,9 +2,9 @@
 doc_type: test_and_handoff_contract
 scope: validation_control
 applies_to: multi-platform
-version: 0.4
+version: 0.5
 status: working
-last_updated: 2026-04-25
+last_updated: 2026-05-09
 ---
 
 # Test And Handoff Contract
@@ -21,6 +21,13 @@ last_updated: 2026-04-25
    automated regression tests before the next live campaign.
 7. Readiness for handoff and constructibility of a meaningful campaign are
    related but not identical gates.
+8. A `PARTIAL` campaign can be accepted as evidence and still route remaining
+   blockers into follow-up packets or a successor diff.
+9. A campaign may expose that the governing packet or diff boundary is wrong;
+   that is a scope or governance outcome, not just a failed test.
+10. Live campaigns should use the installed `TEST-ENVIRONMENT-STARTUP.md`
+    helper when they need real environment setup, reset, preflight, inspection,
+    or shutdown.
 
 ## 1. Readiness Gate
 
@@ -122,7 +129,7 @@ flow, not by structural coupling.
   require a one-to-one mapping between a campaign and specific files in `tests/`
 - the choice to use a harness from `tests/` is a model strategy decision unless
   the project declares a stricter rule elsewhere
-- the repeated bug-fix loop rule in section 3.1 is the explicit exception:
+- the repeated bug-fix loop rule in section 3.2 is the explicit exception:
   there, a targeted automated regression becomes required as a content rule,
   not as a general structural coupling rule
 
@@ -151,13 +158,47 @@ The test result is the basis for:
 
 - accept packet
 - reject packet
+- accept packet with explicit residual blockers
 - create decimal follow-up
 - create next independent IMPL
 - open a superseding `REQUIREMENTS_DIFF_*` when the failure is a scope issue
 
 Manual testing is an acceptance activity, not an exploratory debugging phase.
 
-## 3.1 Repeated Bug-Fix Loop Rule
+### 3.1 Partial Campaign Acceptance
+
+`PARTIAL` is a valid campaign result when the evidence clearly separates what
+passed from what did not pass.
+
+A partial campaign may be accepted only if the campaign records:
+
+- which tests passed and which failed or were not run
+- which requirements or packet objectives are covered by passing evidence
+- which blockers remain
+- whether each blocker stays inside the same packet, opens a dependent
+  follow-up, opens a new independent IMPL, or requires a successor diff
+- whether traceability may move for the validated subset
+
+Acceptance of a partial campaign is not blanket acceptance of the whole
+initiative. It is an explicit routing decision over evidence.
+
+When a partial campaign closes some blockers and carries others forward, the
+diff index, IMPL index, campaign index, and traceability matrix should be
+updated consistently. The matrix remains conservative: unresolved corrected
+requirements normally remain `Gap` or `Partial`, with notes pointing to the
+active successor diff or follow-up packet.
+
+The campaign should include a blocker ledger with:
+
+- blocker id
+- source test
+- classification
+- resolution
+- destination document or packet
+
+This prevents `PARTIAL` from becoming an ambiguous narrative status.
+
+## 3.2 Repeated Bug-Fix Loop Rule
 
 When the same behavioral area has already gone through multiple corrective
 rounds, the active LLM must stop relying on live campaigns alone.
@@ -194,6 +235,8 @@ When validation fails, classify the outcome as one of:
 - independent issue requiring the next integer IMPL
 - scope issue requiring a superseding `REQUIREMENTS_DIFF_*`
 - documentation or traceability drift only
+- packet-boundary issue requiring absorption or replacement of an `IMPL-*`
+  packet
 
 The classification determines whether work stays in the same initiative or
 opens a new one.
@@ -221,6 +264,23 @@ Required consequences:
 Lifecycle nuance belongs in the diff and IMPL layers, not in the matrix status
 legend.
 
+### 4.2 Packet-Boundary Issue Handling
+
+When validation or review shows that an `IMPL-*` packet has the wrong execution
+boundary, classify the result separately from a normal implementation bug.
+
+Required consequences:
+
+- preserve any valid decisions from the packet
+- mark the packet as absorbed, superseded, or cancelled in the IMPL index
+- create or update the replacement root IMPL family or active diff
+- prevent the old packet from remaining an active execution source
+- record the routing in the campaign or review artifact that exposed the issue
+
+This classification is appropriate when executing the packet directly would
+produce a local fix while leaving the real architectural or product problem
+unclosed.
+
 ## 5. Test Output Contract
 
 Expected output:
@@ -237,6 +297,35 @@ Expected output:
 - packet-specific regression checks clearly identified
 - constructibility judgment made explicit when relevant
 - failure classification when the campaign does not pass
+- blocker ledger for `PARTIAL`, `FAIL`, or accepted-with-constraints results
+- environment helper reference when a live setup is required
+- campaign index update when the campaign is created, accepted, partial,
+  deferred, or linked to a review hold
+
+## 5.1 Environment Startup Helpers
+
+A project keeps a reusable `TEST-ENVIRONMENT-STARTUP.md` helper near its
+campaign documents. The helper is installed in every adopted project as a
+standing reference.
+
+Use the helper when campaigns need live environment setup, reset, health check,
+inspection, or shutdown sequence. If the project has no live or integration
+environment yet, record that constraint in the helper rather than deleting the
+file.
+
+The helper should record:
+
+- runtime assumptions
+- clean-state reset
+- startup command or manual startup rule
+- preflight health checks
+- primary acceptance surface
+- inspection surfaces such as logs, metrics, state stores, or screenshots
+- shutdown rule
+- known environment behaviors and how to classify them
+
+The helper is not evidence. A campaign must still record what was actually
+executed and observed.
 
 ## 6. Project-Specific Extension Point
 

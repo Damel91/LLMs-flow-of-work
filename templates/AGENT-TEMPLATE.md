@@ -7,105 +7,79 @@ Replace every `[placeholder]` before use.
 
 ---
 
-## 1. Initialization Check
+## 1. Runtime Boot
 
-Before normal work, verify that the project is initialized.
+Before normal work, read:
 
-Check for:
+1. `authorities/PROJECT-OVERLAY.md`
+2. `CODE-WORKFLOW-CONTRACT.md`
 
-- `CODE-WORKFLOW-CONTRACT.md`
-- `authorities/PROJECT-OVERLAY.md`
-- `authorities/flow-of-work-contract/00-INDEX.md`
+From the overlay, use:
 
-Then read `authorities/PROJECT-OVERLAY.md` sec. 1, sec. 2, and sec. 10.
-Use the document map to resolve installed locations before checking
-location-adaptable files.
+- sec. 1-3 for project identity, adoption mode, language, and scope
+- overlay sec. 8 for manual-bootstrap state
+- overlay sec. 9 for code-bootstrap state
+- sec. 10 for installed document locations
+- sec. 11 for available `flowctl.sh` commands
 
-Resolve at least:
-
-- `TRACEABILITY_MATRIX.md`
-- `IMPL-INDEX.md`
-- `REQUIREMENTS_DIFF_INDEX.md`
-- the installed campaigns location
-
-If any required file is missing, or if the project name is still
-`[Project Name]`, or if a resolved required control-plane file is missing, the
-project is not initialized.
-
-If the project is not initialized:
-
-- stop normal runtime work
-- do not recreate control-plane files from memory
-- state that this entrypoint is runtime-first, not adoption-first
-- route the user to the framework repo:
-  - `STARTER.md` for guided adoption
-  - `STARTER.md` in `code_first` mode if the project starts from existing code
+If `PROJECT-OVERLAY.md`, `CODE-WORKFLOW-CONTRACT.md`, or the contract index at
+`authorities/flow-of-work-contract/00-INDEX.md` is missing, stop normal runtime
+work. Do not recreate control-plane files from memory; route the user to the
+framework `STARTER.md`.
 
 ---
 
-## 2. Manual Bootstrap Handoff
+## 2. Bootstrap Routing
 
-Before code bootstrap or the normal read sequence, inspect overlay sec. 8.
+Inspect overlay sec. 8 before overlay sec. 9.
 
 Run `authorities/manual/MANUAL-BOOTSTRAP.md` if:
 
 - `manual bootstrap status` is `pending` or `in-progress`
 
-If so:
-
-- stop the normal read sequence
-- execute `authorities/manual/MANUAL-BOOTSTRAP.md` as the first operational task
-- use the overlay as the activation source of truth
-
-Otherwise continue.
-
----
-
-## 3. Code Bootstrap Handoff
-
-Before the normal read sequence, inspect overlay sec. 9.
+If manual bootstrap runs, stop normal work until it returns control. Then reload
+the overlay before checking code-bootstrap state.
 
 Run `CODE-BOOTSTRAP.md` if both are true:
 
 - `code bootstrap mode` is not `not_required`
 - `code bootstrap status` is `pending` or `in-progress`
 
-If so:
-
-- stop the normal read sequence
-- execute `CODE-BOOTSTRAP.md` as the first operational task
-- use the overlay as the activation source of truth
-
-Otherwise continue.
+If code bootstrap runs, stop normal work until it returns control. Use the
+overlay as the activation source of truth for both bootstrap paths.
 
 ---
 
-## 4. Read First
+## 3. Operational Orientation
 
-Read in this order:
+Use overlay sec. 11 tooling instead of duplicating navigation logic here.
 
-1. `authorities/PROJECT-OVERLAY.md`
-2. `authorities/flow-of-work-contract/00-INDEX.md`
-3. continue through the contract set in the order declared by `00-INDEX.md`
-4. `CODE-WORKFLOW-CONTRACT.md`
-5. the installed `TRACEABILITY_MATRIX.md` location declared by the overlay
-6. the installed `IMPL-INDEX.md` location declared by the overlay
-7. the installed `REQUIREMENTS_DIFF_INDEX.md` location declared by the overlay
-8. active `REQUIREMENTS_DIFF_*` named by the diff index, if present
-9. active `IMPL-*` in the installed impl location, if present
-10. `TestCampaign-*` linked by the active IMPL or active diff, if present
+Recommended flow:
 
-Use the overlay and installed structure as the source of truth for adapted
-locations.
+1. Use the runtime state command when current mode or active state is
+   unclear.
+2. Use the route command when the next runtime path is unclear.
+3. Use the active diff command before implementation planning when the active
+   `REQUIREMENTS_DIFF_INDEX.md` target is unclear.
+4. Use the location command or overlay sec. 10 to resolve installed document
+   locations.
+5. Read only the governing documents needed for the requested work:
+   - the contract index and relevant contracts
+   - `CODE-WORKFLOW-CONTRACT.md` for code, prompt, parser, routing, graph,
+     workspace, apply, regression, or commit work
+   - the active requirement diff, if one exists
+   - overlapping review holds, active IMPL packets, and linked campaigns when
+     they affect the request
+6. Before handoff, use the handoff command or the relevant checks declared in
+   overlay sec. 11.
 
 ---
 
-## 5. Hard Stops
+## 4. Hard Stops
 
 - Docs govern product intent and workflow.
 - No non-trivial work without an active `IMPL-*`.
-- Code, prompt, parser, routing, and graph changes follow
-  `CODE-WORKFLOW-CONTRACT.md`.
+- Do not infer the active diff from filenames or recency; use the index/tooling.
 - `TRACEABILITY_MATRIX.md` is factual state only. Update it only from evidence.
 - If behavior is not defined, stop and ask instead of inventing it.
 - For prompts, routing, clarification, planning, or graph transitions, inspect

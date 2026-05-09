@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Run './tools/flowctl.sh --help' before using this tool.
+# Run 'bash tools/flowctl.sh --help' before using this tool.
 #
 # flowctl — deterministic flow-of-work governance CLI
 # Validates document structure and gate records.
@@ -45,12 +45,26 @@ resolve_dir() {
   ( cd "$p" 2>/dev/null && pwd ) || printf '%s' "$p"
 }
 
+resolve_target_dir() {
+  local p="$1"
+  [[ -d "$p" ]] || return 1
+  resolve_dir "$p"
+}
+
 resolve_file_path() {
   local p="$1"
   local d b
   d=$(dirname "$p")
   b=$(basename "$p")
   printf '%s/%s' "$(resolve_dir "$d")" "$b"
+}
+
+resolve_workspace_file() {
+  local root="$1" p="$2"
+  case "$p" in
+    /*) printf '%s' "$p" ;;
+    *)  printf '%s/%s' "$root" "$p" ;;
+  esac
 }
 
 # ── string helpers ─────────────────────────────────────────────────────────────
@@ -236,15 +250,40 @@ find_overlay_diff_index() {
   done < <(parse_overlay_map "$map_section")
 }
 
+overlay_location() {
+  local root="$1" row_name="$2"
+  local overlay="$root/authorities/PROJECT-OVERLAY.md"
+  [[ ! -f "$overlay" ]] && return
+  local text map_section nrow
+  text=$(cat "$overlay")
+  map_section=$(extract_section "$text" "## 10. Document Location Map")
+  [[ -z "$map_section" ]] && return
+  nrow=$(normalize_label "$row_name")
+  while IFS=$'\t' read -r dt dl al; do
+    [[ "$(normalize_label "$dt")" == "$nrow" ]] || continue
+    resolve_declared_path "$root" "$dl" "$al" "$row_name"
+    return
+  done < <(parse_overlay_map "$map_section")
+}
+
+diff_dir_for_index() {
+  local root="$1" index_path="$2"
+  local diff_dir
+  diff_dir=$(overlay_location "$root" "Requirement diffs" 2>/dev/null || printf '')
+  if [[ -n "$diff_dir" ]]; then
+    printf '%s' "${diff_dir%/}"
+  else
+    dirname "$index_path"
+  fi
+}
+
 find_diff_index() {
   local root="$1"
   local overlay_path
   overlay_path=$(find_overlay_diff_index "$root" 2>/dev/null || printf '')
   local c
   for c in "$overlay_path" \
-            "$root/authorities/diffs/REQUIREMENTS_DIFF_INDEX.md" \
-            "$root/docs/REQUIREMENTS_DIFF_INDEX.md" \
-            "$root/REQUIREMENTS_DIFF_INDEX.md"; do
+            "$root/authorities/diffs/REQUIREMENTS_DIFF_INDEX.md"; do
     [[ -n "$c" && -f "$c" ]] && printf '%s' "$c" && return
   done
 }
@@ -268,7 +307,6 @@ active_diff_info() {
     done < <(table_rows "$section" | tail -n +2)
   fi
   [[ -z "$active_diff" ]] && active_diff=$(clean_cell "$(get_strong_field "$text" "current active diff")")
-  [[ -z "$active_state" ]] && active_state=$(clean_cell "$(get_strong_field "$text" "current implementation family")")
   printf 'active_diff=%s\nactive_state=%s\n' "$active_diff" "$active_state"
 }
 
@@ -307,8 +345,6 @@ valid_values_for() {
       printf 'local_project filesystem_repo git_repo url web_research archive pasted_code none unknown' ;;
     "code bootstrap requested output")
       printf 'not_required bootstrap_docs_only understanding_only integration_recommendation new_impl_required implementation_candidate unknown' ;;
-    "procedure completed")
-      printf 'yes no in-progress' ;;
   esac
 }
 
@@ -452,12 +488,16 @@ check_framework_mode() {
   local f
   for f in \
     "README.md" "STARTER.md" "CODE-BOOTSTRAP.md" "CODE-WORKFLOW-CONTRACT.md" "WHY.md" \
-    "tools/CONTROL-PLANE-LINT-SPEC.md" "tools/flowctl.sh" \
+    "tools/CONTROL-PLANE-LINT-SPEC.md" "tools/flowctl.sh" "tools/flowctl.py" \
+    "tools/control_plane_lint.py" \
     "templates/AGENT-TEMPLATE.md" "templates/PROJECT-OVERLAY.md" \
     "templates/IMPL-INDEX.md" "templates/TRACEABILITY_MATRIX.md" \
     "templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md" \
     "templates/REQUIREMENTS-DIFF-TEMPLATE.md" \
-    "templates/IMPL-TEMPLATE.md" "templates/TEST-CAMPAIGN-TEMPLATE.md" \
+    "templates/IMPL-TEMPLATE.md" "templates/REVIEW-INDEX-TEMPLATE.md" \
+    "templates/REVIEW-TEMPLATE.md" "templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md" \
+    "templates/TEST-CAMPAIGN-TEMPLATE.md" \
+    "templates/TEST-ENVIRONMENT-STARTUP-TEMPLATE.md" \
     "manual/MANUAL-BOOTSTRAP.md" "manual/REACHING-THE-LLMS.md" \
     "flow-of-work-contract/00-INDEX.md" \
     "flow-of-work-contract/01-LLM-SESSION-CONTRACT.md" \
@@ -478,7 +518,10 @@ check_framework_mode() {
     "templates/IMPL-INDEX.md" "templates/TRACEABILITY_MATRIX.md"
     "templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md"
     "templates/REQUIREMENTS-DIFF-TEMPLATE.md"
-    "templates/IMPL-TEMPLATE.md" "templates/TEST-CAMPAIGN-TEMPLATE.md"
+    "templates/IMPL-TEMPLATE.md" "templates/REVIEW-INDEX-TEMPLATE.md"
+    "templates/REVIEW-TEMPLATE.md" "templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md"
+    "templates/TEST-CAMPAIGN-TEMPLATE.md"
+    "templates/TEST-ENVIRONMENT-STARTUP-TEMPLATE.md"
     "manual/MANUAL-BOOTSTRAP.md" "manual/REACHING-THE-LLMS.md"
     "flow-of-work-contract/00-INDEX.md"
     "flow-of-work-contract/01-LLM-SESSION-CONTRACT.md"
@@ -529,7 +572,7 @@ check_framework_mode() {
       "AGENT-TEMPLATE.md does not reference CODE-WORKFLOW-CONTRACT.md"
   printf '%s\n' "$agent_template" | grep -qF "REQUIREMENTS_DIFF_INDEX.md" || \
     emit_error "agent-diff-index" \
-      "AGENT-TEMPLATE.md does not read REQUIREMENTS_DIFF_INDEX.md before the active diff"
+      "AGENT-TEMPLATE.md does not reference active diff selection through REQUIREMENTS_DIFF_INDEX.md"
   printf '%s\n' "$agent_template" | grep -qF "authorities/diffs/REQUIREMENTS_DIFF_INDEX.md" && \
     emit_error "agent-hardcoded-diff-index" \
       "AGENT-TEMPLATE.md hardcodes the diff index path instead of resolving it from the overlay"
@@ -540,7 +583,8 @@ check_framework_mode() {
   for heading in \
     "## 8. Manual Onboarding State" \
     "## 9. Code Bootstrap State" \
-    "## 10. Document Location Map"
+    "## 10. Document Location Map" \
+    "## 11. Operational Tooling"
   do
     printf '%s\n' "$overlay_template" | grep -qF "$heading" || \
       emit_error "overlay-missing-section" "PROJECT-OVERLAY.md missing section: $heading"
@@ -554,6 +598,33 @@ check_framework_mode() {
     printf '%s\n' "$overlay_template" | grep -qF "**${field}:**" || \
       emit_error "overlay-missing-field" "PROJECT-OVERLAY.md missing field template: $field"
   done
+  local tooling_spec required command
+  for tooling_spec in \
+    "runtime state command:state" \
+    "route command:route" \
+    "location command:where" \
+    "governance status command:status" \
+    "active diff command:active-diff" \
+    "workspace doctor command:doctor" \
+    "handoff command:handoff" \
+    "impl check command:check impl" \
+    "traceability check command:check matrix"
+  do
+    field="${tooling_spec%%:*}"
+    required="${tooling_spec#*:}"
+    command=$(clean_cell "$(get_strong_field "$overlay_template" "$field")")
+    if [[ -z "$command" ]]; then
+      emit_error "overlay-missing-field" \
+        "PROJECT-OVERLAY.md missing operational tooling field template: $field"
+      continue
+    fi
+    [[ "$command" != *"flowctl.sh"* ]] && \
+      emit_error "operational-tool-command-invalid" \
+        "Operational tooling command '$field' must use flowctl.sh"
+    [[ "$command" != *"$required"* ]] && \
+      emit_error "operational-tool-command-invalid" \
+        "Operational tooling command '$field' must contain '$required'"
+  done
 
   local starter
   starter=$(cat "$root/STARTER.md" 2>/dev/null || printf '')
@@ -563,6 +634,12 @@ check_framework_mode() {
   printf '%s\n' "$starter" | grep -qF "CODE-WORKFLOW-CONTRACT.md" || \
     emit_error "starter-install-set-code-workflow" \
       "STARTER.md required install set does not include CODE-WORKFLOW-CONTRACT.md"
+  printf '%s\n' "$starter" | grep -qF "tools/flowctl.sh" || \
+    emit_error "starter-install-set-flowctl-sh" \
+      "STARTER.md required install set does not include tools/flowctl.sh"
+  printf '%s\n' "$starter" | grep -qF "chmod +x tools/flowctl.sh" || \
+    emit_error "starter-flowctl-chmod" \
+      "STARTER.md does not activate tools/flowctl.sh with chmod +x during filesystem adoption"
   printf '%s\n' "$starter" | grep -qF "REQUIREMENTS_DIFF_INDEX.md" || \
     emit_error "starter-install-set-diff-index" \
       "STARTER.md required install set does not include REQUIREMENTS_DIFF_INDEX.md"
@@ -571,7 +648,10 @@ check_framework_mode() {
       "STARTER.md required install set does not include REQUIREMENTS-DIFF-INDEX-TEMPLATE.md"
   local tname
   for tname in \
-    "REQUIREMENTS-DIFF-TEMPLATE.md" "IMPL-TEMPLATE.md" "TEST-CAMPAIGN-TEMPLATE.md"
+    "REQUIREMENTS-DIFF-TEMPLATE.md" "IMPL-TEMPLATE.md" \
+    "REVIEW-INDEX-TEMPLATE.md" "REVIEW-TEMPLATE.md" \
+    "TEST-CAMPAIGN-INDEX-TEMPLATE.md" "TEST-CAMPAIGN-TEMPLATE.md" \
+    "TEST-ENVIRONMENT-STARTUP-TEMPLATE.md"
   do
     printf '%s\n' "$starter" | grep -qF "$tname" || \
       emit_error "starter-install-set-category-template" \
@@ -596,7 +676,10 @@ check_framework_mode() {
     emit_error "structure-diff-index" \
       "05-PROJECT-STRUCTURE.md does not declare REQUIREMENTS_DIFF_INDEX.md"
   for tname in \
-    "REQUIREMENTS-DIFF-TEMPLATE.md" "IMPL-TEMPLATE.md" "TEST-CAMPAIGN-TEMPLATE.md"
+    "REQUIREMENTS-DIFF-TEMPLATE.md" "IMPL-TEMPLATE.md" \
+    "REVIEW-INDEX.md" "REVIEW-TEMPLATE.md" \
+    "TEST-CAMPAIGN-INDEX.md" "TEST-CAMPAIGN-TEMPLATE.md" \
+    "TEST-ENVIRONMENT-STARTUP.md"
   do
     printf '%s\n' "$structure_doc" | grep -qF "$tname" || \
       emit_error "structure-category-template" \
@@ -624,8 +707,14 @@ check_workspace_mode() {
   local relpath
   for relpath in \
     "AGENT.md" "CODE-BOOTSTRAP.md" "CODE-WORKFLOW-CONTRACT.md" \
+    "tools/flowctl.sh" \
     "authorities/PROJECT-OVERLAY.md" "authorities/TRACEABILITY_MATRIX.md" \
     "authorities/flow-of-work-contract/00-INDEX.md" \
+    "authorities/flow-of-work-contract/01-LLM-SESSION-CONTRACT.md" \
+    "authorities/flow-of-work-contract/02-DOCSET-GOVERNANCE-CONTRACT.md" \
+    "authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md" \
+    "authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md" \
+    "authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md" \
     "authorities/manual/MANUAL-BOOTSTRAP.md" \
     "authorities/manual/REACHING-THE-LLMS.md"
   do
@@ -659,14 +748,41 @@ check_workspace_mode() {
     "adoption mode" "adoption procedure" \
     "manual bootstrap status" "manual readiness level" "manual override acknowledged" \
     "code bootstrap mode" "code bootstrap status" \
-    "code bootstrap source type" "code bootstrap requested output" \
-    "procedure completed"
+    "code bootstrap source type" "code bootstrap requested output"
   do
     check_allowed_value "$overlay_text" "$key"
   done
 
+  local tooling_spec key required command
+  for tooling_spec in \
+    "runtime state command:state" \
+    "route command:route" \
+    "location command:where" \
+    "governance status command:status" \
+    "active diff command:active-diff" \
+    "workspace doctor command:doctor" \
+    "handoff command:handoff" \
+    "impl check command:check impl" \
+    "traceability check command:check matrix"
+  do
+    key="${tooling_spec%%:*}"
+    required="${tooling_spec#*:}"
+    command=$(clean_cell "$(get_strong_field "$overlay_text" "$key")")
+    if [[ -z "$command" ]]; then
+      emit_error "operational-tool-command-missing" \
+        "PROJECT-OVERLAY.md missing operational tooling command: $key"
+      continue
+    fi
+    [[ "$command" != *"flowctl.sh"* ]] && \
+      emit_error "operational-tool-command-invalid" \
+        "Operational tooling command '$key' must use flowctl.sh"
+    [[ "$command" != *"$required"* ]] && \
+      emit_error "operational-tool-command-invalid" \
+        "Operational tooling command '$key' must contain '$required'"
+  done
+
   local manual_status manual_level manual_override adoption_mode
-  local code_mode code_status code_source code_output procedure_completed
+  local code_mode code_status code_source code_output
   manual_status=$(clean_cell "$(get_strong_field "$overlay_text" "manual bootstrap status")")
   manual_level=$(clean_cell "$(get_strong_field "$overlay_text" "manual readiness level")")
   manual_override=$(clean_cell "$(get_strong_field "$overlay_text" "manual override acknowledged")")
@@ -675,7 +791,6 @@ check_workspace_mode() {
   code_status=$(clean_cell "$(get_strong_field "$overlay_text" "code bootstrap status")")
   code_source=$(clean_cell "$(get_strong_field "$overlay_text" "code bootstrap source type")")
   code_output=$(clean_cell "$(get_strong_field "$overlay_text" "code bootstrap requested output")")
-  procedure_completed=$(clean_cell "$(get_strong_field "$overlay_text" "procedure completed")")
 
   [[ "$manual_status" == "skipped_by_user" && "$manual_override" != "yes" ]] && \
     emit_error "manual-skip-override" \
@@ -715,20 +830,6 @@ check_workspace_mode() {
      "$code_status" == "not_required" ]] && \
     emit_ok "code_first project appears to have completed or reset its code bootstrap state"
 
-  if [[ "$procedure_completed" == "yes" ]]; then
-    for key in \
-      "adoption mode" "adoption procedure" \
-      "manual bootstrap status" "manual readiness level" "manual override acknowledged" \
-      "code bootstrap mode" "code bootstrap status"
-    do
-      local val
-      val=$(clean_cell "$(get_strong_field "$overlay_text" "$key")")
-      [[ "$val" == "unknown" ]] && \
-        emit_error "unknown-post-adoption" \
-          "Overlay field '$key' is still unknown after procedure completed = yes"
-    done
-  fi
-
   local map_section
   map_section=$(extract_section "$overlay_text" "## 10. Document Location Map")
   if [[ -z "$map_section" ]]; then
@@ -740,7 +841,9 @@ check_workspace_mode() {
   local row_name
   for row_name in \
     "Requirements baseline" "Interactions" "Requirement diffs" "Requirement diff index" \
-    "Implementation packets" "Implementation packet index" "Test campaigns" "Traceability matrix"
+    "Implementation packets" "Implementation packet index" \
+    "Review records" "Review index" "Test campaigns" "Test campaign index" \
+    "Test environment startup helper" "Traceability matrix"
   do
     local found=0
     local nrow
@@ -751,6 +854,16 @@ check_workspace_mode() {
     [[ "$found" -eq 0 ]] && \
       emit_error "overlay-map-row-missing" "Document location map missing row: $row_name"
   done
+
+  while IFS=$'\t' read -r dt _ al; do
+    [[ "$(normalize_label "$dt")" == "traceability matrix" ]] || continue
+    local actual
+    actual=$(clean_cell "$al")
+    [[ "$(printf "%s" "$actual" | tr '[:upper:]' '[:lower:]')" != "default" ]] && \
+      emit_error "traceability-location-not-fixed" \
+        "Traceability matrix must remain at authorities/TRACEABILITY_MATRIX.md with Actual location = default"
+    break
+  done < <(parse_overlay_map "$map_section")
 
   while IFS=$'\t' read -r dt dl al; do
     local path
@@ -764,6 +877,7 @@ check_workspace_mode() {
   for required_template in \
     "Requirement diffs:REQUIREMENTS-DIFF-TEMPLATE.md" \
     "Implementation packets:IMPL-TEMPLATE.md" \
+    "Review records:REVIEW-TEMPLATE.md" \
     "Test campaigns:TEST-CAMPAIGN-TEMPLATE.md"
   do
     local rrow="${required_template%%:*}" tfile="${required_template##*:}"
@@ -988,7 +1102,7 @@ check_matrix_file() {
 cmd_doctor() {
   local target="${1:-.}" mode="${2:-auto}"
   local root
-  root=$(resolve_dir "$target") || { printf 'ERROR: target path does not exist: %s\n' "$target"; exit 1; }
+  root=$(resolve_target_dir "$target") || { printf 'ERROR: target path does not exist: %s\n' "$target"; exit 1; }
 
   [[ "$mode" == "auto" ]] && mode=$(detect_mode "$root")
 
@@ -1005,7 +1119,7 @@ cmd_doctor() {
 cmd_status() {
   local target="${1:-.}"
   local root
-  root=$(resolve_dir "$target") || { printf 'ERROR: target path does not exist: %s\n' "$target"; exit 1; }
+  root=$(resolve_target_dir "$target") || { printf 'ERROR: target path does not exist: %s\n' "$target"; exit 1; }
   local mode
   mode=$(detect_mode "$root")
 
@@ -1047,10 +1161,85 @@ cmd_status() {
   [[ "$mode" != "unknown" ]]
 }
 
+cmd_state() {
+  local target="${1:-.}"
+  local root
+  root=$(resolve_target_dir "$target") || { printf 'ERROR: target path does not exist: %s\n' "$target"; exit 1; }
+  local mode
+  mode=$(detect_mode "$root")
+
+  printf 'Mode: %s\n' "$mode"
+  printf 'Target: %s\n' "$root"
+
+  if [[ "$mode" != "workspace" ]]; then
+    printf 'ERROR: state requires an adopted workspace target\n'
+    return 1
+  fi
+
+  local overlay="$root/authorities/PROJECT-OVERLAY.md"
+  if [[ ! -f "$overlay" ]]; then
+    printf 'ERROR: PROJECT-OVERLAY.md not found under %s\n' "$root"
+    return 1
+  fi
+
+  local overlay_text
+  overlay_text=$(cat "$overlay")
+  local manual_status manual_level code_mode code_status code_source code_output
+  manual_status=$(clean_cell "$(get_strong_field "$overlay_text" "manual bootstrap status")")
+  manual_level=$(clean_cell "$(get_strong_field "$overlay_text" "manual readiness level")")
+  code_mode=$(clean_cell "$(get_strong_field "$overlay_text" "code bootstrap mode")")
+  code_status=$(clean_cell "$(get_strong_field "$overlay_text" "code bootstrap status")")
+  code_source=$(clean_cell "$(get_strong_field "$overlay_text" "code bootstrap source type")")
+  code_output=$(clean_cell "$(get_strong_field "$overlay_text" "code bootstrap requested output")")
+
+  printf 'Manual bootstrap status: %s\n' "${manual_status:-unknown}"
+  printf 'Manual readiness level: %s\n' "${manual_level:-unknown}"
+  printf 'Code bootstrap mode: %s\n' "${code_mode:-unknown}"
+  printf 'Code bootstrap status: %s\n' "${code_status:-unknown}"
+  printf 'Code bootstrap source type: %s\n' "${code_source:-unknown}"
+  printf 'Code bootstrap requested output: %s\n' "${code_output:-unknown}"
+
+  local index_path
+  index_path=$(find_diff_index "$root" 2>/dev/null || printf '')
+  if [[ -n "$index_path" ]]; then
+    local active_diff="" active_state=""
+    while IFS= read -r line; do
+      case "$line" in
+        active_diff=*)  active_diff="${line#active_diff=}" ;;
+        active_state=*) active_state="${line#active_state=}" ;;
+      esac
+    done < <(active_diff_info "$index_path")
+    printf 'Requirement diff index: %s\n' "$index_path"
+    printf 'Active diff: %s\n' "${active_diff:-unknown}"
+    printf 'Active state: %s\n' "${active_state:-unknown}"
+    if [[ -n "$active_diff" && "$(printf '%s' "$active_diff" | tr '[:upper:]' '[:lower:]')" != "none" ]]; then
+      local diff_dir resolved
+      diff_dir=$(diff_dir_for_index "$root" "$index_path")
+      case "$active_diff" in
+        /*) resolved="$active_diff" ;;
+        *)  resolved="$diff_dir/$active_diff" ;;
+      esac
+      printf 'Active diff resolved path: %s\n' "$resolved"
+      [[ -f "$resolved" ]] && printf 'Active diff exists: yes\n' || printf 'Active diff exists: no\n'
+    fi
+  else
+    printf 'Requirement diff index: not found\n'
+  fi
+
+  printf 'Route: '
+  if [[ "$manual_status" == "pending" || "$manual_status" == "in-progress" ]]; then
+    printf 'manual-bootstrap\n'
+  elif [[ "$code_mode" != "not_required" && ( "$code_status" == "pending" || "$code_status" == "in-progress" ) ]]; then
+    printf 'code-bootstrap\n'
+  else
+    printf 'normal-work\n'
+  fi
+}
+
 cmd_active_diff_show() {
   local target="${1:-.}"
   local root
-  root=$(resolve_dir "$target") || { printf 'ERROR: target path does not exist: %s\n' "$target"; exit 1; }
+  root=$(resolve_target_dir "$target") || { printf 'ERROR: target path does not exist: %s\n' "$target"; exit 1; }
 
   local index_path
   index_path=$(find_diff_index "$root" 2>/dev/null || printf '')
@@ -1077,13 +1266,89 @@ cmd_active_diff_show() {
   printf 'Active state: %s\n' "${active_state:-unknown}"
 
   if [[ -n "$active_diff" && "$(printf '%s' "$active_diff" | tr '[:upper:]' '[:lower:]')" != "none" ]]; then
-    local resolved
+    local resolved diff_dir
+    diff_dir=$(diff_dir_for_index "$root" "$index_path")
     case "$active_diff" in
       /*) resolved="$active_diff" ;;
-      *)  resolved="$(dirname "$index_path")/$active_diff" ;;
+      *)  resolved="$diff_dir/$active_diff" ;;
     esac
     printf 'Resolved path: %s\n' "$resolved"
     [[ -f "$resolved" ]] && printf 'Exists: yes\n' || printf 'Exists: no\n'
+  fi
+}
+
+where_row_for_alias() {
+  local alias
+  alias=$(normalize_label "$1")
+  case "$alias" in
+    baseline|"requirements baseline") printf 'Requirements baseline' ;;
+    interactions) printf 'Interactions' ;;
+    diffs|"requirement diffs") printf 'Requirement diffs' ;;
+    diff-index|"requirement diff index") printf 'Requirement diff index' ;;
+    impl|"implementation packets") printf 'Implementation packets' ;;
+    impl-index|"implementation packet index") printf 'Implementation packet index' ;;
+    reviews|"review records") printf 'Review records' ;;
+    review-index|"review index") printf 'Review index' ;;
+    campaigns|"test campaigns") printf 'Test campaigns' ;;
+    campaign-index|"test campaign index") printf 'Test campaign index' ;;
+    startup-helper|"test environment startup helper") printf 'Test environment startup helper' ;;
+    traceability|"traceability matrix") printf 'Traceability matrix' ;;
+    *) printf '' ;;
+  esac
+}
+
+cmd_where() {
+  local target="${1:-.}" alias="${2:-}"
+  local root
+  root=$(resolve_target_dir "$target") || { printf 'ERROR: target path does not exist: %s\n' "$target"; exit 1; }
+  [[ "$(detect_mode "$root")" == "workspace" ]] || {
+    printf 'ERROR: where requires an adopted workspace target\n'
+    return 1
+  }
+  if [[ -z "$alias" ]]; then
+    printf 'Known keys: baseline, interactions, diffs, diff-index, impl, impl-index, reviews, review-index, campaigns, campaign-index, startup-helper, traceability\n'
+    return 0
+  fi
+  local row path
+  row=$(where_row_for_alias "$alias")
+  if [[ -z "$row" ]]; then
+    printf 'ERROR: unknown location key: %s\n' "$alias"
+    return 1
+  fi
+  path=$(overlay_location "$root" "$row" 2>/dev/null || printf '')
+  if [[ -z "$path" ]]; then
+    printf 'ERROR: could not resolve overlay location for: %s\n' "$row"
+    return 1
+  fi
+  printf '%s\n' "$path"
+}
+
+cmd_route() {
+  local target="${1:-.}"
+  local root
+  root=$(resolve_target_dir "$target") || { printf 'ERROR: target path does not exist: %s\n' "$target"; exit 1; }
+  [[ "$(detect_mode "$root")" == "workspace" ]] || {
+    printf 'ERROR: route requires an adopted workspace target\n'
+    return 1
+  }
+  local overlay="$root/authorities/PROJECT-OVERLAY.md"
+  [[ -f "$overlay" ]] || { printf 'ERROR: PROJECT-OVERLAY.md not found under %s\n' "$root"; return 1; }
+  local overlay_text manual_status code_mode code_status
+  overlay_text=$(cat "$overlay")
+  manual_status=$(clean_cell "$(get_strong_field "$overlay_text" "manual bootstrap status")")
+  code_mode=$(clean_cell "$(get_strong_field "$overlay_text" "code bootstrap mode")")
+  code_status=$(clean_cell "$(get_strong_field "$overlay_text" "code bootstrap status")")
+
+  if [[ "$manual_status" == "pending" || "$manual_status" == "in-progress" ]]; then
+    printf 'Route: manual-bootstrap\n'
+    printf 'Reason: manual bootstrap status = %s\n' "$manual_status"
+    printf 'Document: authorities/manual/MANUAL-BOOTSTRAP.md\n'
+  elif [[ "$code_mode" != "not_required" && ( "$code_status" == "pending" || "$code_status" == "in-progress" ) ]]; then
+    printf 'Route: code-bootstrap\n'
+    printf 'Reason: code bootstrap mode = %s, status = %s\n' "$code_mode" "$code_status"
+    printf 'Document: CODE-BOOTSTRAP.md\n'
+  else
+    printf 'Route: normal-work\n'
   fi
 }
 
@@ -1105,6 +1370,54 @@ cmd_check_matrix() {
   [[ "$ERR_COUNT" -eq 0 ]]
 }
 
+cmd_handoff() {
+  local target="." matrix_path="" impl_paths=()
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --impl)
+        shift
+        [[ $# -eq 0 ]] && { printf 'ERROR: --impl requires a path\n'; return 1; }
+        impl_paths+=("$1")
+        shift
+        ;;
+      --impl=*)
+        impl_paths+=("${1#--impl=}")
+        shift
+        ;;
+      --matrix)
+        shift
+        [[ $# -eq 0 ]] && { printf 'ERROR: --matrix requires a path\n'; return 1; }
+        matrix_path="$1"
+        shift
+        ;;
+      --matrix=*)
+        matrix_path="${1#--matrix=}"
+        shift
+        ;;
+      *)
+        target="$1"
+        shift
+        ;;
+    esac
+  done
+
+  local root
+  root=$(resolve_target_dir "$target") || { printf 'ERROR: target path does not exist: %s\n' "$target"; exit 1; }
+  check_workspace_mode "$root"
+
+  local impl_path
+  for impl_path in "${impl_paths[@]}"; do
+    check_impl_file "$(resolve_workspace_file "$root" "$impl_path")"
+  done
+
+  if [[ -n "$matrix_path" ]]; then
+    check_matrix_file "$(resolve_workspace_file "$root" "$matrix_path")"
+  fi
+
+  print_issues "handoff" "$root"
+  [[ "$ERR_COUNT" -eq 0 ]]
+}
+
 # ── help ───────────────────────────────────────────────────────────────────────
 
 usage() {
@@ -1112,7 +1425,7 @@ usage() {
 flowctl — deterministic flow-of-work governance CLI
 
 USAGE
-  ./tools/flowctl.sh <command> [options]
+  bash tools/flowctl.sh <command> [options]
 
 COMMANDS
   doctor [target] [--mode auto|framework|workspace]
@@ -1124,8 +1437,20 @@ COMMANDS
       Show governance status: mode, target, contract states (framework)
       or active diff info (workspace).
 
+  state [target]
+      Show workspace runtime state: bootstrap flags, active diff, and route.
+
+  route [target]
+      Show the deterministic next route from overlay sec. 8 and sec. 9.
+
+  where [target] <key>
+      Resolve a document location from overlay sec. 10.
+
   active-diff show [target]
       Show the active requirement diff from REQUIREMENTS_DIFF_INDEX.md.
+
+  handoff [target] [--impl path] [--matrix path]
+      Run workspace handoff checks, optionally including an IMPL or matrix.
 
   check impl <path>
       Validate the behavioral definition gate of an IMPL packet.
@@ -1137,16 +1462,22 @@ OPTIONS
   --help, -h    Show this help message.
 
 EXAMPLES
-  ./tools/flowctl.sh doctor .
-  ./tools/flowctl.sh doctor . --mode workspace
-  ./tools/flowctl.sh status .
-  ./tools/flowctl.sh active-diff show .
-  ./tools/flowctl.sh check impl authorities/impl/IMPL-1.md
-  ./tools/flowctl.sh check matrix authorities/TRACEABILITY_MATRIX.md
+  bash tools/flowctl.sh doctor .
+  bash tools/flowctl.sh doctor . --mode workspace
+  bash tools/flowctl.sh status .
+  bash tools/flowctl.sh state /path/to/adopted/project
+  bash tools/flowctl.sh route /path/to/adopted/project
+  bash tools/flowctl.sh where /path/to/adopted/project diff-index
+  bash tools/flowctl.sh active-diff show /path/to/adopted/project
+  bash tools/flowctl.sh handoff /path/to/adopted/project --impl authorities/impl/IMPL-1.md --matrix authorities/TRACEABILITY_MATRIX.md
+  bash tools/flowctl.sh check impl authorities/impl/IMPL-1.md
+  bash tools/flowctl.sh check matrix authorities/TRACEABILITY_MATRIX.md
 
 NOTES
+  STARTER.md activates this file with: chmod +x tools/flowctl.sh
   Requires bash and standard POSIX tools (awk, grep, sed).
   Works on macOS, Linux, and Windows via Git Bash.
+  The canonical invocation remains: bash tools/flowctl.sh ...
 EOF
 }
 
@@ -1162,7 +1493,10 @@ main() {
       local target="." mode="auto"
       while [[ $# -gt 0 ]]; do
         case "$1" in
-          --mode)   shift; mode="$1"; shift ;;
+          --mode)
+            shift
+            [[ $# -eq 0 ]] && { printf 'ERROR: --mode requires a value\n'; exit 1; }
+            mode="$1"; shift ;;
           --mode=*) mode="${1#--mode=}"; shift ;;
           *)        target="$1"; shift ;;
         esac
@@ -1172,10 +1506,27 @@ main() {
     status)
       shift; cmd_status "${1:-.}"
       ;;
+    state)
+      shift; cmd_state "${1:-.}"
+      ;;
+    route)
+      shift; cmd_route "${1:-.}"
+      ;;
+    where)
+      shift
+      case "$#" in
+        0) cmd_where "." "" ;;
+        1) cmd_where "." "$1" ;;
+        *) cmd_where "$1" "$2" ;;
+      esac
+      ;;
     active-diff)
       shift
       [[ "${1:-}" == "show" ]] && shift
       cmd_active_diff_show "${1:-.}"
+      ;;
+    handoff)
+      shift; cmd_handoff "$@"
       ;;
     check)
       shift

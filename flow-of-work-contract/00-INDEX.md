@@ -2,9 +2,9 @@
 doc_type: flow_of_work_contract_index
 scope: development_control
 applies_to: multi-platform
-version: 0.1
+version: 0.2
 status: working
-last_updated: 2026-04-25
+last_updated: 2026-05-09
 ---
 
 # Flow Of Work Contract Index
@@ -55,5 +55,8 @@ They do not replace:
 - `authorities/diffs/REQUIREMENTS_DIFF_INDEX.md` for selecting the active diff
 - `authorities/diffs/REQUIREMENTS_DIFF_*` for active scope evolution
 - `authorities/impl/IMPL-*` for bounded execution
+- `authorities/reviews/REVIEW-INDEX.md` and `REVIEW-*` for review holds
+- `authorities/campaigns/TEST-CAMPAIGN-INDEX.md` for campaign navigation
+- `authorities/campaigns/TEST-ENVIRONMENT-STARTUP.md` for reusable campaign startup procedure
 - `authorities/campaigns/TestCampaign-*` for evidence
 - `authorities/TRACEABILITY_MATRIX.md` for accepted factual state
