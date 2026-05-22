@@ -9,6 +9,7 @@ records. It does not call models, judge product merit, or accept work.
 from __future__ import annotations
 
 import argparse
+import filecmp
 import sys
 from pathlib import Path
 
@@ -550,6 +551,194 @@ def command_check_matrix(args: argparse.Namespace) -> int:
     return emit_issues(check_matrix_file(Path(args.path).resolve()))
 
 
+def check_diff_file(path: Path) -> LintResult:
+    result = LintResult("diff", path)
+    if not path.exists():
+        result.error("diff-missing", f"Requirements diff file does not exist: {path}")
+        return result
+
+    text = read_text(result, path)
+    for heading in (
+        "## 1. Purpose",
+        "## 2. Authority And Succession",
+        "## 3. Scope",
+        "## 4. Requirement Changes",
+        "## 5. Interaction And Sequence Impact",
+        "## 6. Concept Closure",
+        "## 7. Behavioral Definition",
+        "## 8. Propagation Impact",
+        "## 9. Acceptance Criteria",
+        "## 10. Open Questions",
+    ):
+        if not extract_section(text, heading):
+            result.error("diff-section-missing", f"Missing section: {heading}")
+
+    status = metadata_status(path).lower()
+    if "template" in status:
+        return result
+
+    open_questions = extract_section(text, "## 10. Open Questions")
+    for row in parse_markdown_table(open_questions)[1:]:
+        if len(row) < 3:
+            continue
+        question = clean_cell(row[0])
+        blocking = clean_cell(row[2]).lower()
+        if blocking in {"yes", "true", "blocking"}:
+            result.error(
+                "diff-blocking-open-question",
+                f"Blocking open question remains in diff: {question}",
+            )
+    return result
+
+
+def command_check_diff(args: argparse.Namespace) -> int:
+    return emit_issues(check_diff_file(Path(args.path).resolve()))
+
+
+def check_campaign_file(path: Path) -> LintResult:
+    result = LintResult("campaign", path)
+    if not path.exists():
+        result.error("campaign-missing", f"Test campaign file does not exist: {path}")
+        return result
+
+    text = read_text(result, path)
+    for heading in (
+        "## 2. Readiness And Constructibility",
+        "## 6. Test Matrix",
+        "## 7. Evidence Log",
+        "## 8. Failure Triage",
+        "## 8.1 Blocker Ledger",
+        "## 9. Result",
+        "## 10. Traceability Recommendation",
+        "## 11. Acceptance Record",
+    ):
+        if not extract_section(text, heading):
+            result.error("campaign-section-missing", f"Missing section: {heading}")
+
+    readiness_section = extract_section(text, "## 2. Readiness And Constructibility")
+    result_section = extract_section(text, "## 9. Result")
+    acceptance_section = extract_section(text, "## 11. Acceptance Record")
+
+    readiness_fields = parse_strong_fields(readiness_section)
+    result_fields = parse_strong_fields(result_section)
+    acceptance_fields = parse_strong_fields(acceptance_section)
+
+    for field in ("readiness for validation handoff", "campaign constructibility"):
+        if field not in readiness_fields:
+            result.error("campaign-readiness-field-missing", f"Missing campaign field: {field}")
+    if "campaign result" not in result_fields:
+        result.error("campaign-result-field-missing", "Missing campaign field: campaign result")
+    for field in ("acceptance authority", "decision"):
+        if field not in acceptance_fields:
+            result.error("campaign-acceptance-field-missing", f"Missing campaign field: {field}")
+
+    status = metadata_status(path).lower()
+    if "template" in status:
+        return result
+
+    campaign_result = clean_cell(result_fields.get("campaign result", "")).lower()
+    decision = clean_cell(acceptance_fields.get("decision", "")).lower()
+    needs_blockers = campaign_result in {"fail", "partial"} or (
+        "constraint" in decision or decision in {"rejected", "deferred"}
+    )
+
+    if needs_blockers:
+        blocker_section = extract_section(text, "## 8.1 Blocker Ledger")
+        concrete = False
+        for row in parse_markdown_table(blocker_section)[1:]:
+            if len(row) >= 5 and not all(is_placeholder(cell) for cell in row[:5]):
+                concrete = True
+                break
+        if not concrete:
+            result.error(
+                "campaign-blocker-ledger-missing",
+                "FAIL/PARTIAL/constrained campaign requires a concrete blocker ledger row",
+            )
+    return result
+
+
+def command_check_campaign(args: argparse.Namespace) -> int:
+    return emit_issues(check_campaign_file(Path(args.path).resolve()))
+
+
+def sync_compare_file(result: LintResult, framework: Path, workspace: Path, fw_rel: str, ws_rel: str) -> None:
+    fw_path = framework / fw_rel
+    ws_path = workspace / ws_rel
+    if not fw_path.exists():
+        result.error("sync-framework-file-missing", f"Framework reference file missing: {fw_rel}")
+        return
+    if not ws_path.exists():
+        result.error("sync-workspace-file-missing", f"Workspace installed file missing: {ws_rel}")
+        return
+    if not filecmp.cmp(fw_path, ws_path, shallow=False):
+        result.warning("sync-file-drift", f"Installed file differs from framework: {ws_rel}")
+
+
+def check_workspace_sync(workspace: Path, framework: Path) -> LintResult:
+    result = LintResult("sync-check", workspace)
+    if not workspace.exists() or not workspace.is_dir():
+        result.error("sync-workspace-missing", f"Workspace path does not exist: {workspace}")
+        return result
+    if not framework.exists() or not framework.is_dir():
+        result.error("sync-framework-missing", f"Framework path does not exist: {framework}")
+        return result
+    if workspace == framework:
+        result.warning(
+            "sync-self-compare",
+            "Workspace and framework paths are identical; pass --framework when running sync-check from an adopted workspace",
+        )
+        return result
+
+    for fw_rel, ws_rel in (
+        ("tools/flowctl.sh", "tools/flowctl.sh"),
+        ("tools/CONTROL-PLANE-LINT-SPEC.md", "tools/CONTROL-PLANE-LINT-SPEC.md"),
+        ("CODE-WORKFLOW-CONTRACT.md", "CODE-WORKFLOW-CONTRACT.md"),
+        ("CODE-BOOTSTRAP.md", "CODE-BOOTSTRAP.md"),
+        ("manual/MANUAL-BOOTSTRAP.md", "authorities/manual/MANUAL-BOOTSTRAP.md"),
+        ("manual/REACHING-THE-LLMS.md", "authorities/manual/REACHING-THE-LLMS.md"),
+        ("templates/IMPL-TEMPLATE.md", "authorities/impl/IMPL-TEMPLATE.md"),
+        ("templates/REQUIREMENTS-DIFF-TEMPLATE.md", "authorities/diffs/REQUIREMENTS-DIFF-TEMPLATE.md"),
+        ("templates/REVIEW-TEMPLATE.md", "authorities/reviews/REVIEW-TEMPLATE.md"),
+        ("templates/TEST-CAMPAIGN-TEMPLATE.md", "authorities/campaigns/TEST-CAMPAIGN-TEMPLATE.md"),
+    ):
+        sync_compare_file(result, framework, workspace, fw_rel, ws_rel)
+
+    for name in CONTRACT_FILES:
+        sync_compare_file(
+            result,
+            framework,
+            workspace,
+            f"flow-of-work-contract/{name}",
+            f"authorities/flow-of-work-contract/{name}",
+        )
+
+    if not (workspace / "AGENT.md").exists() and (workspace / "AGENTS.md").exists():
+        result.warning(
+            "sync-agent-entrypoint-legacy",
+            "Workspace uses AGENTS.md while the current framework standard is AGENT.md",
+        )
+
+    overlay = workspace / "authorities" / "PROJECT-OVERLAY.md"
+    if not overlay.exists():
+        result.error("sync-overlay-missing", "Workspace overlay missing: authorities/PROJECT-OVERLAY.md")
+    elif "## 11. Operational Tooling" not in overlay.read_text(encoding="utf-8"):
+        result.warning(
+            "sync-overlay-tooling-old",
+            "Workspace overlay does not use current sec. 11 Operational Tooling shape",
+        )
+
+    return result
+
+
+def command_sync_check(args: argparse.Namespace) -> int:
+    workspace = resolve_existing_target(args.workspace)
+    if workspace is None:
+        print(f"ERROR: workspace path does not exist: {Path(args.workspace).resolve()}")
+        return 1
+    framework = Path(args.framework).resolve() if args.framework else Path(__file__).resolve().parents[1]
+    return emit_issues(check_workspace_sync(workspace, framework))
+
+
 def command_handoff(args: argparse.Namespace) -> int:
     root = resolve_existing_target(args.target)
     if root is None:
@@ -562,6 +751,10 @@ def command_handoff(args: argparse.Namespace) -> int:
     check_workspace_mode(result)
     for impl_path in args.impl:
         merge_issues(result, check_impl_file(resolve_workspace_file(root, impl_path)))
+    for diff_path in args.diff:
+        merge_issues(result, check_diff_file(resolve_workspace_file(root, diff_path)))
+    for campaign_path in args.campaign:
+        merge_issues(result, check_campaign_file(resolve_workspace_file(root, campaign_path)))
     if args.matrix:
         merge_issues(result, check_matrix_file(resolve_workspace_file(root, args.matrix)))
     return emit_issues(result)
@@ -609,6 +802,8 @@ def build_parser() -> argparse.ArgumentParser:
     handoff = sub.add_parser("handoff", help="Run workspace handoff checks")
     handoff.add_argument("target", nargs="?", default=".")
     handoff.add_argument("--impl", action="append", default=[], help="IMPL packet path to check")
+    handoff.add_argument("--diff", action="append", default=[], help="Requirements diff path to check")
+    handoff.add_argument("--campaign", action="append", default=[], help="Test campaign path to check")
     handoff.add_argument("--matrix", help="Traceability matrix path to check")
     handoff.set_defaults(func=command_handoff)
 
@@ -620,6 +815,17 @@ def build_parser() -> argparse.ArgumentParser:
     check_matrix = check_sub.add_parser("matrix", help="Check a traceability matrix")
     check_matrix.add_argument("path")
     check_matrix.set_defaults(func=command_check_matrix)
+    check_diff = check_sub.add_parser("diff", help="Check a requirements diff")
+    check_diff.add_argument("path")
+    check_diff.set_defaults(func=command_check_diff)
+    check_campaign = check_sub.add_parser("campaign", help="Check a test campaign")
+    check_campaign.add_argument("path")
+    check_campaign.set_defaults(func=command_check_campaign)
+
+    sync = sub.add_parser("sync-check", help="Compare installed flow files against this framework")
+    sync.add_argument("workspace", nargs="?", default=".")
+    sync.add_argument("--framework", help="Framework repository path. Defaults to this tool's repo.")
+    sync.set_defaults(func=command_sync_check)
 
     return parser
 

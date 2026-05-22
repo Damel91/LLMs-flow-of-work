@@ -706,6 +706,14 @@ They can:
 - run tests
 - maintain the documents with lower friction
 
+Use this class of model for broad root IMPL families, schema migrations,
+cross-module refactors, prompt/state-machine changes, graph/runtime work, and
+final severe reviews before live campaigns.
+
+If a packet chain was produced by another model, have an execution-capable
+frontier model review the chain against the active diff, code surfaces, matrix,
+review holds, and campaign path before implementation starts.
+
 ### Analysis-only model
 
 Examples:
@@ -723,6 +731,20 @@ You will need to:
 
 Do not let them own governance, architecture, or traceability.
 Use them only for narrow bounded work.
+
+Good tasks for this class:
+
+- summarize a single document
+- fill a template section from already-approved input
+- classify a small list
+- perform a local mechanical edit under a frontier-model plan
+
+Bad tasks for this class:
+
+- deciding packet boundaries
+- interpreting live campaign authority
+- changing product scope
+- owning schema, routing, prompt, graph, or config architecture
 
 ---
 

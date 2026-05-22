@@ -193,6 +193,9 @@ It must also define fields for:
 - `Handoff command`
 - `IMPL check command`
 - `Traceability check command`
+- `Diff check command`
+- `Campaign check command`
+- `Sync check command`
 
 Operational tooling commands must name the installed `flowctl.sh` command for
 the relevant operation:
@@ -206,6 +209,9 @@ the relevant operation:
 - handoff checks use `handoff`
 - IMPL gate checks use `check impl`
 - traceability matrix checks use `check matrix`
+- requirements diff checks use `check diff`
+- campaign checks use `check campaign`
+- workspace/framework sync checks use `sync-check`
 
 Missing section, missing field, or unrelated command: `error`.
 
@@ -519,6 +525,22 @@ The workspace passes only if:
   resolved locations
 - the resolved `REQUIREMENTS_DIFF_INDEX.md` passes the active-head and ledger
   consistency checks
+
+### 5.7 Focused Artifact Checks
+
+The installed `flowctl.sh` should expose focused checks for the artifact types
+that most often drift during long LLM work:
+
+- `check impl`
+- `check matrix`
+- `check diff`
+- `check campaign`
+
+The framework repository may also expose `sync-check`, which compares installed
+workspace control-plane files against the current framework repository. This is
+not a replacement for project-specific review; it detects stale installed
+contracts, templates, tooling, manual files, and legacy entrypoint/tooling
+shapes.
 
 ---
 

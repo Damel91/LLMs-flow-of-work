@@ -167,6 +167,23 @@ Use this section when the diff is broad enough to require multiple packets.
 The packet split is planning authority only. It becomes executable when the
 corresponding `IMPL-*` packet exists and is registered in the IMPL index.
 
+## 8.2 Requirement-To-Evidence Coverage Plan
+
+Use this section for broad diffs or root implementation families.
+
+The goal is to prevent a long chain from producing plausible packets that do
+not actually cover every requirement or validation surface. This table is a
+planning map, not evidence. It becomes factual only after the linked campaign
+and traceability updates exist.
+
+| Requirement ID | Planned IMPL packet(s) | Deterministic evidence | Live / campaign evidence | Traceability target |
+|---|---|---|---|---|
+| `FR-[AREA]-NN` | `IMPL-N.M` | [test/harness/review target] | [campaign test or `TBD`] | [Gap / Partial / Implemented after evidence] |
+
+If a requirement has no planned IMPL or no meaningful evidence path, the diff
+is not ready for execution. If the evidence path is intentionally delayed,
+state why and where the delayed validation will be routed.
+
 ---
 
 ## 9. Acceptance Criteria

@@ -2,9 +2,9 @@
 doc_type: docset_governance_contract
 scope: documentation_control
 applies_to: multi-platform
-version: 0.4
+version: 0.5
 status: working
-last_updated: 2026-05-09
+last_updated: 2026-05-22
 ---
 
 # Docset Governance Contract
@@ -236,6 +236,7 @@ The root packet should identify:
 - active governing diff
 - affected scenario layer
 - baseline areas known to be stale during execution
+- requirement-to-packet coverage when the active diff is broad
 - expected test campaign
 - expected post-acceptance canonical refresh targets, if any
 

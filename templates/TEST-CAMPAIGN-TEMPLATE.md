@@ -41,6 +41,11 @@ Reason:
 If constructibility is not clear, do not use this campaign as authoritative
 acceptance evidence.
 
+Before handoff or acceptance, run the project-local campaign check when
+available:
+
+- `bash tools/flowctl.sh check campaign [this-file]`
+
 ---
 
 ## 3. Scope

@@ -2,9 +2,9 @@
 doc_type: test_and_handoff_contract
 scope: validation_control
 applies_to: multi-platform
-version: 0.5
+version: 0.6
 status: working
-last_updated: 2026-05-09
+last_updated: 2026-05-22
 ---
 
 # Test And Handoff Contract
@@ -28,6 +28,8 @@ last_updated: 2026-05-09
 10. Live campaigns should use the installed `TEST-ENVIRONMENT-STARTUP.md`
     helper when they need real environment setup, reset, preflight, inspection,
     or shutdown.
+11. Before accepting or handing off a campaign, use the installed campaign
+    check (`flowctl.sh check campaign`) when available.
 
 ## 1. Readiness Gate
 

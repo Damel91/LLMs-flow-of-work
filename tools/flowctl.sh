@@ -608,7 +608,10 @@ check_framework_mode() {
     "workspace doctor command:doctor" \
     "handoff command:handoff" \
     "impl check command:check impl" \
-    "traceability check command:check matrix"
+    "traceability check command:check matrix" \
+    "diff check command:check diff" \
+    "campaign check command:check campaign" \
+    "sync check command:sync-check"
   do
     field="${tooling_spec%%:*}"
     required="${tooling_spec#*:}"
@@ -763,7 +766,10 @@ check_workspace_mode() {
     "workspace doctor command:doctor" \
     "handoff command:handoff" \
     "impl check command:check impl" \
-    "traceability check command:check matrix"
+    "traceability check command:check matrix" \
+    "diff check command:check diff" \
+    "campaign check command:check campaign" \
+    "sync check command:sync-check"
   do
     key="${tooling_spec%%:*}"
     required="${tooling_spec#*:}"
@@ -1097,6 +1103,216 @@ check_matrix_file() {
   done < <(printf '%s\n' "$all_rows" | tail -n +2)
 }
 
+# ── check diff ─────────────────────────────────────────────────────────────────
+
+check_diff_file() {
+  local path="$1"
+  if [[ ! -f "$path" ]]; then
+    emit_error "diff-missing" "Requirements diff file does not exist: $path"
+    return
+  fi
+
+  local text
+  text=$(cat "$path")
+
+  local heading
+  for heading in \
+    "## 1. Purpose" \
+    "## 2. Authority And Succession" \
+    "## 3. Scope" \
+    "## 4. Requirement Changes" \
+    "## 5. Interaction And Sequence Impact" \
+    "## 6. Concept Closure" \
+    "## 7. Behavioral Definition" \
+    "## 8. Propagation Impact" \
+    "## 9. Acceptance Criteria" \
+    "## 10. Open Questions"
+  do
+    [[ -z "$(extract_section "$text" "$heading")" ]] && \
+      emit_error "diff-section-missing" "Missing section: $heading"
+  done
+
+  local doc_status
+  doc_status=$(metadata_status "$path")
+  printf '%s' "$doc_status" | grep -qi "template" && return
+
+  local open_questions
+  open_questions=$(extract_section "$text" "## 10. Open Questions")
+  while IFS= read -r row; do
+    local n question blocking
+    n=$(count_cells "$row")
+    [[ "$n" -lt 3 ]] && continue
+    question=$(clean_cell "$(get_cell "$row" 1)")
+    blocking=$(clean_cell "$(get_cell "$row" 3)")
+    blocking=$(printf '%s' "$blocking" | tr '[:upper:]' '[:lower:]')
+    if [[ "$blocking" == "yes" || "$blocking" == "true" || "$blocking" == "blocking" ]]; then
+      emit_error "diff-blocking-open-question" \
+        "Blocking open question remains in diff: $question"
+    fi
+  done < <(table_rows "$open_questions" | tail -n +2)
+}
+
+# ── check campaign ─────────────────────────────────────────────────────────────
+
+check_campaign_file() {
+  local path="$1"
+  if [[ ! -f "$path" ]]; then
+    emit_error "campaign-missing" "Test campaign file does not exist: $path"
+    return
+  fi
+
+  local text
+  text=$(cat "$path")
+
+  local heading
+  for heading in \
+    "## 2. Readiness And Constructibility" \
+    "## 6. Test Matrix" \
+    "## 7. Evidence Log" \
+    "## 8. Failure Triage" \
+    "## 8.1 Blocker Ledger" \
+    "## 9. Result" \
+    "## 10. Traceability Recommendation" \
+    "## 11. Acceptance Record"
+  do
+    [[ -z "$(extract_section "$text" "$heading")" ]] && \
+      emit_error "campaign-section-missing" "Missing section: $heading"
+  done
+
+  local readiness_section result_section acceptance_section
+  readiness_section=$(extract_section "$text" "## 2. Readiness And Constructibility")
+  result_section=$(extract_section "$text" "## 9. Result")
+  acceptance_section=$(extract_section "$text" "## 11. Acceptance Record")
+
+  local field
+  for field in "readiness for validation handoff" "campaign constructibility"; do
+    [[ -z "$(get_strong_field "$readiness_section" "$field")" ]] && \
+      emit_error "campaign-readiness-field-missing" "Missing campaign field: $field"
+  done
+  [[ -z "$(get_strong_field "$result_section" "campaign result")" ]] && \
+    emit_error "campaign-result-field-missing" "Missing campaign field: campaign result"
+  for field in "acceptance authority" "decision"; do
+    [[ -z "$(get_strong_field "$acceptance_section" "$field")" ]] && \
+      emit_error "campaign-acceptance-field-missing" "Missing campaign field: $field"
+  done
+
+  local doc_status
+  doc_status=$(metadata_status "$path")
+  printf '%s' "$doc_status" | grep -qi "template" && return
+
+  local campaign_result decision must_have_blockers=0
+  campaign_result=$(clean_cell "$(get_strong_field "$result_section" "campaign result")")
+  campaign_result=$(printf '%s' "$campaign_result" | tr '[:upper:]' '[:lower:]')
+  decision=$(clean_cell "$(get_strong_field "$acceptance_section" "decision")")
+  decision=$(printf '%s' "$decision" | tr '[:upper:]' '[:lower:]')
+
+  case "$campaign_result" in
+    fail|partial) must_have_blockers=1 ;;
+  esac
+  case "$decision" in
+    *constraint*|rejected|deferred) must_have_blockers=1 ;;
+  esac
+
+  if [[ "$must_have_blockers" -eq 1 ]]; then
+    local blocker_section concrete=0
+    blocker_section=$(extract_section "$text" "## 8.1 Blocker Ledger")
+    while IFS= read -r row; do
+      local n c1 c2 c3 c4 c5
+      n=$(count_cells "$row")
+      [[ "$n" -lt 5 ]] && continue
+      c1=$(clean_cell "$(get_cell "$row" 1)")
+      c2=$(clean_cell "$(get_cell "$row" 2)")
+      c3=$(clean_cell "$(get_cell "$row" 3)")
+      c4=$(clean_cell "$(get_cell "$row" 4)")
+      c5=$(clean_cell "$(get_cell "$row" 5)")
+      if ! { is_placeholder "$c1" && is_placeholder "$c2" && is_placeholder "$c3" && is_placeholder "$c4" && is_placeholder "$c5"; }; then
+        concrete=1
+        break
+      fi
+    done < <(table_rows "$blocker_section" | tail -n +2)
+    [[ "$concrete" -eq 0 ]] && \
+      emit_error "campaign-blocker-ledger-missing" \
+        "FAIL/PARTIAL/constrained campaign requires a concrete blocker ledger row"
+  fi
+}
+
+# ── sync check ─────────────────────────────────────────────────────────────────
+
+sync_compare_file() {
+  local framework="$1" workspace="$2" fw_rel="$3" ws_rel="$4"
+  local fw_path="$framework/$fw_rel" ws_path="$workspace/$ws_rel"
+  if [[ ! -f "$fw_path" ]]; then
+    emit_error "sync-framework-file-missing" "Framework reference file missing: $fw_rel"
+    return
+  fi
+  if [[ ! -f "$ws_path" ]]; then
+    emit_error "sync-workspace-file-missing" "Workspace installed file missing: $ws_rel"
+    return
+  fi
+  if ! cmp -s "$fw_path" "$ws_path"; then
+    emit_warning "sync-file-drift" "Installed file differs from framework: $ws_rel"
+  fi
+}
+
+check_workspace_sync() {
+  local workspace="$1" framework="$2"
+  if [[ ! -d "$workspace" ]]; then
+    emit_error "sync-workspace-missing" "Workspace path does not exist: $workspace"
+    return
+  fi
+  if [[ ! -d "$framework" ]]; then
+    emit_error "sync-framework-missing" "Framework path does not exist: $framework"
+    return
+  fi
+  if [[ "$workspace" == "$framework" ]]; then
+    emit_warning "sync-self-compare" \
+      "Workspace and framework paths are identical; pass --framework when running sync-check from an adopted workspace"
+    return
+  fi
+
+  sync_compare_file "$framework" "$workspace" "tools/flowctl.sh" "tools/flowctl.sh"
+  sync_compare_file "$framework" "$workspace" "tools/CONTROL-PLANE-LINT-SPEC.md" "tools/CONTROL-PLANE-LINT-SPEC.md"
+  sync_compare_file "$framework" "$workspace" "CODE-WORKFLOW-CONTRACT.md" "CODE-WORKFLOW-CONTRACT.md"
+  sync_compare_file "$framework" "$workspace" "CODE-BOOTSTRAP.md" "CODE-BOOTSTRAP.md"
+  sync_compare_file "$framework" "$workspace" "manual/MANUAL-BOOTSTRAP.md" "authorities/manual/MANUAL-BOOTSTRAP.md"
+  sync_compare_file "$framework" "$workspace" "manual/REACHING-THE-LLMS.md" "authorities/manual/REACHING-THE-LLMS.md"
+
+  local name
+  for name in \
+    "00-INDEX.md" "01-LLM-SESSION-CONTRACT.md" "02-DOCSET-GOVERNANCE-CONTRACT.md" \
+    "03-BEHAVIORAL-DEFINITION-GATE.md" "04-TEST-AND-HANDOFF-CONTRACT.md" \
+    "05-PROJECT-STRUCTURE.md"
+  do
+    sync_compare_file "$framework" "$workspace" \
+      "flow-of-work-contract/$name" "authorities/flow-of-work-contract/$name"
+  done
+
+  sync_compare_file "$framework" "$workspace" \
+    "templates/IMPL-TEMPLATE.md" "authorities/impl/IMPL-TEMPLATE.md"
+  sync_compare_file "$framework" "$workspace" \
+    "templates/REQUIREMENTS-DIFF-TEMPLATE.md" "authorities/diffs/REQUIREMENTS-DIFF-TEMPLATE.md"
+  sync_compare_file "$framework" "$workspace" \
+    "templates/REVIEW-TEMPLATE.md" "authorities/reviews/REVIEW-TEMPLATE.md"
+  sync_compare_file "$framework" "$workspace" \
+    "templates/TEST-CAMPAIGN-TEMPLATE.md" "authorities/campaigns/TEST-CAMPAIGN-TEMPLATE.md"
+
+  if [[ ! -f "$workspace/AGENT.md" && -f "$workspace/AGENTS.md" ]]; then
+    emit_warning "sync-agent-entrypoint-legacy" \
+      "Workspace uses AGENTS.md while the current framework standard is AGENT.md"
+  fi
+
+  local overlay="$workspace/authorities/PROJECT-OVERLAY.md"
+  if [[ -f "$overlay" ]]; then
+    local overlay_text
+    overlay_text=$(cat "$overlay")
+    printf '%s\n' "$overlay_text" | grep -qF "## 11. Operational Tooling" || \
+      emit_warning "sync-overlay-tooling-old" \
+        "Workspace overlay does not use current sec. 11 Operational Tooling shape"
+  else
+    emit_error "sync-overlay-missing" "Workspace overlay missing: authorities/PROJECT-OVERLAY.md"
+  fi
+}
+
 # ── commands ───────────────────────────────────────────────────────────────────
 
 cmd_doctor() {
@@ -1370,8 +1586,39 @@ cmd_check_matrix() {
   [[ "$ERR_COUNT" -eq 0 ]]
 }
 
+cmd_check_diff() {
+  local path="$1"
+  local abs_path
+  abs_path=$(resolve_file_path "$path")
+  check_diff_file "$abs_path"
+  print_issues "diff" "$abs_path"
+  [[ "$ERR_COUNT" -eq 0 ]]
+}
+
+cmd_check_campaign() {
+  local path="$1"
+  local abs_path
+  abs_path=$(resolve_file_path "$path")
+  check_campaign_file "$abs_path"
+  print_issues "campaign" "$abs_path"
+  [[ "$ERR_COUNT" -eq 0 ]]
+}
+
+cmd_sync_check() {
+  local workspace="${1:-.}" framework="${2:-}"
+  if [[ -z "$framework" ]]; then
+    framework=$(resolve_dir "$(dirname "$0")/..")
+  fi
+  local workspace_root framework_root
+  workspace_root=$(resolve_target_dir "$workspace") || { printf 'ERROR: workspace path does not exist: %s\n' "$workspace"; exit 1; }
+  framework_root=$(resolve_target_dir "$framework") || { printf 'ERROR: framework path does not exist: %s\n' "$framework"; exit 1; }
+  check_workspace_sync "$workspace_root" "$framework_root"
+  print_issues "sync-check" "$workspace_root"
+  [[ "$ERR_COUNT" -eq 0 ]]
+}
+
 cmd_handoff() {
-  local target="." matrix_path="" impl_paths=()
+  local target="." matrix_path="" impl_paths=() diff_paths=() campaign_paths=()
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --impl)
@@ -1394,6 +1641,26 @@ cmd_handoff() {
         matrix_path="${1#--matrix=}"
         shift
         ;;
+      --diff)
+        shift
+        [[ $# -eq 0 ]] && { printf 'ERROR: --diff requires a path\n'; return 1; }
+        diff_paths+=("$1")
+        shift
+        ;;
+      --diff=*)
+        diff_paths+=("${1#--diff=}")
+        shift
+        ;;
+      --campaign)
+        shift
+        [[ $# -eq 0 ]] && { printf 'ERROR: --campaign requires a path\n'; return 1; }
+        campaign_paths+=("$1")
+        shift
+        ;;
+      --campaign=*)
+        campaign_paths+=("${1#--campaign=}")
+        shift
+        ;;
       *)
         target="$1"
         shift
@@ -1408,6 +1675,16 @@ cmd_handoff() {
   local impl_path
   for impl_path in "${impl_paths[@]}"; do
     check_impl_file "$(resolve_workspace_file "$root" "$impl_path")"
+  done
+
+  local diff_path
+  for diff_path in "${diff_paths[@]}"; do
+    check_diff_file "$(resolve_workspace_file "$root" "$diff_path")"
+  done
+
+  local campaign_path
+  for campaign_path in "${campaign_paths[@]}"; do
+    check_campaign_file "$(resolve_workspace_file "$root" "$campaign_path")"
   done
 
   if [[ -n "$matrix_path" ]]; then
@@ -1449,14 +1726,23 @@ COMMANDS
   active-diff show [target]
       Show the active requirement diff from REQUIREMENTS_DIFF_INDEX.md.
 
-  handoff [target] [--impl path] [--matrix path]
-      Run workspace handoff checks, optionally including an IMPL or matrix.
+  handoff [target] [--impl path] [--diff path] [--campaign path] [--matrix path]
+      Run workspace handoff checks, optionally including IMPL/diff/campaign/matrix artifacts.
 
   check impl <path>
       Validate the behavioral definition gate of an IMPL packet.
 
   check matrix <path>
       Validate the structure and consistency of a traceability matrix.
+
+  check diff <path>
+      Validate requirements-diff structure and blocking open questions.
+
+  check campaign <path>
+      Validate campaign readiness/result/acceptance and blocker-ledger structure.
+
+  sync-check [workspace] [--framework path]
+      Compare an adopted workspace's installed flow files against this framework.
 
 OPTIONS
   --help, -h    Show this help message.
@@ -1469,9 +1755,12 @@ EXAMPLES
   bash tools/flowctl.sh route /path/to/adopted/project
   bash tools/flowctl.sh where /path/to/adopted/project diff-index
   bash tools/flowctl.sh active-diff show /path/to/adopted/project
-  bash tools/flowctl.sh handoff /path/to/adopted/project --impl authorities/impl/IMPL-1.md --matrix authorities/TRACEABILITY_MATRIX.md
+  bash tools/flowctl.sh handoff /path/to/adopted/project --impl authorities/impl/IMPL-1.md --campaign authorities/campaigns/TestCampaign-1.md --matrix authorities/TRACEABILITY_MATRIX.md
   bash tools/flowctl.sh check impl authorities/impl/IMPL-1.md
   bash tools/flowctl.sh check matrix authorities/TRACEABILITY_MATRIX.md
+  bash tools/flowctl.sh check diff authorities/diffs/REQUIREMENTS_DIFF-1.md
+  bash tools/flowctl.sh check campaign authorities/campaigns/TestCampaign-1.md
+  bash tools/flowctl.sh sync-check /path/to/adopted/project --framework /path/to/flow-of-work
 
 NOTES
   STARTER.md activates this file with: chmod +x tools/flowctl.sh
@@ -1541,11 +1830,45 @@ main() {
           [[ -z "${1:-}" ]] && { printf 'ERROR: check matrix requires a path\n'; exit 1; }
           cmd_check_matrix "$1"
           ;;
+        diff)
+          shift
+          [[ -z "${1:-}" ]] && { printf 'ERROR: check diff requires a path\n'; exit 1; }
+          cmd_check_diff "$1"
+          ;;
+        campaign)
+          shift
+          [[ -z "${1:-}" ]] && { printf 'ERROR: check campaign requires a path\n'; exit 1; }
+          cmd_check_campaign "$1"
+          ;;
         *)
           printf 'ERROR: unknown check subcommand: %s\n' "${1:-}"
           usage; exit 1
           ;;
       esac
+      ;;
+    sync-check)
+      shift
+      local workspace="${1:-.}" framework=""
+      [[ $# -gt 0 ]] && shift
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          --framework)
+            shift
+            [[ $# -eq 0 ]] && { printf 'ERROR: --framework requires a path\n'; exit 1; }
+            framework="$1"
+            shift
+            ;;
+          --framework=*)
+            framework="${1#--framework=}"
+            shift
+            ;;
+          *)
+            printf 'ERROR: unknown sync-check option: %s\n' "$1"
+            exit 1
+            ;;
+        esac
+      done
+      cmd_sync_check "$workspace" "$framework"
       ;;
     *)
       printf 'ERROR: unknown command: %s\n' "$1"

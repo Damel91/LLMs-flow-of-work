@@ -2,9 +2,9 @@
 doc_type: llm_session_contract
 scope: development_control
 applies_to: multi-platform
-version: 0.4
+version: 0.5
 status: working
-last_updated: 2026-05-09
+last_updated: 2026-05-22
 ---
 
 # LLM Session Contract
@@ -152,6 +152,26 @@ The boundary is capability-based, not artificially tiny:
 - the packet ends where human-only validation becomes necessary
 - a root family may coordinate multiple executable subpackets, but each
   subpacket must have a clear responsibility boundary
+
+### 4.4 Pre-Execution Chain Review Rule
+
+When an active diff opens a root IMPL family, or when another model generated
+the packet chain, execution must not start until the active model has reviewed
+the chain against:
+
+- the active `REQUIREMENTS_DIFF_*`
+- relevant code surfaces, when the work affects runtime or architecture
+- the installed `TRACEABILITY_MATRIX.md`
+- overlapping `REVIEW-*` holds
+- expected deterministic and live campaign coverage
+
+The review must identify whether the chain actually covers the diff,
+whether packet boundaries are coherent, and whether any blocking ambiguity
+remains. If the chain is broad enough that a smaller model could lose the
+global contract, use a frontier execution model or split the chain further.
+
+This review is not optional ceremony. It is the guard that prevents a long
+LLM-generated implementation family from becoming plausible but incomplete.
 
 ## 5. Platform Session Setup
 

@@ -1,6 +1,6 @@
 # Project Overlay
 
-**Version:** 0.2
+**Version:** 0.3
 **Status:** working_draft
 **Last updated:** YYYY-MM-DD
 
@@ -287,8 +287,8 @@ when a session changes governance files.
 
 **Handoff command:** `bash tools/flowctl.sh handoff .`
 Use before handoff when a session changed governance files, an IMPL packet, or
-the traceability matrix. Add `--impl path` or `--matrix path` when a focused
-artifact check is needed in the same run.
+the traceability matrix. Add `--impl path`, `--diff path`, `--campaign path`, or
+`--matrix path` when a focused artifact check is needed in the same run.
 
 **IMPL check command:** `bash tools/flowctl.sh check impl [path]`
 Use before handoff for an IMPL packet whose behavioral gate was added or
@@ -296,3 +296,16 @@ modified.
 
 **Traceability check command:** `bash tools/flowctl.sh check matrix authorities/TRACEABILITY_MATRIX.md`
 Use before handoff when traceability rows were added or modified.
+
+**Diff check command:** `bash tools/flowctl.sh check diff [path]`
+Use before implementing a broad or newly activated `REQUIREMENTS_DIFF_*`,
+especially when open questions, absorbed design inputs, or packet splits were
+changed.
+
+**Campaign check command:** `bash tools/flowctl.sh check campaign [path]`
+Use before campaign handoff or acceptance when readiness, constructibility,
+failure triage, result, blocker ledger, or acceptance record changed.
+
+**Sync check command:** `bash tools/flowctl.sh sync-check . --framework [path-to-flow-of-work]`
+Use after adopting a newer framework version, after framework upgrades, or when
+the installed project control plane may be older than the framework repository.

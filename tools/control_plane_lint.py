@@ -86,6 +86,9 @@ OPERATIONAL_TOOLING_COMMANDS = {
     "handoff command": ("flowctl.sh", "handoff"),
     "impl check command": ("flowctl.sh", "check impl"),
     "traceability check command": ("flowctl.sh", "check matrix"),
+    "diff check command": ("flowctl.sh", "check diff"),
+    "campaign check command": ("flowctl.sh", "check campaign"),
+    "sync check command": ("flowctl.sh", "sync-check"),
 }
 
 

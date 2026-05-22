@@ -113,6 +113,9 @@ installed overlay records for day-to-day navigation:
 - `bash tools/flowctl.sh where . diff-index`
 - `bash tools/flowctl.sh active-diff show .`
 - `bash tools/flowctl.sh handoff . --impl authorities/impl/IMPL-1.md --matrix authorities/TRACEABILITY_MATRIX.md`
+- `bash tools/flowctl.sh check diff authorities/diffs/REQUIREMENTS_DIFF-1.md`
+- `bash tools/flowctl.sh check campaign authorities/campaigns/TestCampaign-1.md`
+- `bash tools/flowctl.sh sync-check /path/to/adopted/project --framework /path/to/flow-of-work`
 
 A Python equivalent with the same command families is also available for
 environments where Python 3 is preferred. This command is normally run from the
@@ -122,6 +125,7 @@ Python toolchain too:
 
 - `python3 tools/flowctl.py doctor .`
 - `python3 tools/flowctl.py doctor /path/to/adopted/project --mode workspace`
+- `python3 tools/flowctl.py sync-check /path/to/adopted/project`
 
 If neither tool is available (chat-only or no shell access), use the portable
 Markdown fallback:
@@ -159,6 +163,7 @@ The same contract governs all models. Every project installs an `AGENT.md` from 
   - previous frontier reasoning models of the same families
 - Frontier models with file and shell access implement, review, and prepare traceability updates inside an IMPL packet boundary.
 - Frontier models in chat mode analyze, draft diffs and packets, produce patch-ready outputs.
+- Broad root implementation families, schema changes, graph/runtime refactors, and multi-packet chains should be executed or reviewed by a frontier execution model before live validation.
 - Free-tier, lightweight, or small local models are not a good fit as primary governance executors. They may help with narrow bounded tasks, but they are not the intended class of model for this repository.
 
 ---
