@@ -240,9 +240,10 @@ Before starting derivation or targeted integration, read in this order:
 5. `authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md`
 6. `authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md`
 7. `authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md`
-8. the installed `REQUIREMENTS_DIFF_INDEX.md` location declared by the overlay
-9. the installed `IMPL-INDEX.md` location declared by the overlay
-10. the installed `REVIEW-INDEX.md` location declared by the overlay
+8. `authorities/flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md`
+9. the installed `REQUIREMENTS_DIFF_INDEX.md` location declared by the overlay
+10. the installed `IMPL-INDEX.md` location declared by the overlay
+11. the installed `REVIEW-INDEX.md` location declared by the overlay
 11. the installed `TEST-CAMPAIGN-INDEX.md` location declared by the overlay
 12. any existing destination content in the installed baseline and interaction
    locations declared by the overlay

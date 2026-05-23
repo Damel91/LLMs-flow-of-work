@@ -172,35 +172,34 @@ what the installed campaign documents are for.
 ## 6. Update Reminders
 
 > **This section is a non-authoritative working reminder.**
-> If it conflicts with `flow-of-work-contract/02-DOCSET-GOVERNANCE-CONTRACT.md`
-> or `flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md`, the contracts
+> If it conflicts with `flow-of-work-contract/02-DOCSET-GOVERNANCE-CONTRACT.md`,
+> `flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md`, or
+> `flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md`, the contracts
 > win. Its purpose is to let the active model recall the matrix update
 > discipline at the moment it is about to act on this file, without
 > re-reading all the contracts during an ongoing session.
 
 ### 6.1 When the matrix may be updated
 
-- After a `TestCampaign-*` has been executed and accepted by the user.
-- After code references together with a model code review establish a factual
-  conservative state, typically for a `Partial` row awaiting first authoritative
-  campaign.
+- After a `TestCampaign-*` has been executed and accepted by the user or by a
+  delegated acceptance authority declared in the campaign.
 - After an explicit user decision to record a status change.
 
 ### 6.2 When the matrix must NOT be updated
 
-- Before evidence exists.
+- Before accepted campaign evidence exists, unless an explicit user decision
+  authorizes a status change.
 - During an IMPL packet execution, in anticipation of completion.
-- Based on model self-check alone, without code references plus review,
-  `TestCampaign-*` evidence, or explicit user acceptance.
+- Based on model self-check alone.
 - To express future intent, planning, or roadmap state.
 
 ### 6.3 What constitutes evidence
 
 - A `TestCampaign-*` document with executed steps, recorded outputs, and
   a user-acceptance marker. This is the default and preferred form.
-- Reachable code references together with a model code review may support a
-  conservative `Partial` row before the first authoritative campaign. This is
-  not the default path to `Implemented`.
+- A `TestCampaign-*` document with executed steps, recorded outputs, all
+  acceptance tests green, and delegated model/deterministic acceptance authority
+  declared in the campaign.
 - For non-functional governance rows, the existence of the canonical
   document or contract that embodies the property may itself be evidence.
   In this case the Primary evidence column points at that document.

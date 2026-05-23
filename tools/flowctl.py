@@ -36,6 +36,7 @@ CONTRACT_FILES = [
     "03-BEHAVIORAL-DEFINITION-GATE.md",
     "04-TEST-AND-HANDOFF-CONTRACT.md",
     "05-PROJECT-STRUCTURE.md",
+    "06-VALIDATION-EXECUTION-CONTRACT.md",
 ]
 
 AUTHORITY_TYPES = {
@@ -604,6 +605,7 @@ def check_campaign_file(path: Path) -> LintResult:
     text = read_text(result, path)
     for heading in (
         "## 2. Readiness And Constructibility",
+        "## 5.1 Adversarial Validation Design",
         "## 6. Test Matrix",
         "## 7. Evidence Log",
         "## 8. Failure Triage",
@@ -616,16 +618,30 @@ def check_campaign_file(path: Path) -> LintResult:
             result.error("campaign-section-missing", f"Missing section: {heading}")
 
     readiness_section = extract_section(text, "## 2. Readiness And Constructibility")
+    validation_section = extract_section(text, "## 5.1 Adversarial Validation Design")
     result_section = extract_section(text, "## 9. Result")
     acceptance_section = extract_section(text, "## 11. Acceptance Record")
 
     readiness_fields = parse_strong_fields(readiness_section)
+    validation_fields = parse_strong_fields(validation_section)
     result_fields = parse_strong_fields(result_section)
     acceptance_fields = parse_strong_fields(acceptance_section)
 
     for field in ("readiness for validation handoff", "campaign constructibility"):
         if field not in readiness_fields:
             result.error("campaign-readiness-field-missing", f"Missing campaign field: {field}")
+    for field in (
+        "pass-bias guard completed",
+        "worst-case path included",
+        "negative/error path included",
+        "regression path included",
+        "real acceptance surface used",
+    ):
+        if field not in validation_fields:
+            result.error(
+                "campaign-validation-field-missing",
+                f"Missing campaign validation field: {field}",
+            )
     if "campaign result" not in result_fields:
         result.error("campaign-result-field-missing", "Missing campaign field: campaign result")
     for field in ("acceptance authority", "decision"):
@@ -638,6 +654,18 @@ def check_campaign_file(path: Path) -> LintResult:
 
     campaign_result = clean_cell(result_fields.get("campaign result", "")).lower()
     decision = clean_cell(acceptance_fields.get("decision", "")).lower()
+    pass_bias = clean_cell(validation_fields.get("pass-bias guard completed", "")).lower()
+    real_surface = clean_cell(validation_fields.get("real acceptance surface used", "")).lower()
+    if pass_bias != "yes":
+        result.error(
+            "campaign-pass-bias-guard-not-complete",
+            "Campaign must complete the pass-bias guard before it can be authoritative",
+        )
+    if real_surface == "no":
+        result.warning(
+            "campaign-real-surface-not-used",
+            "Campaign does not use the real acceptance surface; result may be support evidence only",
+        )
     needs_blockers = campaign_result in {"fail", "partial"} or (
         "constraint" in decision or decision in {"rejected", "deferred"}
     )

@@ -335,8 +335,10 @@ Commit at least:
 
 - after creating a requirements diff or equivalent scope-change document
 - after every code change that significantly changes behavior
-- after each completed implementation cycle
-- after each completed test campaign or equivalent validation cycle
+- after each completed implementation cycle, once the packet and `IMPL-INDEX.md`
+  have been aligned
+- after each accepted test campaign or equivalent validation cycle, once full
+  documentation and traceability alignment have been completed
 - after important cleanup that removes dead code or obsolete flow
 
 Commit rules:

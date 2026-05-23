@@ -2,9 +2,9 @@
 doc_type: flow_of_work_contract_index
 scope: development_control
 applies_to: multi-platform
-version: 0.2
+version: 0.3
 status: working
-last_updated: 2026-05-09
+last_updated: 2026-05-23
 ---
 
 # Flow Of Work Contract Index
@@ -31,6 +31,7 @@ Read in this order:
 5. `authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md`
 6. `authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md`
 7. `authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md`
+8. `authorities/flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md`
 
 ## 2. Document Roles
 
@@ -43,6 +44,7 @@ Read in this order:
 | `03-BEHAVIORAL-DEFINITION-GATE.md` | When is the agent blocked because behavior is not defined? |
 | `04-TEST-AND-HANDOFF-CONTRACT.md` | When is a packet ready for validation and how is evidence produced? |
 | `05-PROJECT-STRUCTURE.md` | Where do documents and project files go? |
+| `06-VALIDATION-EXECUTION-CONTRACT.md` | How must deterministic and live campaigns be designed so they find defects instead of merely passing? |
 
 ## 3. Authority Note
 

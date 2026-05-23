@@ -1,8 +1,8 @@
 # 05 — Project Structure
 
-**Version:** 0.2
+**Version:** 0.3
 **Status:** working
-**Last updated:** 2026-05-09
+**Last updated:** 2026-05-23
 
 ---
 
@@ -74,7 +74,8 @@ separation that the governance contract depends on.
     │   ├── 02-DOCSET-GOVERNANCE-CONTRACT.md
     │   ├── 03-BEHAVIORAL-DEFINITION-GATE.md
     │   ├── 04-TEST-AND-HANDOFF-CONTRACT.md
-    │   └── 05-PROJECT-STRUCTURE.md
+    │   ├── 05-PROJECT-STRUCTURE.md
+    │   └── 06-VALIDATION-EXECUTION-CONTRACT.md
     ├── baseline/                    # stable accepted product requirements
     │   ├── REQUIREMENTS.md
     │   ├── REQUIREMENTS_FUNCTIONAL.md
@@ -127,7 +128,7 @@ they are not part of the canonical steady-state structure:
 | `/` (root) | Immediate model and user entry points plus installed integration bootstrap and code workflow contract | — | Any authority document other than AGENT.md and README.md, except `CODE-BOOTSTRAP.md`, `CODE-WORKFLOW-CONTRACT.md`, and temporary adoption bootstraps during active adoption |
 | `src/` | Project source code | Project-specific | Authority documents, test evidence |
 | `config/` | Configuration files | Project-specific | Source code, authority documents |
-| `tests/` | Automated test code and harnesses | `04-TEST-AND-HANDOFF-CONTRACT.md` | TestCampaign documents (those belong in campaigns/) |
+| `tests/` | Automated test code and harnesses | `04-TEST-AND-HANDOFF-CONTRACT.md` and `06-VALIDATION-EXECUTION-CONTRACT.md` | TestCampaign documents (those belong in campaigns/) |
 | `tools/` | Installed governance CLI and project utility scripts | `05-PROJECT-STRUCTURE.md` and project-specific tool policy | Authority documents, product requirements, campaign evidence |
 | `release/` | Release artifacts — see section 4.7 | Project-specific | Authority documents, source code |
 | `authorities/` | Full project authority docset | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Source code, build artifacts |
@@ -139,7 +140,7 @@ they are not part of the canonical steady-state structure:
 | `authorities/diffs/` | Active diff index, current and historical scope evolution, and local diff creation template | `01-LLM-SESSION-CONTRACT.md` | Accepted baseline text, test evidence |
 | `authorities/impl/` | Bounded execution history plus its local creation template | `01-LLM-SESSION-CONTRACT.md` | Requirements, test campaigns |
 | `authorities/reviews/` | Review holds, clarification records, and local review templates | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Implementation plans, campaign evidence |
-| `authorities/campaigns/` | Validation evidence, campaign navigation, environment helper, and local campaign creation template | `04-TEST-AND-HANDOFF-CONTRACT.md` | Implementation plans, requirements |
+| `authorities/campaigns/` | Validation evidence, campaign navigation, environment helper, and local campaign creation template | `04-TEST-AND-HANDOFF-CONTRACT.md` and `06-VALIDATION-EXECUTION-CONTRACT.md` | Implementation plans, requirements |
 | `authorities/TRACEABILITY_MATRIX.md` | Accepted factual state across all layers | `02-DOCSET-GOVERNANCE-CONTRACT.md` | Future intent, speculative status |
 
 ---

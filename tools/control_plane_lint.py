@@ -412,6 +412,7 @@ def check_framework_mode(result: LintResult) -> None:
         "flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md",
         "flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md",
         "flow-of-work-contract/05-PROJECT-STRUCTURE.md",
+        "flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md",
     ]
     for relpath in required_files:
         require_exists(result, root, relpath)
@@ -448,6 +449,7 @@ def check_framework_mode(result: LintResult) -> None:
         "flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md",
         "flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md",
         "flow-of-work-contract/05-PROJECT-STRUCTURE.md",
+        "flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md",
     ]
     forbidden_refs = {
         "MANUAL-STARTER.md": "legacy-manual-starter-ref",
@@ -628,6 +630,11 @@ def check_framework_mode(result: LintResult) -> None:
             "structure-diff-index",
             "05-PROJECT-STRUCTURE.md does not declare REQUIREMENTS_DIFF_INDEX.md",
         )
+    if "06-VALIDATION-EXECUTION-CONTRACT.md" not in structure_doc:
+        result.error(
+            "structure-validation-contract",
+            "05-PROJECT-STRUCTURE.md does not declare 06-VALIDATION-EXECUTION-CONTRACT.md",
+        )
     for template_name in (
         "REQUIREMENTS-DIFF-TEMPLATE.md",
         "IMPL-TEMPLATE.md",
@@ -673,6 +680,7 @@ def check_workspace_mode(result: LintResult) -> None:
         "authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md",
         "authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md",
         "authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md",
+        "authorities/flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md",
         "authorities/manual/MANUAL-BOOTSTRAP.md",
         "authorities/manual/REACHING-THE-LLMS.md",
     ]

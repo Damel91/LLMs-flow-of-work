@@ -2,9 +2,9 @@
 doc_type: docset_governance_contract
 scope: documentation_control
 applies_to: multi-platform
-version: 0.5
+version: 0.6
 status: working
-last_updated: 2026-05-22
+last_updated: 2026-05-23
 ---
 
 # Docset Governance Contract
@@ -32,6 +32,13 @@ last_updated: 2026-05-22
 12. If an `IMPL-*` packet has the wrong boundary but contains valid decisions,
     preserve those decisions in the active diff or replacement family instead
     of executing the packet as written.
+13. After each implemented packet, update the packet itself and `IMPL-INDEX.md`
+    before moving to validation.
+14. Full documentation alignment happens only after a green campaign or after
+    explicit user acceptance of a partial/constrained campaign.
+15. If a campaign exposes blockers, keep the evidence, route fixing packets,
+    rerun regression/live validation, and delay full documentation alignment
+    until acceptance.
 
 ## 1. Purpose
 
@@ -73,8 +80,10 @@ Use the following authority order when working on an active initiative:
 11. `TEST-CAMPAIGN-INDEX.md` for campaign navigation and acceptance-state lookup
 12. `TEST-ENVIRONMENT-STARTUP.md` for reusable validation startup procedure,
     when a campaign references it
-13. `TestCampaign-*` for acceptance evidence
-14. `TRACEABILITY_MATRIX.md` for accepted factual status
+13. `06-VALIDATION-EXECUTION-CONTRACT.md` for validation design and execution
+    quality
+14. `TestCampaign-*` for acceptance evidence
+15. `TRACEABILITY_MATRIX.md` for accepted factual status
 
 Important distinction:
 
@@ -104,6 +113,7 @@ Older diffs are historical records, not mutable working drafts.
 | `Review-*` / `REVIEW-*` | Clarification, risk, or acceptance hold record | implementation packet or evidence |
 | `TEST-CAMPAIGN-INDEX.md` | Campaign navigation, campaign acceptance state, and active review links | validation evidence |
 | `TEST-ENVIRONMENT-STARTUP.md` | Reusable environment startup and preflight procedure for campaigns | campaign result or acceptance evidence |
+| `06-VALIDATION-EXECUTION-CONTRACT.md` | Validation design and execution quality contract | campaign evidence or implementation plan |
 | `TestCampaign-*` | Executed validation evidence | implementation plan |
 | `TRACEABILITY_MATRIX.md` | Accepted repo reality | future intent |
 
@@ -195,8 +205,9 @@ When documents disagree, resolve them in this order:
 7. scenario meaning from `USE_CASES_AND_SEQUENCES.md`
 8. bounded execution details from active `IMPL-*`
 9. active review holds for affected scope
-10. factual evidence from `TestCampaign-*`
-11. accepted status from `TRACEABILITY_MATRIX.md`
+10. validation execution rules from `06-VALIDATION-EXECUTION-CONTRACT.md`
+11. factual evidence from `TestCampaign-*`
+12. accepted status from `TRACEABILITY_MATRIX.md`
 
 If an active diff explicitly changes scenario meaning for a bounded scope, that
 scoped reading prevails over conflicting passages in
@@ -225,6 +236,36 @@ After an initiative is accepted through evidence:
 
 Canonical refresh is a curation activity, not an automatic acceptance step.
 Baseline is not required to absorb every accepted diff.
+
+### 7.1 Packet Completion Versus Campaign Acceptance
+
+Packet completion and campaign acceptance are different document events.
+
+After each implemented packet or subpacket, update only packet-execution state:
+
+- the packet status, evidence notes, and residual risks;
+- `IMPL-INDEX.md`;
+- review holds or review index rows that the packet actually resolves;
+- deterministic self-check notes.
+
+Do not perform full documentation alignment at this point. Do not update
+`TRACEABILITY_MATRIX.md` as accepted reality from implementation completion
+alone.
+
+After a campaign is green, or after the user explicitly accepts a partial or
+constrained campaign, perform full documentation alignment:
+
+- update the campaign record and `TEST-CAMPAIGN-INDEX.md`;
+- update `TRACEABILITY_MATRIX.md` from accepted evidence;
+- update `REQUIREMENTS_DIFF_INDEX.md`, `REVIEW-INDEX.md`, blocker ledgers, and
+  follow-up routing when their factual state changed;
+- refresh canonical baseline or interaction documents only when curated
+  restatement improves readability or removes stale supersession.
+
+If a campaign fails or records blockers, keep the campaign as evidence and route
+the blockers into fixing `IMPL-*` packets or a successor diff. Full
+documentation alignment waits until the relevant validation is green or
+explicitly accepted.
 
 ## 8. Initiative Ledger Rule
 

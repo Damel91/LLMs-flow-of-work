@@ -177,12 +177,14 @@ Concrete packets:
 3. Open one atomic `IMPL-*`, or a root family plus subpackets when the boundary
    is coherent but too broad for one slice.
 4. Execute only what the active model can safely self-validate.
-5. Run model code review before handoff.
-6. Check `REVIEW-INDEX.md` before handoff if any review hold overlaps the
+5. After each implemented packet, update the packet status and this index.
+6. Run model code review before handoff.
+7. Check `REVIEW-INDEX.md` before handoff if any review hold overlaps the
    packet.
-7. Open a `TestCampaign-*` only after the readiness gate passes, and update
+8. Open a `TestCampaign-*` only after the readiness gate passes, and update
    `TEST-CAMPAIGN-INDEX.md` when the campaign state changes.
-8. Update the installed `TRACEABILITY_MATRIX.md` only from evidence.
+9. Update the installed `TRACEABILITY_MATRIX.md` only after accepted campaign
+   evidence.
 
 **When resuming a session:**
 

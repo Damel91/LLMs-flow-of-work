@@ -93,13 +93,40 @@ deviation from its standard sequence.
 
 ---
 
+## 5.1 Adversarial Validation Design
+
+Campaigns must follow `06-VALIDATION-EXECUTION-CONTRACT.md`.
+
+**Pass-bias guard completed:** [yes / no]
+
+**Worst-case path included:** [yes / no / not_applicable]
+
+**Negative/error path included:** [yes / no / not_applicable]
+
+**Regression path included:** [yes / no / not_applicable]
+
+**Real acceptance surface used:** [yes / no / not_applicable]
+
+Risk questions:
+
+- [what failure would prove this is not implemented correctly?]
+- [which setup mistake could create a false pass?]
+- [which previous blocker or regression seam is protected?]
+- [which expected result was fixed before execution and must not be weakened?]
+
+If any relevant path is omitted, state why the campaign remains interpretable.
+
+---
+
 ## 6. Test Matrix
 
 | Test | Purpose | Steps | Expected result | Actual result | Status |
 |---|---|---|---|---|---|
 | T0 | Environment preflight | [steps] | [expected] | [observed] | [PASS / FAIL / PARTIAL / NOT RUN] |
 | T1 | Main behavior | [steps] | [expected] | [observed] | [PASS / FAIL / PARTIAL / NOT RUN] |
-| T2 | Regression / edge case | [steps] | [expected] | [observed] | [PASS / FAIL / PARTIAL / NOT RUN] |
+| T2 | Worst-case / adversarial path | [steps] | [expected] | [observed] | [PASS / FAIL / PARTIAL / NOT RUN] |
+| T3 | Regression / edge case | [steps] | [expected] | [observed] | [PASS / FAIL / PARTIAL / NOT RUN] |
+| T4 | Negative / error path | [steps] | [expected] | [observed] | [PASS / FAIL / PARTIAL / NOT RUN] |
 
 Separate executed tests from non-executed tests. Do not mark a test `PASS`
 unless it was actually exercised.
@@ -181,7 +208,7 @@ Do not introduce matrix states outside `Implemented`, `Partial`, and `Gap`.
 
 ## 11. Acceptance Record
 
-**Acceptance authority:** [user / delegated model / not accepted]
+**Acceptance authority:** [green campaign default / user / delegated model / not accepted]
 
 **Decision:** [accepted / rejected / accepted with constraints / deferred]
 
@@ -190,3 +217,7 @@ Do not introduce matrix states outside `Implemented`, `Partial`, and `Gap`.
 [short factual note]
 
 **Campaign index update:** [updated / not updated / not required]
+
+**Full documentation alignment:** [completed / blocked / not required]
+
+**Traceability matrix update:** [completed after accepted evidence / blocked / not required]

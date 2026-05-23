@@ -2,9 +2,9 @@
 doc_type: test_and_handoff_contract
 scope: validation_control
 applies_to: multi-platform
-version: 0.6
+version: 0.7
 status: working
-last_updated: 2026-05-22
+last_updated: 2026-05-23
 ---
 
 # Test And Handoff Contract
@@ -30,6 +30,10 @@ last_updated: 2026-05-22
     or shutdown.
 11. Before accepting or handing off a campaign, use the installed campaign
     check (`flowctl.sh check campaign`) when available.
+12. Campaign execution must follow `06-VALIDATION-EXECUTION-CONTRACT.md`.
+    Tests are designed to find blockers, not to make the packet look done.
+13. After packet implementation, update the packet and `IMPL-INDEX.md`; do not
+    perform full documentation alignment until campaign acceptance.
 
 ## 1. Readiness Gate
 
@@ -48,6 +52,20 @@ predictable from the current code and review state.
 If predictable blockers remain, the model must continue implementation inside
 the current packet boundary or explicitly declare a blocked condition that
 requires user routing.
+
+### 1.2 Post-Packet Documentation Gate
+
+Before validation handoff, each implemented packet or subpacket must have its
+execution state aligned:
+
+- packet status updated;
+- deterministic self-checks and residual risks recorded;
+- `IMPL-INDEX.md` updated;
+- active review holds updated only if the packet resolved them.
+
+This is not full documentation alignment. It must not move
+`TRACEABILITY_MATRIX.md` to accepted reality and must not mark the active diff
+accepted.
 
 ### 1.1 Campaign Constructibility Gate
 
@@ -167,6 +185,11 @@ The test result is the basis for:
 
 Manual testing is an acceptance activity, not an exploratory debugging phase.
 
+Campaign test design and execution must satisfy
+`06-VALIDATION-EXECUTION-CONTRACT.md`. A campaign that tests only the happy path,
+uses a lower-level probe to avoid the real acceptance surface, or weakens
+expected results after execution is not authoritative acceptance evidence.
+
 ### 3.1 Partial Campaign Acceptance
 
 `PARTIAL` is a valid campaign result when the evidence clearly separates what
@@ -199,6 +222,29 @@ The campaign should include a blocker ledger with:
 - destination document or packet
 
 This prevents `PARTIAL` from becoming an ambiguous narrative status.
+
+### 3.1.1 Acceptance And Full Documentation Alignment
+
+When a campaign is fully green, or when the user explicitly accepts a partial or
+constrained campaign, full documentation alignment may proceed.
+
+Full alignment may include:
+
+- campaign record and `TEST-CAMPAIGN-INDEX.md`;
+- `TRACEABILITY_MATRIX.md`;
+- diff index state;
+- review index and hold state;
+- blocker ledger routing;
+- canonical baseline or sequence refresh where useful.
+
+If every acceptance test is green and no blockers remain, the campaign is
+accepted evidence by default unless its acceptance record explicitly requires
+manual user acceptance. If the campaign declares the user as the sole acceptance
+authority, the user must still accept it explicitly.
+
+If the campaign is not green and is not accepted by the user, full alignment is
+blocked. Open or continue fixing `IMPL-*` packets, add regression coverage where
+required, and rerun the relevant campaign slice.
 
 ## 3.2 Repeated Bug-Fix Loop Rule
 

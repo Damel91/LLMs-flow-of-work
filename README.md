@@ -47,7 +47,7 @@ In all three states the user remains the routing authority, answers one question
 ## What this repository contains
 
 ```
-flow-of-work-contract/        the five governance contracts
+flow-of-work-contract/        the governance contracts
 templates/                    installation templates and document creation templates
 STARTER.md                    guided LLM-driven adoption (single entry point)
 CODE-BOOTSTRAP.md             post-adoption code integration tool
@@ -57,7 +57,7 @@ tools/                        governance CLI and control-plane integrity utiliti
 reader/md-reader.html         offline Markdown reader (optional utility)
 ```
 
-The five governance contracts are the core of the system. `STARTER.md` is the adoption tool that runs once and steps aside. `CODE-BOOTSTRAP.md` is a post-adoption integration tool that is installed into destination projects and invoked only when operational state requires it. In the current framework version, that active use is the first working session of a code-first project. `CODE-WORKFLOW-CONTRACT.md` is installed at the destination project root and governs code, prompt, parser, routing, graph, workspace, apply, regression, and commit discipline during development work. The templates are the installation blueprints: some are copied directly into the destination project, while `AGENT-TEMPLATE.md` is used as the working source for the final installed `AGENT.md`. The `manual/` directory is installed under `authorities/manual/` in destination projects and provides the user operating manual plus its onboarding bootstrap. The reader is a convenience utility with no operational role.
+The governance contracts are the core of the system. `STARTER.md` is the adoption tool that runs once and steps aside. `CODE-BOOTSTRAP.md` is a post-adoption integration tool that is installed into destination projects and invoked only when operational state requires it. In the current framework version, that active use is the first working session of a code-first project. `CODE-WORKFLOW-CONTRACT.md` is installed at the destination project root and governs code, prompt, parser, routing, graph, workspace, apply, regression, and commit discipline during development work. The templates are the installation blueprints: some are copied directly into the destination project, while `AGENT-TEMPLATE.md` is used as the working source for the final installed `AGENT.md`. The `manual/` directory is installed under `authorities/manual/` in destination projects and provides the user operating manual plus its onboarding bootstrap. The reader is a convenience utility with no operational role.
 
 The `templates/` directory also includes creation templates, navigation
 indexes, and reusable test helpers for the main operational artifacts:

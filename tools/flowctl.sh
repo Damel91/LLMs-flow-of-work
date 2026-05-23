@@ -504,7 +504,8 @@ check_framework_mode() {
     "flow-of-work-contract/02-DOCSET-GOVERNANCE-CONTRACT.md" \
     "flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md" \
     "flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md" \
-    "flow-of-work-contract/05-PROJECT-STRUCTURE.md"
+    "flow-of-work-contract/05-PROJECT-STRUCTURE.md" \
+    "flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md"
   do
     require_exists "$root" "$f"
   done
@@ -529,6 +530,7 @@ check_framework_mode() {
     "flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md"
     "flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md"
     "flow-of-work-contract/05-PROJECT-STRUCTURE.md"
+    "flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md"
   )
 
   local relpath text
@@ -678,6 +680,9 @@ check_framework_mode() {
   printf '%s\n' "$structure_doc" | grep -qF "REQUIREMENTS_DIFF_INDEX.md" || \
     emit_error "structure-diff-index" \
       "05-PROJECT-STRUCTURE.md does not declare REQUIREMENTS_DIFF_INDEX.md"
+  printf '%s\n' "$structure_doc" | grep -qF "06-VALIDATION-EXECUTION-CONTRACT.md" || \
+    emit_error "structure-validation-contract" \
+      "05-PROJECT-STRUCTURE.md does not declare 06-VALIDATION-EXECUTION-CONTRACT.md"
   for tname in \
     "REQUIREMENTS-DIFF-TEMPLATE.md" "IMPL-TEMPLATE.md" \
     "REVIEW-INDEX.md" "REVIEW-TEMPLATE.md" \
@@ -718,6 +723,7 @@ check_workspace_mode() {
     "authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md" \
     "authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md" \
     "authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md" \
+    "authorities/flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md" \
     "authorities/manual/MANUAL-BOOTSTRAP.md" \
     "authorities/manual/REACHING-THE-LLMS.md"
   do
@@ -1167,6 +1173,7 @@ check_campaign_file() {
   local heading
   for heading in \
     "## 2. Readiness And Constructibility" \
+    "## 5.1 Adversarial Validation Design" \
     "## 6. Test Matrix" \
     "## 7. Evidence Log" \
     "## 8. Failure Triage" \
@@ -1179,8 +1186,9 @@ check_campaign_file() {
       emit_error "campaign-section-missing" "Missing section: $heading"
   done
 
-  local readiness_section result_section acceptance_section
+  local readiness_section validation_section result_section acceptance_section
   readiness_section=$(extract_section "$text" "## 2. Readiness And Constructibility")
+  validation_section=$(extract_section "$text" "## 5.1 Adversarial Validation Design")
   result_section=$(extract_section "$text" "## 9. Result")
   acceptance_section=$(extract_section "$text" "## 11. Acceptance Record")
 
@@ -1188,6 +1196,16 @@ check_campaign_file() {
   for field in "readiness for validation handoff" "campaign constructibility"; do
     [[ -z "$(get_strong_field "$readiness_section" "$field")" ]] && \
       emit_error "campaign-readiness-field-missing" "Missing campaign field: $field"
+  done
+  for field in \
+    "pass-bias guard completed" \
+    "worst-case path included" \
+    "negative/error path included" \
+    "regression path included" \
+    "real acceptance surface used"
+  do
+    [[ -z "$(get_strong_field "$validation_section" "$field")" ]] && \
+      emit_error "campaign-validation-field-missing" "Missing campaign validation field: $field"
   done
   [[ -z "$(get_strong_field "$result_section" "campaign result")" ]] && \
     emit_error "campaign-result-field-missing" "Missing campaign field: campaign result"
@@ -1205,6 +1223,18 @@ check_campaign_file() {
   campaign_result=$(printf '%s' "$campaign_result" | tr '[:upper:]' '[:lower:]')
   decision=$(clean_cell "$(get_strong_field "$acceptance_section" "decision")")
   decision=$(printf '%s' "$decision" | tr '[:upper:]' '[:lower:]')
+
+  local pass_bias real_surface
+  pass_bias=$(clean_cell "$(get_strong_field "$validation_section" "pass-bias guard completed")")
+  pass_bias=$(printf '%s' "$pass_bias" | tr '[:upper:]' '[:lower:]')
+  real_surface=$(clean_cell "$(get_strong_field "$validation_section" "real acceptance surface used")")
+  real_surface=$(printf '%s' "$real_surface" | tr '[:upper:]' '[:lower:]')
+  [[ "$pass_bias" != "yes" ]] && \
+    emit_error "campaign-pass-bias-guard-not-complete" \
+      "Campaign must complete the pass-bias guard before it can be authoritative"
+  [[ "$real_surface" == "no" ]] && \
+    emit_warning "campaign-real-surface-not-used" \
+      "Campaign does not use the real acceptance surface; result may be support evidence only"
 
   case "$campaign_result" in
     fail|partial) must_have_blockers=1 ;;
@@ -1281,7 +1311,7 @@ check_workspace_sync() {
   for name in \
     "00-INDEX.md" "01-LLM-SESSION-CONTRACT.md" "02-DOCSET-GOVERNANCE-CONTRACT.md" \
     "03-BEHAVIORAL-DEFINITION-GATE.md" "04-TEST-AND-HANDOFF-CONTRACT.md" \
-    "05-PROJECT-STRUCTURE.md"
+    "05-PROJECT-STRUCTURE.md" "06-VALIDATION-EXECUTION-CONTRACT.md"
   do
     sync_compare_file "$framework" "$workspace" \
       "flow-of-work-contract/$name" "authorities/flow-of-work-contract/$name"
@@ -1348,7 +1378,7 @@ cmd_status() {
     for name in \
       "00-INDEX.md" "01-LLM-SESSION-CONTRACT.md" "02-DOCSET-GOVERNANCE-CONTRACT.md" \
       "03-BEHAVIORAL-DEFINITION-GATE.md" "04-TEST-AND-HANDOFF-CONTRACT.md" \
-      "05-PROJECT-STRUCTURE.md"
+      "05-PROJECT-STRUCTURE.md" "06-VALIDATION-EXECUTION-CONTRACT.md"
     do
       local p="$root/flow-of-work-contract/$name" status
       [[ -f "$p" ]] && status=$(metadata_status "$p") || status="missing"

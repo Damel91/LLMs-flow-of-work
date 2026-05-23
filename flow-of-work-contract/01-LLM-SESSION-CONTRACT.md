@@ -2,9 +2,9 @@
 doc_type: llm_session_contract
 scope: development_control
 applies_to: multi-platform
-version: 0.5
+version: 0.6
 status: working
-last_updated: 2026-05-22
+last_updated: 2026-05-23
 ---
 
 # LLM Session Contract
@@ -26,9 +26,12 @@ Use this sequence unless a project-specific overlay says otherwise:
 5. Execute all work the active LLM can safely implement and self-check
    inside that packet scope.
 6. Run model-side code review.
-7. Apply the behavior-definition gate and the readiness gate before handoff.
-8. Route test evidence through the test and handoff contract.
-9. Update `TRACEABILITY_MATRIX.md` only from evidence.
+7. After each implemented packet, update the packet and `IMPL-INDEX.md`.
+8. Apply the behavior-definition gate and the readiness gate before handoff.
+9. Route test evidence through the test, handoff, and validation execution
+   contracts.
+10. After an accepted campaign, do full documentation alignment and update
+    `TRACEABILITY_MATRIX.md` from accepted evidence.
 
 ## 1. Purpose
 
@@ -70,6 +73,7 @@ Read in this order:
 3. `03-BEHAVIORAL-DEFINITION-GATE.md`
 4. this document
 5. `04-TEST-AND-HANDOFF-CONTRACT.md`
+6. `06-VALIDATION-EXECUTION-CONTRACT.md`
 
 ## 4. Decision Gate
 
@@ -263,8 +267,10 @@ Required setup:
 | IMPL | Accepted requirement scope or fix scope | one atomic `IMPL-*`, or one root family with atomic subpackets | Required for non-trivial execution |
 | Execution | active IMPL | code or docs changes | Must stay inside packet scope and inside the LLM capability boundary |
 | Model review | changed code + active IMPL + docs | findings / residual risks | Pre-test quality gate |
+| Packet documentation alignment | implemented packet + self-check evidence | updated packet and `IMPL-INDEX.md` | Required after every implemented packet |
 | Readiness and behavior gates | implemented result + review | handoff decision or blocked state | Blocks premature validation |
-| Traceability update | test evidence | factual matrix refresh | Never before evidence |
+| Validation execution | campaign plan + implementation | deterministic/live evidence | Must be adversarial and interpretable |
+| Full documentation alignment | accepted campaign evidence | updated campaign index, matrix, review/diff state as needed | Never before campaign acceptance |
 | Canonical refresh | accepted contract change | optional curated docs refresh | Only when a restatement improves readability or removes stale supersession |
 
 ### 6.2 Phase Details
@@ -364,7 +370,34 @@ Review output must be:
 
 This is not final acceptance.
 
-#### Phase F — Traceability Matrix Update
+#### Phase F — Packet Documentation Alignment
+
+After every implemented packet or subpacket, update only the execution-layer
+documents that describe packet progress:
+
+- the packet status and evidence notes
+- `IMPL-INDEX.md`
+- active review or hold records, only if the packet resolves them
+- deterministic self-check notes or residual risk
+
+Do not use this phase for full documentation alignment. Do not update
+`TRACEABILITY_MATRIX.md` as accepted product reality just because the packet was
+implemented.
+
+#### Phase G — Validation Execution
+
+Validation evidence flows through `04-TEST-AND-HANDOFF-CONTRACT.md` and
+`06-VALIDATION-EXECUTION-CONTRACT.md`.
+
+Campaigns must be designed to expose failures, including worst-case,
+regression, negative/error, and isolation paths when relevant. A campaign that
+only proves the easy path is weak evidence even if it is green.
+
+If a campaign fails or is partial, preserve the campaign as evidence, route
+blockers into fixing `IMPL-*` packets or a successor diff, add targeted
+regression coverage where required, and rerun the relevant campaign slice.
+
+#### Phase H — Full Documentation And Traceability Alignment
 
 `TRACEABILITY_MATRIX.md` may be updated only after evidence exists.
 
@@ -376,14 +409,23 @@ Allowed factual outcomes:
 
 The matrix reflects repo reality, not intended future state.
 
-For worker behavior, one accepted operational reading matters here:
+Implementation-level self-checks may be recorded in the packet and `IMPL-INDEX`,
+but they do not move the matrix by themselves. The default rule is no matrix
+movement before campaign evidence is accepted.
 
-- `Partial` may record that a requirement is implemented at code level and
-  self-checked, but still awaiting its first authoritative campaign
+Full documentation alignment happens after a campaign is green and accepted, or
+after the user explicitly accepts a partial/constrained campaign.
 
-This is a factual conservative state, not final acceptance.
+It may update:
 
-#### Phase G — Canonical Documentation Refresh
+- `TEST-CAMPAIGN-INDEX.md`
+- `TRACEABILITY_MATRIX.md`
+- `REQUIREMENTS_DIFF_INDEX.md`
+- `REVIEW-INDEX.md`
+- blocker ledgers and follow-up routing
+- canonical baseline or interactions, only if curated restatement is useful
+
+#### Phase I — Canonical Documentation Refresh
 
 If the accepted work changes the product contract, canonical docs may then be
 refreshed only where a curated restatement improves readability or resolves

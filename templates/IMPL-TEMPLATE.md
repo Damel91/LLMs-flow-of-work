@@ -213,6 +213,14 @@ Before handoff, run focused checks when the corresponding artifacts changed:
 - `bash tools/flowctl.sh check diff [governing-diff]`
 - `bash tools/flowctl.sh check campaign [campaign]`
 
+Post-packet documentation alignment before validation handoff:
+
+- [packet status updated]
+- [`IMPL-INDEX.md` updated]
+- [self-check evidence recorded]
+- [active review holds updated only if resolved]
+- [`TRACEABILITY_MATRIX.md` not updated before accepted campaign evidence]
+
 Partial acceptance routing, if applicable:
 
 | Potential blocker | Expected routing if campaign is PARTIAL |
@@ -223,14 +231,15 @@ Partial acceptance routing, if applicable:
 
 ## 9. Traceability Impact
 
-Expected matrix movement after evidence exists.
+Expected matrix movement after accepted campaign evidence exists.
 
 | Requirement ID | Expected status | Evidence needed |
 |---|---|---|
 | [ID] | [Implemented / Partial / Gap] | [campaign or review basis] |
 
-Do not update `TRACEABILITY_MATRIX.md` during execution unless the project has
-explicit evidence sufficient for the target status.
+Do not update `TRACEABILITY_MATRIX.md` during packet execution. Packet
+completion updates this packet and `IMPL-INDEX.md`; matrix movement waits for a
+green or explicitly accepted campaign.
 
 For requirements introduced by an active successor diff but not yet
 implemented, prefer `Gap` with a note pointing to the active diff or planned

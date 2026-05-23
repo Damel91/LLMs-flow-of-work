@@ -128,6 +128,7 @@ The framework repo must contain at least:
 - `flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md`
 - `flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md`
 - `flow-of-work-contract/05-PROJECT-STRUCTURE.md`
+- `flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md`
 
 If one is missing: `error`.
 
@@ -295,6 +296,7 @@ The adopted workspace must contain at least:
 - `authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md`
 - `authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md`
 - `authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md`
+- `authorities/flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md`
 - `authorities/manual/MANUAL-BOOTSTRAP.md`
 - `authorities/manual/REACHING-THE-LLMS.md`
 
@@ -535,6 +537,11 @@ that most often drift during long LLM work:
 - `check matrix`
 - `check diff`
 - `check campaign`
+
+`check campaign` must verify the validation-execution fields from
+`06-VALIDATION-EXECUTION-CONTRACT.md`, including the adversarial validation
+section and pass-bias guard. A campaign that has not completed the pass-bias
+guard is not authoritative acceptance evidence.
 
 The framework repository may also expose `sync-check`, which compares installed
 workspace control-plane files against the current framework repository. This is

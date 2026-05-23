@@ -65,22 +65,23 @@ Before starting the guided procedure, read in this order:
 4. `flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md`
 5. `flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md`
 6. `flow-of-work-contract/05-PROJECT-STRUCTURE.md`
-7. `templates/PROJECT-OVERLAY.md`
-8. `templates/AGENT-TEMPLATE.md`
-9. `templates/IMPL-INDEX.md`
-10. `templates/TRACEABILITY_MATRIX.md`
-11. `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
-12. `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`
-13. `templates/IMPL-TEMPLATE.md`
-14. `templates/REVIEW-INDEX-TEMPLATE.md`
-15. `templates/REVIEW-TEMPLATE.md`
-16. `templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md`
-17. `templates/TEST-CAMPAIGN-TEMPLATE.md`
-18. `templates/TEST-ENVIRONMENT-STARTUP-TEMPLATE.md`
-19. `CODE-WORKFLOW-CONTRACT.md`
-20. `CODE-BOOTSTRAP.md`
-21. `manual/REACHING-THE-LLMS.md`
-22. `manual/MANUAL-BOOTSTRAP.md`
+7. `flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md`
+8. `templates/PROJECT-OVERLAY.md`
+9. `templates/AGENT-TEMPLATE.md`
+10. `templates/IMPL-INDEX.md`
+11. `templates/TRACEABILITY_MATRIX.md`
+12. `templates/REQUIREMENTS-DIFF-TEMPLATE.md`
+13. `templates/REQUIREMENTS-DIFF-INDEX-TEMPLATE.md`
+14. `templates/IMPL-TEMPLATE.md`
+15. `templates/REVIEW-INDEX-TEMPLATE.md`
+16. `templates/REVIEW-TEMPLATE.md`
+17. `templates/TEST-CAMPAIGN-INDEX-TEMPLATE.md`
+18. `templates/TEST-CAMPAIGN-TEMPLATE.md`
+19. `templates/TEST-ENVIRONMENT-STARTUP-TEMPLATE.md`
+20. `CODE-WORKFLOW-CONTRACT.md`
+21. `CODE-BOOTSTRAP.md`
+22. `manual/REACHING-THE-LLMS.md`
+23. `manual/MANUAL-BOOTSTRAP.md`
 
 Goal:
 
@@ -636,6 +637,7 @@ Check at least:
 - `authorities/flow-of-work-contract/03-BEHAVIORAL-DEFINITION-GATE.md` exists
 - `authorities/flow-of-work-contract/04-TEST-AND-HANDOFF-CONTRACT.md` exists
 - `authorities/flow-of-work-contract/05-PROJECT-STRUCTURE.md` exists
+- `authorities/flow-of-work-contract/06-VALIDATION-EXECUTION-CONTRACT.md` exists
 - `authorities/TRACEABILITY_MATRIX.md` exists
 - `authorities/manual/MANUAL-BOOTSTRAP.md` exists
 - `authorities/manual/REACHING-THE-LLMS.md` exists
