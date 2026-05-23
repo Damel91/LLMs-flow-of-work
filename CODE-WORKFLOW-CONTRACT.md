@@ -335,8 +335,8 @@ Commit at least:
 
 - after creating a requirements diff or equivalent scope-change document
 - after every code change that significantly changes behavior
-- after each completed implementation cycle, once the packet and `IMPL-INDEX.md`
-  have been aligned
+- after each completed, scaffolded, partial, or blocked implementation cycle,
+  once the packet completion ledger and `IMPL-INDEX.md` have been aligned
 - after each accepted test campaign or equivalent validation cycle, once full
   documentation and traceability alignment have been completed
 - after important cleanup that removes dead code or obsolete flow
@@ -351,6 +351,10 @@ Commit rules:
 - do not rewrite history without explicit approval
 
 Local commits are not acceptance. They are checkpoints that protect the work.
+
+A commit for a scaffolded cycle is a checkpoint only. It does not close the
+packet and must leave an explicit follow-up, blocker, deferral, supersession,
+or cancellation route in the packet and `IMPL-INDEX.md`.
 
 ---
 

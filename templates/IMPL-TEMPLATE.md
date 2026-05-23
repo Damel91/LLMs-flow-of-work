@@ -189,6 +189,36 @@ List what the active model can verify before handoff.
 Also state what cannot be validated by the model and must go to campaign or
 user acceptance.
 
+### 7.1 Completion Criteria Ledger
+
+Use this ledger to prevent movement from being confused with completion.
+Scaffolding, broad file edits, or a plausible bone structure are not enough to
+claim implementation closure.
+
+**Completion claim:** [not started / scaffolded / partial / implemented / blocked]
+**Movement-bias guard completed:** [yes / no]
+**Skeleton/stub-only changes present:** [yes / no]
+
+For every objective or acceptance criterion this packet owns, record concrete
+evidence and the verification performed.
+
+| Criterion / objective | Implementation evidence | Verification performed | Residual status |
+|---|---|---|---|
+| [criterion] | [file/function/doc path] | [test/review/check] | [complete / partial / blocked / deferred / not_applicable] |
+
+Rules:
+
+- `implemented` requires every in-scope criterion to be `complete` or
+  `not_applicable`.
+- `scaffolded` means structure exists but behavior is incomplete. It is
+  non-terminal: it must not be recorded as `Implemented`, `Merged`, or closed
+  in `IMPL-INDEX.md`, and it requires explicit routing to continued execution,
+  a follow-up packet, `Partial`, `Blocked`, `Deferred`, `Superseded`, or
+  `Cancelled`.
+- `partial`, `blocked`, and `deferred` rows require explicit routing in this
+  packet, a follow-up packet, review hold, or campaign blocker ledger.
+- Model confidence is not evidence.
+
 ---
 
 ## 8. Test And Handoff Plan
@@ -217,6 +247,7 @@ Post-packet documentation alignment before validation handoff:
 
 - [packet status updated]
 - [`IMPL-INDEX.md` updated]
+- [completion criteria ledger filled and consistent with packet/index status]
 - [self-check evidence recorded]
 - [active review holds updated only if resolved]
 - [`TRACEABILITY_MATRIX.md` not updated before accepted campaign evidence]

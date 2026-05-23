@@ -2,7 +2,7 @@
 doc_type: test_and_handoff_contract
 scope: validation_control
 applies_to: multi-platform
-version: 0.7
+version: 0.8
 status: working
 last_updated: 2026-05-23
 ---
@@ -34,6 +34,12 @@ last_updated: 2026-05-23
     Tests are designed to find blockers, not to make the packet look done.
 13. After packet implementation, update the packet and `IMPL-INDEX.md`; do not
     perform full documentation alignment until campaign acceptance.
+14. A packet whose completion criteria ledger contains scaffolded, partial,
+    blocked, or deferred in-scope rows is not ready for validation handoff as
+    an implemented packet. Route the remaining work first, or declare the
+    handoff as partial support evidence.
+15. `Scaffolded` is never a closure handoff state. It requires a follow-up
+    route before the packet can leave active execution.
 
 ## 1. Readiness Gate
 
@@ -59,9 +65,21 @@ Before validation handoff, each implemented packet or subpacket must have its
 execution state aligned:
 
 - packet status updated;
+- completion criteria ledger filled;
+- any scaffolded, partial, blocked, or deferred objective routed explicitly;
 - deterministic self-checks and residual risks recorded;
 - `IMPL-INDEX.md` updated;
 - active review holds updated only if the packet resolved them.
+
+`Implemented` may be used only when the completion ledger shows all in-scope
+objectives as complete or not applicable. If the packet produced a useful bone
+structure but did not complete behavior, the packet and index must say
+`Scaffolded`, `Partially merged`, `In progress`, or another accurate state
+from the installed IMPL index vocabulary.
+
+`Scaffolded` is not validation-ready as an implemented packet. It may support a
+campaign only when the campaign explicitly validates the scaffolded subset as
+support evidence and records the unfinished behavior as routed residual work.
 
 This is not full documentation alignment. It must not move
 `TRACEABILITY_MATRIX.md` to accepted reality and must not mark the active diff
@@ -343,6 +361,7 @@ Expected output:
 - executed vs non-executed tests clearly separated
 - relevant logs or observations captured
 - packet-specific regression checks clearly identified
+- packet completion state checked before authoritative validation
 - constructibility judgment made explicit when relevant
 - failure classification when the campaign does not pass
 - blocker ledger for `PARTIAL`, `FAIL`, or accepted-with-constraints results

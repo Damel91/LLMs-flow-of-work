@@ -2,7 +2,7 @@
 doc_type: llm_session_contract
 scope: development_control
 applies_to: multi-platform
-version: 0.6
+version: 0.7
 status: working
 last_updated: 2026-05-23
 ---
@@ -25,12 +25,17 @@ Use this sequence unless a project-specific overlay says otherwise:
    execution slice.
 5. Execute all work the active LLM can safely implement and self-check
    inside that packet scope.
-6. Run model-side code review.
-7. After each implemented packet, update the packet and `IMPL-INDEX.md`.
-8. Apply the behavior-definition gate and the readiness gate before handoff.
-9. Route test evidence through the test, handoff, and validation execution
+6. Fill the packet completion criteria ledger. Useful movement, scaffold, or
+   75/80% completion must be recorded as such, not as `Implemented`.
+7. Run model-side code review.
+8. After each implemented, scaffolded, partial, or blocked packet, update the
+   packet and `IMPL-INDEX.md` honestly. `Scaffolded` is non-terminal and must
+   route to continued work, a follow-up, or an explicit blocker/deferral state.
+9. Apply the behavior-definition gate, completion gate, and readiness gate
+   before handoff.
+10. Route test evidence through the test, handoff, and validation execution
    contracts.
-10. After an accepted campaign, do full documentation alignment and update
+11. After an accepted campaign, do full documentation alignment and update
     `TRACEABILITY_MATRIX.md` from accepted evidence.
 
 ## 1. Purpose
@@ -102,10 +107,16 @@ request.
    by a root `IMPL-*` family whose subpackets are atomic executable slices.
 7. The active LLM should complete all work inside its reliable execution and
    self-check boundary before handoff.
-8. `TRACEABILITY_MATRIX.md` is updated only from evidence.
-9. The active diff is selected by `REQUIREMENTS_DIFF_INDEX.md`, not by filename
+8. Movement is not completion. A packet cannot be marked `Implemented` unless
+   its completion criteria ledger proves that every in-scope objective is
+   complete or not applicable.
+9. If the active model says the chain is too long, difficult, context-heavy, or
+   only partially reliable, it must checkpoint the partial state instead of
+   presenting a scaffold as done.
+10. `TRACEABILITY_MATRIX.md` is updated only from evidence.
+11. The active diff is selected by `REQUIREMENTS_DIFF_INDEX.md`, not by filename
    ordering or by stale status fields inside individual diff files.
-10. Diff mutability and succession are governed by
+12. Diff mutability and succession are governed by
    `02-DOCSET-GOVERNANCE-CONTRACT.md`.
 
 ### 4.2 Concept Closure Checklist
@@ -267,8 +278,9 @@ Required setup:
 | IMPL | Accepted requirement scope or fix scope | one atomic `IMPL-*`, or one root family with atomic subpackets | Required for non-trivial execution |
 | Execution | active IMPL | code or docs changes | Must stay inside packet scope and inside the LLM capability boundary |
 | Model review | changed code + active IMPL + docs | findings / residual risks | Pre-test quality gate |
-| Packet documentation alignment | implemented packet + self-check evidence | updated packet and `IMPL-INDEX.md` | Required after every implemented packet |
-| Readiness and behavior gates | implemented result + review | handoff decision or blocked state | Blocks premature validation |
+| Completion gate | changed code + active IMPL + self-check evidence | completion criteria ledger | Required before claiming `Implemented` |
+| Packet documentation alignment | packet + completion ledger + self-check evidence | updated packet and `IMPL-INDEX.md` | Required after every implemented, scaffolded, partial, or blocked packet |
+| Readiness and behavior gates | packet result + review | handoff decision or blocked state | Blocks premature validation |
 | Validation execution | campaign plan + implementation | deterministic/live evidence | Must be adversarial and interpretable |
 | Full documentation alignment | accepted campaign evidence | updated campaign index, matrix, review/diff state as needed | Never before campaign acceptance |
 | Canonical refresh | accepted contract change | optional curated docs refresh | Only when a restatement improves readability or removes stale supersession |
@@ -341,6 +353,9 @@ Execution rules:
 - preserve existing documented constraints
 - keep edits minimal and explainable
 - complete all work the active LLM can safely self-validate before handoff
+- do not optimize for visible movement over completion
+- do not treat broad scaffolding, interface creation, or plausible wiring as
+  implemented behavior unless the packet objective was explicitly scaffolding
 
 Additional empirical execution rule for constrained execution flows:
 
@@ -348,6 +363,15 @@ Additional empirical execution rule for constrained execution flows:
   do not bypass it by feeding the executor raw user instructions
 - execution retries are local recovery only and must not be treated as
   a substitute for planning or context discovery
+
+If the active model reaches a context, capability, or reliability boundary, it
+must stop and record the actual state as `Scaffolded`, `Partial`, `Blocked`, or
+`In progress`. It must not continue narratively to the end of the chain just to
+create the appearance of progress.
+
+`Scaffolded` is an active state, not a closure. It records that useful structure
+exists, but behavior is still incomplete. A scaffolded packet must name the
+remaining work and its route before handoff.
 
 #### Phase E — Model Code Review
 
@@ -370,10 +394,45 @@ Review output must be:
 
 This is not final acceptance.
 
+#### Phase E.1 — Completion Gate
+
+Before a packet or subpacket can be marked `Implemented`, the active model must
+fill the completion criteria ledger in that packet.
+
+The ledger must compare every in-scope objective or acceptance criterion
+against:
+
+- implementation evidence;
+- verification performed;
+- residual status.
+
+Allowed residual statuses are:
+
+- `complete`;
+- `not_applicable`;
+- `partial`;
+- `blocked`;
+- `deferred`.
+
+`Implemented` is allowed only when every in-scope row is `complete` or
+`not_applicable`. Any `partial`, `blocked`, or `deferred` row requires the
+packet to remain non-implemented and to route the residual work to the same
+packet, a follow-up packet, a review hold, a blocker ledger, or a successor
+diff.
+
+If the completion claim is `scaffolded`, at least one in-scope criterion must
+remain incomplete and the packet must route the remaining behavior. A
+scaffolded packet cannot be terminally closed, merged, accepted, or treated as
+ready-for-validation as an implemented packet.
+
+This gate exists because LLMs can create convincing bone structures that move a
+chain forward while leaving behavior incomplete. The correct response is not to
+reward movement; it is to record the actual completion state.
+
 #### Phase F — Packet Documentation Alignment
 
-After every implemented packet or subpacket, update only the execution-layer
-documents that describe packet progress:
+After every implemented, scaffolded, partial, or blocked packet or subpacket,
+update only the execution-layer documents that describe packet progress:
 
 - the packet status and evidence notes
 - `IMPL-INDEX.md`

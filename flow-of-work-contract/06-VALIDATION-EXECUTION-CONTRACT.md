@@ -2,7 +2,7 @@
 doc_type: validation_execution_contract
 scope: validation_execution
 applies_to: multi-platform
-version: 0.1
+version: 0.2
 status: working
 last_updated: 2026-05-23
 ---
@@ -29,6 +29,13 @@ last_updated: 2026-05-23
    code completion.
 9. Traceability matrix updates follow accepted campaign evidence, not packet
    implementation.
+10. Validation must not be used to hide incomplete execution. If a packet is
+    only scaffolded or partial, the campaign must say so and test the completed
+    subset or route the remaining implementation first.
+11. Scaffold validation is support evidence only. It cannot close the packet
+    unless a later completion ledger converts the scaffold into `Implemented`,
+    `Partial` with accepted residual routing, or another explicit terminal
+    state.
 
 ## 1. Purpose
 
@@ -43,6 +50,15 @@ result.
 The validation executor must therefore think like a skeptical reviewer. The
 question is not "can this pass?" The question is "what would prove this still
 breaks?"
+
+The same skepticism applies before execution reaches validation. A campaign is
+not a tool for making a partially completed chain look finished. If the packet
+completion ledger shows scaffolded, partial, blocked, or deferred work, the
+campaign must be scoped to that factual state or validation handoff must wait.
+
+Do not create a scaffold-only campaign as a substitute for completion. It may
+record that useful structure exists, but the packet remains active until the
+remaining behavior is routed and resolved.
 
 ## 2. Campaign Design Standard
 
@@ -62,6 +78,8 @@ Minimum design questions:
 5. What negative/error behavior proves validation is strict?
 6. What evidence would distinguish implementation bug, scope issue,
    environment issue, and documentation drift?
+7. Does the governing packet claim full completion, partial completion, or only
+   scaffolding, and is the campaign scoped to that factual state?
 
 If these questions cannot be answered, the campaign is not constructible yet.
 
@@ -80,6 +98,10 @@ The executor must not:
 - treat absence of an exception as proof of semantic correctness;
 - update traceability to `Implemented` because code was written but not
   accepted through evidence.
+- accept a skeleton implementation by testing only the thin path that the
+  skeleton already covers;
+- convert model effort, elapsed time, or long-chain progress into evidence of
+  completion.
 
 If a test was poorly designed and cannot prove anything meaningful, record it
 as weak or invalid evidence instead of converting it into success.

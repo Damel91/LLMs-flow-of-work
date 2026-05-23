@@ -444,6 +444,128 @@ def check_impl_file(path: Path) -> LintResult:
     if is_template:
         return result
 
+    completion_section = extract_section(text, "### 7.1 Completion Criteria Ledger")
+    execution_status = clean_cell(doc_fields.get("execution status", "")).lower()
+    handoff_status = clean_cell(doc_fields.get("handoff status", "")).lower()
+    if not completion_section:
+        if execution_status == "implemented":
+            result.error(
+                "impl-completion-ledger-missing",
+                "Implemented packet requires section: ### 7.1 Completion Criteria Ledger",
+            )
+        else:
+            result.warning(
+                "impl-completion-ledger-missing",
+                "Missing completion criteria ledger; packet cannot be treated as implemented",
+            )
+    else:
+        completion_fields = parse_strong_fields(completion_section)
+        for field in (
+            "completion claim",
+            "movement-bias guard completed",
+            "skeleton/stub-only changes present",
+        ):
+            if field not in completion_fields:
+                result.error(
+                    "impl-completion-field-missing",
+                    f"Missing completion field: {field}",
+                )
+
+        completion_claim = clean_cell(completion_fields.get("completion claim", "")).lower()
+        movement_guard = clean_cell(
+            completion_fields.get("movement-bias guard completed", "")
+        ).lower()
+        skeleton_present = clean_cell(
+            completion_fields.get("skeleton/stub-only changes present", "")
+        ).lower()
+
+        if completion_claim not in {
+            "not started",
+            "scaffolded",
+            "partial",
+            "implemented",
+            "blocked",
+        }:
+            result.error(
+                "impl-completion-claim-invalid",
+                "Completion claim must be not started, scaffolded, partial, implemented, or blocked",
+            )
+
+        concrete_rows = []
+        invalid_residuals = []
+        incomplete_residuals = []
+        for row in parse_markdown_table(completion_section)[1:]:
+            if len(row) < 4 or all(is_placeholder(cell) for cell in row[:4]):
+                continue
+            concrete_rows.append(row)
+            residual = clean_cell(row[3]).lower()
+            if residual not in {"complete", "partial", "blocked", "deferred", "not_applicable"}:
+                invalid_residuals.append(residual or "<empty>")
+            if residual not in {"complete", "not_applicable"}:
+                incomplete_residuals.append(residual or "<empty>")
+
+        if completion_claim == "implemented":
+            if movement_guard != "yes":
+                result.error(
+                    "impl-movement-bias-guard-not-complete",
+                    "Implemented packet requires movement-bias guard completed = yes",
+                )
+            if skeleton_present == "yes":
+                result.error(
+                    "impl-skeleton-present-implemented",
+                    "Packet cannot claim implemented while skeleton/stub-only changes are present",
+                )
+            if not concrete_rows:
+                result.error(
+                    "impl-completion-ledger-empty",
+                    "Implemented packet requires concrete completion criteria rows",
+                )
+            if incomplete_residuals:
+                result.error(
+                    "impl-completion-ledger-incomplete",
+                    "Implemented packet has non-complete residual statuses: "
+                    + ", ".join(sorted(set(incomplete_residuals))),
+                )
+        if completion_claim == "scaffolded":
+            if not concrete_rows:
+                result.error(
+                    "impl-scaffolded-ledger-empty",
+                    "Scaffolded packet requires concrete completion criteria rows",
+                )
+            if not incomplete_residuals:
+                result.error(
+                    "impl-scaffolded-without-residual-work",
+                    "Scaffolded packet must leave at least one incomplete residual row",
+                )
+            if execution_status in {
+                "implemented",
+                "merged",
+                "closed",
+                "closed after empirical validation",
+                "cancelled",
+                "deferred",
+            }:
+                result.error(
+                    "impl-scaffolded-terminal-status",
+                    f"Scaffolded packet cannot have terminal execution status: {execution_status}",
+                )
+            if handoff_status.startswith("ready"):
+                result.error(
+                    "impl-scaffolded-ready-handoff",
+                    "Scaffolded packet is not ready for validation handoff as implemented",
+                )
+        if execution_status == "implemented" and completion_claim != "implemented":
+            result.error(
+                "impl-execution-status-contradicts-completion",
+                "Execution status is implemented but completion claim is not implemented",
+            )
+        if invalid_residuals:
+            result.error(
+                "impl-completion-residual-invalid",
+                "Invalid completion residual status: "
+                + ", ".join(sorted(set(invalid_residuals))),
+            )
+
     gate_status = clean_cell(fields.get("gate status", "")).lower()
     authority_type = clean_cell(fields.get("authority type", "")).lower()
     authority_reference = clean_cell(fields.get("authority reference", ""))
@@ -627,7 +749,11 @@ def check_campaign_file(path: Path) -> LintResult:
     result_fields = parse_strong_fields(result_section)
     acceptance_fields = parse_strong_fields(acceptance_section)
 
-    for field in ("readiness for validation handoff", "campaign constructibility"):
+    for field in (
+        "readiness for validation handoff",
+        "campaign constructibility",
+        "packet completion state checked",
+    ):
         if field not in readiness_fields:
             result.error("campaign-readiness-field-missing", f"Missing campaign field: {field}")
     for field in (
@@ -654,8 +780,16 @@ def check_campaign_file(path: Path) -> LintResult:
 
     campaign_result = clean_cell(result_fields.get("campaign result", "")).lower()
     decision = clean_cell(acceptance_fields.get("decision", "")).lower()
+    packet_completion_checked = clean_cell(
+        readiness_fields.get("packet completion state checked", "")
+    ).lower()
     pass_bias = clean_cell(validation_fields.get("pass-bias guard completed", "")).lower()
     real_surface = clean_cell(validation_fields.get("real acceptance surface used", "")).lower()
+    if packet_completion_checked != "yes":
+        result.error(
+            "campaign-packet-completion-not-checked",
+            "Campaign must check packet completion state before it can be authoritative",
+        )
     if pass_bias != "yes":
         result.error(
             "campaign-pass-bias-guard-not-complete",

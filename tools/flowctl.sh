@@ -967,6 +967,116 @@ check_impl_file() {
   doc_status=$(clean_cell "$doc_status")
   printf '%s' "$doc_status" | grep -qi "template" && return
 
+  local completion_section execution_status handoff_status
+  completion_section=$(extract_section "$text" "### 7.1 Completion Criteria Ledger")
+  execution_status=$(clean_cell "$(get_strong_field "$text" "execution status")")
+  execution_status=$(printf "%s" "$execution_status" | tr '[:upper:]' '[:lower:]')
+  handoff_status=$(clean_cell "$(get_strong_field "$text" "handoff status")")
+  handoff_status=$(printf "%s" "$handoff_status" | tr '[:upper:]' '[:lower:]')
+  if [[ -z "$completion_section" ]]; then
+    if [[ "$execution_status" == "implemented" ]]; then
+      emit_error "impl-completion-ledger-missing" \
+        "Implemented packet requires section: ### 7.1 Completion Criteria Ledger"
+    else
+      emit_warning "impl-completion-ledger-missing" \
+        "Missing completion criteria ledger; packet cannot be treated as implemented"
+    fi
+  else
+    local completion_field
+    for completion_field in \
+      "completion claim" \
+      "movement-bias guard completed" \
+      "skeleton/stub-only changes present"
+    do
+      [[ -z "$(get_strong_field "$completion_section" "$completion_field")" ]] && \
+        emit_error "impl-completion-field-missing" \
+          "Missing completion field: $completion_field"
+    done
+
+    local completion_claim movement_guard skeleton_present
+    completion_claim=$(clean_cell "$(get_strong_field "$completion_section" "completion claim")")
+    completion_claim=$(printf "%s" "$completion_claim" | tr '[:upper:]' '[:lower:]')
+    movement_guard=$(clean_cell "$(get_strong_field "$completion_section" "movement-bias guard completed")")
+    movement_guard=$(printf "%s" "$movement_guard" | tr '[:upper:]' '[:lower:]')
+    skeleton_present=$(clean_cell "$(get_strong_field "$completion_section" "skeleton/stub-only changes present")")
+    skeleton_present=$(printf "%s" "$skeleton_present" | tr '[:upper:]' '[:lower:]')
+
+    case "$completion_claim" in
+      "not started"|scaffolded|partial|implemented|blocked) ;;
+      *)
+        emit_error "impl-completion-claim-invalid" \
+          "Completion claim must be not started, scaffolded, partial, implemented, or blocked"
+        ;;
+    esac
+
+    local concrete_rows=0 incomplete_residuals="" invalid_residuals=""
+    while IFS= read -r row; do
+      local n c1 c2 c3 c4 residual
+      n=$(count_cells "$row")
+      [[ "$n" -lt 4 ]] && continue
+      c1=$(clean_cell "$(get_cell "$row" 1)")
+      c2=$(clean_cell "$(get_cell "$row" 2)")
+      c3=$(clean_cell "$(get_cell "$row" 3)")
+      c4=$(clean_cell "$(get_cell "$row" 4)")
+      if is_placeholder "$c1" && is_placeholder "$c2" && \
+         is_placeholder "$c3" && is_placeholder "$c4"; then
+        continue
+      fi
+      concrete_rows=$(( concrete_rows + 1 ))
+      residual=$(printf "%s" "$c4" | tr '[:upper:]' '[:lower:]')
+      case "$residual" in
+        complete|partial|blocked|deferred|not_applicable) ;;
+        *) invalid_residuals="${invalid_residuals}${invalid_residuals:+, }${residual:-<empty>}" ;;
+      esac
+      case "$residual" in
+        complete|not_applicable) ;;
+        *) incomplete_residuals="${incomplete_residuals}${incomplete_residuals:+, }${residual:-<empty>}" ;;
+      esac
+    done < <(table_rows "$completion_section" | tail -n +2)
+
+    if [[ "$completion_claim" == "implemented" ]]; then
+      [[ "$movement_guard" != "yes" ]] && \
+        emit_error "impl-movement-bias-guard-not-complete" \
+          "Implemented packet requires movement-bias guard completed = yes"
+      [[ "$skeleton_present" == "yes" ]] && \
+        emit_error "impl-skeleton-present-implemented" \
+          "Packet cannot claim implemented while skeleton/stub-only changes are present"
+      [[ "$concrete_rows" -eq 0 ]] && \
+        emit_error "impl-completion-ledger-empty" \
+          "Implemented packet requires concrete completion criteria rows"
+      [[ -n "$incomplete_residuals" ]] && \
+        emit_error "impl-completion-ledger-incomplete" \
+          "Implemented packet has non-complete residual statuses: $incomplete_residuals"
+    fi
+    if [[ "$completion_claim" == "scaffolded" ]]; then
+      [[ "$concrete_rows" -eq 0 ]] && \
+        emit_error "impl-scaffolded-ledger-empty" \
+          "Scaffolded packet requires concrete completion criteria rows"
+      [[ -z "$incomplete_residuals" ]] && \
+        emit_error "impl-scaffolded-without-residual-work" \
+          "Scaffolded packet must leave at least one incomplete residual row"
+      case "$execution_status" in
+        implemented|merged|closed|"closed after empirical validation"|cancelled|deferred)
+          emit_error "impl-scaffolded-terminal-status" \
+            "Scaffolded packet cannot have terminal execution status: $execution_status"
+          ;;
+      esac
+      case "$handoff_status" in
+        ready*)
+          emit_error "impl-scaffolded-ready-handoff" \
+            "Scaffolded packet is not ready for validation handoff as implemented"
+          ;;
+      esac
+    fi
+    if [[ "$execution_status" == "implemented" && "$completion_claim" != "implemented" ]]; then
+      emit_error "impl-execution-status-contradicts-completion" \
+        "Execution status is implemented but completion claim is not implemented"
+    fi
+    [[ -n "$invalid_residuals" ]] && \
+      emit_error "impl-completion-residual-invalid" \
+        "Invalid completion residual status: $invalid_residuals"
+  fi
+
   local gate_status authority_type authority_reference runtime_affected fallback_affected
   gate_status=$(clean_cell "$(get_strong_field "$section" "gate status")")
   gate_status=$(printf "%s" "$gate_status" | tr '[:upper:]' '[:lower:]')
@@ -1193,7 +1303,11 @@ check_campaign_file() {
   acceptance_section=$(extract_section "$text" "## 11. Acceptance Record")
 
   local field
-  for field in "readiness for validation handoff" "campaign constructibility"; do
+  for field in \
+    "readiness for validation handoff" \
+    "campaign constructibility" \
+    "packet completion state checked"
+  do
     [[ -z "$(get_strong_field "$readiness_section" "$field")" ]] && \
       emit_error "campaign-readiness-field-missing" "Missing campaign field: $field"
   done
@@ -1224,11 +1338,16 @@ check_campaign_file() {
   decision=$(clean_cell "$(get_strong_field "$acceptance_section" "decision")")
   decision=$(printf '%s' "$decision" | tr '[:upper:]' '[:lower:]')
 
-  local pass_bias real_surface
+  local packet_completion_checked pass_bias real_surface
+  packet_completion_checked=$(clean_cell "$(get_strong_field "$readiness_section" "packet completion state checked")")
+  packet_completion_checked=$(printf '%s' "$packet_completion_checked" | tr '[:upper:]' '[:lower:]')
   pass_bias=$(clean_cell "$(get_strong_field "$validation_section" "pass-bias guard completed")")
   pass_bias=$(printf '%s' "$pass_bias" | tr '[:upper:]' '[:lower:]')
   real_surface=$(clean_cell "$(get_strong_field "$validation_section" "real acceptance surface used")")
   real_surface=$(printf '%s' "$real_surface" | tr '[:upper:]' '[:lower:]')
+  [[ "$packet_completion_checked" != "yes" ]] && \
+    emit_error "campaign-packet-completion-not-checked" \
+      "Campaign must check packet completion state before it can be authoritative"
   [[ "$pass_bias" != "yes" ]] && \
     emit_error "campaign-pass-bias-guard-not-complete" \
       "Campaign must complete the pass-bias guard before it can be authoritative"

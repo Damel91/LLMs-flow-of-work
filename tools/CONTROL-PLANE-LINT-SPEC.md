@@ -540,8 +540,19 @@ that most often drift during long LLM work:
 
 `check campaign` must verify the validation-execution fields from
 `06-VALIDATION-EXECUTION-CONTRACT.md`, including the adversarial validation
-section and pass-bias guard. A campaign that has not completed the pass-bias
-guard is not authoritative acceptance evidence.
+section, packet completion-state check, and pass-bias guard. A campaign that
+has not checked packet completion or completed the pass-bias guard is not
+authoritative acceptance evidence.
+
+`check impl` must verify the behavioral definition gate and the completion
+criteria ledger. A packet that claims `Implemented` while the ledger is
+missing, incomplete, scaffolded, or contradicted by residual statuses is a
+control-plane error. This check exists to prevent long chains from rewarding
+movement instead of completion.
+
+`check impl` must also treat `Scaffolded` as non-terminal: it requires concrete
+ledger rows, at least one incomplete residual row, no terminal execution status,
+and no ready-for-validation handoff claim as an implemented packet.
 
 The framework repository may also expose `sync-check`, which compares installed
 workspace control-plane files against the current framework repository. This is

@@ -2,7 +2,7 @@
 doc_type: docset_governance_contract
 scope: documentation_control
 applies_to: multi-platform
-version: 0.6
+version: 0.7
 status: working
 last_updated: 2026-05-23
 ---
@@ -39,6 +39,12 @@ last_updated: 2026-05-23
 15. If a campaign exposes blockers, keep the evidence, route fixing packets,
     rerun regression/live validation, and delay full documentation alignment
     until acceptance.
+16. Packet lifecycle state must reflect completion, not effort. A scaffolded or
+    partially implemented chain is recorded as scaffolded/partial/blocked, even
+    if it moved through every planned packet.
+17. `Scaffolded` is non-terminal. It cannot close a packet and must route to
+    continued execution, follow-up work, partial acceptance, blocker, deferral,
+    supersession, or cancellation.
 
 ## 1. Purpose
 
@@ -241,11 +247,26 @@ Baseline is not required to absorb every accepted diff.
 
 Packet completion and campaign acceptance are different document events.
 
-After each implemented packet or subpacket, update only packet-execution state:
+Packet completion is not the same as model effort, elapsed time, or traversal
+through a planned packet chain. The packet and `IMPL-INDEX.md` may say
+`Implemented` only when the packet's completion criteria ledger shows every
+in-scope objective as complete or not applicable.
+
+If the model created architecture, placeholders, adapter seams, or partial
+wiring but did not close behavior, use an accurate lifecycle state such as
+`Scaffolded`, `In progress`, `Partially merged`, or `Blocked`.
+
+`Scaffolded` cannot be used as a final resting state. A scaffolded packet
+remains active until the remaining behavior is implemented, accepted as a
+partial with blockers, blocked, deferred, superseded, or cancelled.
+
+After each implemented, scaffolded, partial, or blocked packet or subpacket,
+update only packet-execution state:
 
 - the packet status, evidence notes, and residual risks;
 - `IMPL-INDEX.md`;
 - review holds or review index rows that the packet actually resolves;
+- completion criteria ledger;
 - deterministic self-check notes.
 
 Do not perform full documentation alignment at this point. Do not update

@@ -108,6 +108,7 @@ Examples with documentation language Italian:
 | `In progress` | Execution underway inside packet boundary |
 | `Planned` | Packet is defined but not yet executed |
 | `Planned decomposition` | Root initiative packet that defines a multi-packet execution chain |
+| `Scaffolded` | Non-terminal active state: bone structure, interfaces, or partial wiring exist, but owned behavior is not complete |
 | `Implemented` | Packet has been executed and its intended runtime/code changes are live |
 | `Merged` | Packet's core intent is reflected in the live code and canonical docs |
 | `Merged with open drift` | Packet landed, but a documented behavioral gap remains |
@@ -122,6 +123,25 @@ Examples with documentation language Italian:
 **Drift rule**: if the Notes column contradicts the State column, State must be
 updated. A note that says "executed" while State says "Planned" is a
 documentation failure, not a valid workaround.
+
+**Completion rule**: `Implemented` is allowed only when the packet's completion
+criteria ledger shows every in-scope criterion as complete or not applicable.
+`Scaffolded`, `Partially merged`, and `Pending acceptance` are not shame states;
+they are the required states when the model produced useful movement but did
+not finish the behavior. Do not record progress as completion to make the
+chain look healthier than it is.
+
+`Scaffolded` is not a closure state. A scaffolded packet remains active and
+must route to one of:
+
+- continued execution in the same packet;
+- a follow-up packet that owns the remaining behavior;
+- `Partial` / `Partially merged` with explicit accepted subset and residual
+  blockers;
+- `Blocked`, `Deferred`, `Superseded`, or `Cancelled` with explicit reason.
+
+If no follow-up or blocker route exists, keep the packet `In progress` instead
+of using `Scaffolded` as a final resting state.
 
 ---
 
@@ -177,13 +197,15 @@ Concrete packets:
 3. Open one atomic `IMPL-*`, or a root family plus subpackets when the boundary
    is coherent but too broad for one slice.
 4. Execute only what the active model can safely self-validate.
-5. After each implemented packet, update the packet status and this index.
-6. Run model code review before handoff.
-7. Check `REVIEW-INDEX.md` before handoff if any review hold overlaps the
+5. Fill the packet completion criteria ledger before claiming implementation.
+6. After each implemented, scaffolded, partial, or blocked packet, update the
+   packet status and this index honestly.
+7. Run model code review before handoff.
+8. Check `REVIEW-INDEX.md` before handoff if any review hold overlaps the
    packet.
-8. Open a `TestCampaign-*` only after the readiness gate passes, and update
+9. Open a `TestCampaign-*` only after the readiness gate passes, and update
    `TEST-CAMPAIGN-INDEX.md` when the campaign state changes.
-9. Update the installed `TRACEABILITY_MATRIX.md` only after accepted campaign
+10. Update the installed `TRACEABILITY_MATRIX.md` only after accepted campaign
    evidence.
 
 **When resuming a session:**

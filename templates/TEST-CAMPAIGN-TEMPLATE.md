@@ -32,6 +32,8 @@ packet-specific regressions. It must not be derived only from changed files.
 
 **Campaign constructibility:** [constructible / not constructible / partial]
 
+**Packet completion state checked:** [yes / no]
+
 Reason:
 
 - [why a campaign result will be interpretable]
